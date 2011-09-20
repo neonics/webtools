@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<psp:page template="main"
+	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:pst="http://neonics.com/2011/psp/template"
+>
+	<pst:content>
+		<l:h1>Page not found.</l:h1>
+
+		<psp:if>
+			<psp:expr>isset($_SERVER['HTTP_REFERER'])</psp:expr>
+			<psp:then>
+
+				<psp:element name="a" prefix="l">
+
+					<psp:attribute name="href"><psp:expr>$_SERVER["HTTP_REFERER"]</psp:expr></psp:attribute>
+
+					Go back.
+
+				</psp:element>
+			</psp:then>
+			<psp:else>
+				...
+
+			</psp:else>
+		</psp:if>
+
+	</pst:content>
+
+</psp:page>

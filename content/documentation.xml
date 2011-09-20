@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+
+<?psp module="db"?>
+
+<psp:page template="article"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:pst="http://neonics.com/2011/psp/template"
+	xmlns:db="http://neonics.com/2011/db/xml"
+  xmlns:auth="http://neonics.com/2000/xsp/auth"
+>
+	<pst:menu>
+	</pst:menu>
+
+	<pst:content>
+		<section title="Documentation">
+
+			<section title="Architecture">
+				<section title="Processing">
+					<section title="Call Sequence">
+<style type="text/css">
+dt { color: blue; font-style: italic;}
+</style>
+					<dl>
+						<dt>.htaccess</dt>
+						<dd>Handler definitions mapping URLS to handle.php,
+						and 404 redirects for hidden directories such as lib/,
+						psp/ and content/.</dd>
+						<dt>handle.php</dt>
+						<dd>Configuration and delegator to serve.php</dd>
+						<dt>serve.php</dt>
+							<dd>
+							Main entry point. Sets up resources and requesthandlers
+							and propagates the call to the requesthandlers.
+						</dd>
+						<dt>lib/Requesthandler.php</dt>
+						<dd>
+							A chain of requesthandlers, URI matched with regular expressions.
+							Custom requesthandlers can be added here if necessary.
+							<dl>
+							<dt>Static</dt>
+							<dd>
+								Handles files that don't need processing
+								such as images, scripts, CSS.
+								Static locations are configurable and default to
+								css/, js/, ckeditor/, and img/.
+							</dd>
+							<dt>Dynamic</dt>
+							<dd>
+								Parses the content XML file, and lets the ModuleManager
+								apply transformations. Then, the result is transformed
+								using an XSLT stylesheet.
+								<dl>
+									<dt>lib/ModuleManager.php</dt>
+									<dd>
+										Loads the PSP Module into the ModuleManager,
+										and applies the PSP stylesheet to it.
+										Processing instructions found in the XML will
+										be handled by the PSP module, such as loading additional
+										modules.
+									</dd>
+									<dt>psp/psp.xsl, psp/psp.php</dt>
+									<dd>Looks for processing instructions and other
+									special psp: namespaced tags to load additional
+									modules etc..
+									</dd>
+									<dt>psp/MODULE.xsl, psp/MODULE.php</dt>
+									<dd>any additional modules specified in the content XML
+										using <![CDATA[<?psp module="MODULE"?>]]> will be applied.
+										If the .php file exists, it is instantiated and it's
+										init( Request ) method is called.
+										If it's stylesheet exists, the PSP xsl is applied
+										to it, and then it is applied to the XML.
+									</dd>
+									<dt>style/layout.xsl</dt>
+									<dd>Finally the layout.xsl is applied to convert the XML
+									to HTML.
+									</dd>
+								</dl>
+							</dd>
+							</dl>
+						</dd>
+					</dl>
+					</section>
+
+					<section title="XSL processing">
+						PSP is installed in /webtools, whereas the website has it's own
+						place in for instance /site.
+						In /site there is a copy of handle.php with localized configuration.
+
+					</section>
+
+				</section>
+			</section>
+		</section>
+	</pst:content>
+</psp:page>

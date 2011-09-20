@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<?psp module="auth"?>
+
+<psp:page template="main"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:db="http://neonics.com/2011/db/xml"
+  xmlns:auth="http://neonics.com/2000/xsp/auth"
+	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
+>
+		<psp:content>
+			DaPage
+			<auth:permission role="editor">
+				<auth:fail>
+					permission denied
+				</auth:fail>
+				<auth:success>
+					success
+					<psp:if action="template:post">
+						Template stored.. redirecting back.
+						// todo: messagebox etc..
+						<script type="text/javascript">
+							window.location = '<psp:expr>$_REQUEST['template:referer']</psp:expr>';
+						</script>
+					</psp:if>
+				</auth:success>
+			</auth:permission>
+		</psp:content>
+</psp:page>

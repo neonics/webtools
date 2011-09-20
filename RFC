@@ -1,0 +1,90 @@
+Request (specification) For Change
+
+Feature: RFC management ('issue' management).
+
+Feature: User preference. Use either persistent sessions/cookies,
+  initially a welcome name perhaps - uniqueified by email/passwd.
+
+  Site then stores last visited page (either in session/cookie
+  or persistent), offering to continue there, following the trail
+  of documents as they are added. References to followups
+  are within the document.
+
+Feature: History management on articles. Show diff - addenda, corrections.
+  Addenda include references to new articles/followups etc.
+
+
+Bug: xsl:param in local psp:template is not present in merged xsl.
+
+
+
+Feature: E-Mail registration functionality - optional email token verification.
+
+
+Feature: News
+  Refactor the Article module to support multiple tables.
+
+Feature: Comments
+Module: article
+
+
+Enhancement: external content storage in XML DB
+Module: DB
+  Using xi:include tags to split off the article contents into
+  separate files, to keep the articles.xml just a reference/metadata.
+
+
+
+Feature: "Self-Selling Software"
+  The webtools/ dir as a core service already provides several default
+  pages in websites, such as the article page, content editor, and
+  authentication administration.
+  The issue tracking, project management modules would allow for
+  the software to be packaged on the fly, and offer itself for download.
+
+
+Feature: Password reset
+Module: auth
+
+
+Feature: sitemap
+Module: core
+Case: content/module.xml would be used in case of /module/section/view.
+Description:
+  A-la Java RequestHandler from container module.
+  Request handlers may take the first segment from an URI,
+  and some of these request handlers then terminate as they
+  found a content-source. The remaining URI then serves as
+  parameters, commands, sub-indices. A requesturi then may
+  be /module/section/view, module being for instance the wiki,
+  using a DB as datasource. Section then may indicate the key,
+  and view may be an edit mode or something.
+.
+Case: one main content-structure file, containing all matched URI's,
+  including possibility for url rewriting, defining what content.
+
+  The original sitemap as per neoserv/cocoon then, using regexp,
+  selects the requesthandler to use, or, allows parameterisation.
+
+  Since most of the content files are very short, these can be grouped
+  in one file.
+
+Feature: Actions
+Description:
+  XML Module descriptor for actions, forms, input-output etc.
+  Have some sort of standard for module action implementation.
+  Using reflection the action_ methods or something can be gathered
+  and action calling handled by the core module code instead of
+  using switches in the init method.
+  An implicit call to performAction then. The action:module:[actionname]
+  format allows this to be known centrally.
+  The __call function may serve then to filter out action_[actionname]
+  calls, delegating to an action performer, offering the request/response
+  args by using the module descriptor.
+  First stage would simply be to have action_X methods that are triggered
+  when action:module:X is present.
+
+Feature: SQL DB / DAL for PHP
+
+
+  

@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+
+<?psp module="auth"?>
+
+<psp:page template="main"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:db="http://neonics.com/2011/db/xml"
+  xmlns:auth="http://neonics.com/2000/xsp/auth"
+	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
+>
+	<psp:content>
+		Number of users: <auth:numusers/>
+		<auth:firstrun>
+			<auth:success>
+				This is the first run - initializing administrator user
+				<l:form method="post">
+					<l:label>Username</l:label>
+					<l:input type="text" name="username" value="admin"/><l:br/>
+					<l:label>Password</l:label>
+					<l:input type="password" name="password" value="admin"/><l:br/>
+					<l:input type="submit" name="action:auth:firstuser" value="Create"/>
+				</l:form>
+
+			</auth:success>
+			<auth:fail>
+				<auth:listUsers/>
+
+				<auth:user>
+					<auth:fail>
+							<auth:login/>
+					</auth:fail>
+					<auth:success>
+						<auth:permission role="admin">
+							<db:listTable/>
+							<!--
+							<l:form method="POST">
+								<l:input type="text" name="name"/>
+								<l:input type="submit" name="action:auth:db-create" value="Create"/>
+							</l:form>
+							-->
+						</auth:permission>
+					</auth:success>
+				</auth:user>
+
+			</auth:fail>
+		</auth:firstrun>
+
+
+	</psp:content>
+</psp:page>

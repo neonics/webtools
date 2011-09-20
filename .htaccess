@@ -1,0 +1,25 @@
+ErrorDocument 404 /webtools/404.html
+
+RewriteEngine On
+RewriteBase /webtools
+RewriteRule ^articles/$ articles.html [R]
+RewriteRule ^articles/([^/]+)/?([^/]+)?$  articles.html?article:id=$1&action:article:$2= [L]
+#RewriteRule ^(articles/[^/]+?)$ $1/ [R]
+#RewriteRule ^articles/([^/]+?)$ articles.html?article:id=$1 [NC,L]
+#RewriteRule ^articles/(([0123456789]*?)/)?([^/]*)/?$ articles.html?article:id=$2&action:article:$3= [NC,L]
+
+
+RewriteCond %{REQUEST_URI} !\.html$
+RewriteRule ^([^/]+)$    $1/index.html
+
+RewriteRule ^(.*?)\.html handle.php [L]
+
+# This is handled internally
+RewriteRule ^lib	404.html
+RewriteRule ^content	404.html
+RewriteRule ^psp	404.html
+RewriteRule ^js		404.html
+RewriteRule ^css	404.html
+RewriteRule ^style	404.html
+
+

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<psp:page template="main"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+  xmlns:auth="http://neonics.com/2000/xsp/auth"
+>
+	<psp:content>
+
+		<auth:user>
+			<auth:success>
+				<p>Site under construction</p>
+			</auth:success>
+			<auth:fail>
+				<psp:if action="show-login">
+					<auth:login/>
+				</psp:if>
+			</auth:fail>
+		</auth:user>
+	</psp:content>
+</psp:page>

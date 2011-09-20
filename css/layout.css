@@ -1,0 +1,200 @@
+/**
+ * @author: Kenney Westerhof
+ *
+ */
+
+html, body, form, td, div, p, ul, li {
+	border: 0px;
+	padding: 0px;
+	margin: 0px;
+	vertical-align: top;
+}
+
+html {
+	font-family: Arial;
+	/*color: #333333;*/
+	color: #333;
+}
+
+body {
+	background-color: #ffffff;
+	height: 100%;
+}
+
+td.left { width: 20%; }
+
+h1:first-of-type {
+	margin-top: 0;
+}
+
+.messagebox { border: 1px solid #444; }
+.messageboxtitle { color: #aaa;}
+
+.message { display:block; }
+
+.message .debug { color: #888; }
+
+/* ***************************************** */
+
+div#main {
+	height: 100%;
+	width: 80%;
+	margin-left: 10%;
+	margin-right: auto;
+	bottom: 0px; 
+	top: 0px;
+	padding-top: 16px;
+}
+
+div.logo {
+}
+
+div.background {
+}
+
+
+div#content {
+	background-color: #448;
+	width: auto; /*80%;*/
+	font-size: 12pt;
+	margin-left: 5px;
+
+	padding: 10px;
+}
+
+div#content a {
+	color: #bae;
+}
+
+
+/* ******* Menu ********* */
+
+.menu {
+	border: 0;
+	padding: 0;
+	margin: 0;
+	color: #aeb;
+}
+
+.menuitem {
+}
+
+li.menuitem {
+	list-style-type: circle;
+	list-style-position: inside;
+}
+
+.subtitle {
+	font-style: italic;
+}
+
+.menutitle {
+	font-weight: bold;
+	margin-bottom: 0.5em;
+	margin-top: 0.5em;
+}
+
+.menutitle:first-child {
+	margin-top: 0;
+}
+
+.menuitem a {}
+.menuitem a:hover {} 
+.menuitem a:active {}
+.menuitem a:visited {}
+
+/* Vertical Menu */
+
+.vmenu {
+	font-size: 12pt;
+	background-color: #6b1958;
+	background-image: url('../img/vmenu.png');
+
+	padding: 10px;
+	margin: 0;
+	margin-bottom: 10pt;
+}
+
+.vmenu > .vmenu {
+	margin-bottom: 0pt;
+	padding: 0px;
+	padding-left: 5pt;
+}
+
+.vmenu > .vmenu > .menuitem {
+	padding-left: 15pt;
+}
+
+.vmenu > .vmenu > .subtitle {
+	padding-left: 0pt;
+}
+
+.vmenu > .hmenu {
+	margin-bottom: 0pt;
+	padding: 0px;
+	padding-left: 5pt;
+}
+
+.vmenu > .menuitem {
+	display: block;
+	float: none; /* inherited in case of nested in hmenu */
+	text-align: left;
+	padding-left: 0;
+	margin-left: 0;
+}
+
+.vmenu > .menutitle {
+	background-color: #837;
+}
+
+.vmenu > .menuitem a {
+	color: #aaf;
+}
+
+
+/* Horizontal Menu */
+
+.hmenu {
+}
+
+.hmenu > .menuitem {
+	display: inline;
+}
+
+
+/* Main Menu */
+
+.mainmenu {
+	width: 100%;
+
+	height: 33pt;
+	padding: 0;
+	padding-top: 8pt;
+
+	margin: 0;
+	margin-top: 20pt;
+	margin-bottom: 10pt;
+
+	background-image: url('../img/menu-bg.png');
+
+	color: #dcc;
+
+	font-size: 18pt;
+	font-weight: bold;
+	background-color: #baa;
+	border: 1px solid #b88;
+}
+
+.mainmenu > .menuitem {
+	display: block;
+	float: left;
+	color: inherit;
+	width: 20%; 
+	text-align: center;
+	font-size: 18pt;
+}
+
+.mainmenu > .menuitem a {
+	color: inherit;
+}
+

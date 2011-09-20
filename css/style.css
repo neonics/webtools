@@ -1,0 +1,95 @@
+/**
+ * @author: Kenney Westerhof
+ *
+ */
+
+
+p {
+	padding-top: .5em;
+}
+
+
+div.logo {
+}
+
+a.bloglink
+{
+	padding-left: 40px;
+	height: 36px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	margin-top: 10px;
+}
+
+a {
+	text-decoration: none;
+}
+
+.copyright {
+	position: fixed;
+	width: 100%;
+	text-align: center;
+	z-index: 1;
+	bottom: 20px;
+	left: 0px;
+}
+
+.copyright span {
+	margin-left: 220px;
+}
+
+
+p {
+	text-align: justify;
+	text-justify: newspaper;
+}
+
+.nav {
+	text-align: right;
+	position: absolute;
+	width: 100%;
+	z-index: 1;
+	bottom: 20px;
+	left: 0px;
+}
+
+/** The space between two columns */
+.column_horiz_space {
+	width: 15px;
+}
+
+
+/***** Module article ******/
+h1.article {
+	font-size: 18pt;
+	padding: 0;
+	margin: 0;
+}
+
+h2.article {
+	font-size: 8pt;
+	font-style: italic;
+	padding: 0;
+	margin: 0;
+	margin-bottom: 2em;
+}
+
+div.article {
+	margin-bottom: 5em;
+}
+
+
+h1.project {
+	font-size: 18pt;
+	padding: 0;
+	margin: 0;
+	color: #cfc;
+	background-color: #66a;
+
+}
+
+td.section_title {
+	font-size: font-size: 16pt;
+	font-weight: bold;
+	color: #beb;
+}

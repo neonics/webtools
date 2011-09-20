@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<?psp module="article"?>
+<psp:page template="main"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:pst="http://neonics.com/2011/psp/template"
+	xmlns:a="http://neonics.com/2011/article"
+  xmlns:auth="http://neonics.com/2000/xsp/auth"
+>
+	<pst:menu>
+		<a:menu/>
+	</pst:menu>
+
+	<pst:content>
+		<a:show/>
+	</pst:content>
+</psp:page>

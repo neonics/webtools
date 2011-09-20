@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<?psp module="template"?>
+
+<pst:template template="main"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:pst="http://neonics.com/2011/psp/template"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:auth="http://neonics.com/2000/xsp/auth"
+>
+	<pst:content>
+
+		<auth:user>
+			<auth:success>
+				<p>Site under construction</p>
+			</auth:success>
+			<auth:fail>
+				<auth:login/>
+			</auth:fail>
+		</auth:user>
+
+	</pst:content>
+
+</pst:template>

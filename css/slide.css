@@ -1,0 +1,20 @@
+
+.slides {
+	background-color: white;
+	height: 100%;
+	padding: 10px;
+}
+
+.slide {
+	top: 0px;
+}
+
+.slide img {
+	margin: 5px;
+}
+
+.slide h2 {
+	font-weight: bold;
+	font-size: 14pt;
+	padding-bottom: .5em;
+}
