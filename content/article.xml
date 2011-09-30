@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 
 <?psp module="article"?>
-<psp:page template="main"
+<?psp module="template"?>
+<psp:page template="article"
 	xmlns="http://www.neonics.com/xslt/layout/1.0"
 	xmlns:psp="http://neonics.com/2011/psp"
 	xmlns:pst="http://neonics.com/2011/psp/template"
