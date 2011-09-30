@@ -34,10 +34,7 @@ class ArticleModule extends AbstractModule
 		psp_module( "db" );
 		$db->table( "articles", $this->ns );
 
-		foreach ($_REQUEST as $k=>$v)
-		{
-			echo "REQUEST $k => $v<br>";
-		}
+#		foreach ($_REQUEST as $k=>$v) { echo "REQUEST $k => $v<br>"; }
 
 		if ( isset( $_REQUEST["article:id"] ) && $_REQUEST["article:id"] != "" )
 			$this->articleId = $_REQUEST["article:id"];

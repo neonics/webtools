@@ -34,9 +34,9 @@
   </xsl:template>
 
 	<xsl:template match="l:body">
-    <body>
+    <body id="body">
+			<xsl:apply-templates select="l:header"/>
 			<div id="main">
-				<div class="logo"><img src="{$psp:requestBaseURI}img/neonics.png"/></div>
 				<xsl:apply-templates select="l:menu"/>
 				<table width="100%" border="0" padding="0" cellspacing="0">
 					<tr>
@@ -53,6 +53,7 @@
 				</table>
 			</div>
 
+			<xsl:apply-templates select="l:footer"/>
 			<!-- XXX TODO FIXME - enable for LIVE -->
 			<!--
 			<xsl:call-template name="statcounter"/>
@@ -61,19 +62,19 @@
     </body>
 	</xsl:template>
 
+	<xsl:template match="l:header|l:footer">
+		<xsl:apply-templates/>
+	</xsl:template>
+
 	<xsl:template match="l:content">
 		<div id="content">
-			<xsl:apply-templates/>
+			<xsl:apply-templates select="@*|*"/>
 			<div class="copyright">
 				<span>
 				&#169; 2011. All Rights Reserved.
 				</span>
 			</div>
 		</div>
-	</xsl:template>
-
-	<xsl:template match="l:box">
-		<xsl:apply-templates/>
 	</xsl:template>
 
 	<xsl:template match="l:messagebox">
@@ -328,14 +329,14 @@
 	</xsl:template>
 
 	<xsl:template match="l:box">
-		<div class="{@align}">
-			<xsl:apply-templates/>
+		<div class="{@align} {@class}">
+			<xsl:apply-templates select="@*|*"/>
 		</div>
 	</xsl:template>
 
-
   <xsl:template match="l:section">
     <xsl:variable name="depth" select="1+count(ancestor::l:section)"/>
+		<!--
     <table border="0" width="100%">
       <tr>
         <td colspan="2" height="{$depth*6}">&#160;</td>
@@ -353,7 +354,15 @@
         </td>
       </tr>
     </table>
+		-->
+		<div class="section">
+			<xsl:apply-templates/>
+		</div>
   </xsl:template>
+
+	<xsl:template match="l:title">
+		<h1><xsl:apply-templates/></h1>
+	</xsl:template>
 
   <xsl:template match="l:para|l:p">
     <p>

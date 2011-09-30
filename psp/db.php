@@ -93,6 +93,7 @@ class XMLDB {
 			if ( file_exists( $tableFile ) )
 			{
 				$doc->load( $tableFile );
+				$doc->xinclude();
 			}
 			else
 			{

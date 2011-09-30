@@ -193,10 +193,13 @@ class AuthModule extends AbstractModule
 
 	function permission( $role )
 	{
+		global $debug;
+
 		$user = $this->getSessionUser();
 		if ( !isset ($user) )
 		{
-			echo "No user - can't check permission $role";
+			if ( $debug > 2 )
+			debug( "No user - can't check permission $role" );
 			return false;
 		}
 #		echo "Session User: id=" . $_SESSION['auth.user.id'].': '. str_replace( '<', '&lt;', $this->authTable->saveXML( $user) ); var_dump( $user);

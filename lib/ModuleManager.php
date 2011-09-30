@@ -140,15 +140,15 @@ class ModuleManager
 
 		self::addXSL( "$m.xsl", $m  );
 
-		if ( $debug > 2 )
+		if ( $debug > 1 )
 		{
-			debug( 'module', "module $m" );
+			#debug( 'module', "module $m" );
 			foreach ( self::$stylesheets as $s )
 			{
 				debug( 'module', "  sheet " . $s[0] );
 				
 				for ($i=1; $i<count($s); $i++)
-					debug( 'module', "      ".$s[$i]);
+					debug( 'module', "        ".$s[$i]);
 			}
 		}
 	}
@@ -273,8 +273,11 @@ EOF;
 	public function addXSL( $sheet, $m = null )
 	{
 		global $debug;
-		$z =  DirectoryResource::findFiles( $sheet, $m==null?'style':'logic' );
+		$z = DirectoryResource::findFiles( $sheet, $m==null?'style':'logic' );
 		$z = array_reverse( $z );
+
+		if ( empty( $z ) )
+			return;
 
 		// TODO: blend/merge the stylesheets.
 		// Earlier tests showed that loading the sheets ASAP does not work.
@@ -293,7 +296,9 @@ EOF;
 				($debug > 2 ? $z[0] : $sheet)
 			);
 
-			array_unshift( self::$stylesheets, $z );
+			//array_unshift( self::$stylesheets, $z );
+			// XXX FIXME MAJOR CHANGE TODO CHECK
+			array_push( self::$stylesheets, $z );
 		}
 		else
 		{

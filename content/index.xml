@@ -5,17 +5,20 @@
 	xmlns:psp="http://neonics.com/2011/psp"
   xmlns:auth="http://neonics.com/2000/xsp/auth"
 >
-	<psp:content>
+	<psp:body>
+		<psp:title>Neonics PSP</psp:title>
+		<psp:content>
 
-		<auth:user>
-			<auth:success>
-				<p>Site under construction</p>
-			</auth:success>
-			<auth:fail>
-				<psp:if action="show-login">
-					<auth:login/>
-				</psp:if>
-			</auth:fail>
-		</auth:user>
-	</psp:content>
+			<auth:user>
+				<auth:success>
+					<p>Site under construction</p>
+				</auth:success>
+				<auth:fail>
+					<psp:if action="show-login">
+						<auth:login/>
+					</psp:if>
+				</auth:fail>
+			</auth:user>
+		</psp:content>
+	</psp:body>
 </psp:page>

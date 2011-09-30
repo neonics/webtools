@@ -22,11 +22,20 @@ class Request
 	{
 		global $debug;
 
+		if ( array_key_exists( "REDIRECT_URL", $_SERVER ) )
+		{
+			$this->requestURI = $_SERVER["REDIRECT_URL"];
+			if ( array_key_exists( "REQUEST_QUERY_STRING", $_SERVER) )
+				$this->requestQuery = "?".$_SERVER["REQUEST_QUERY_STRING"];
+		}
+		else
+		{
 		if ( !preg_match( "@^(.*?)(\?.*)?$@", $_SERVER["REQUEST_URI"], $matches ) )
 			die ("Regexp error");
 
-		$this->requestURI = $matches[1];
-		$this->requestQuery = array_key_exists( 2, $matches ) ? $matches[2] : null;
+			$this->requestURI = $matches[1];
+			$this->requestQuery = array_key_exists( 2, $matches ) ? $matches[2] : null;
+		}
 
 		if ( !isset( $requestURIRoots ) )
 			$requestURIRoots = Array( '/' );
@@ -58,7 +67,7 @@ class Request
 			substr( $this->requestPathURI, strlen( $this->requestBaseURI ) );
 
 		$this->requestFileURI =
-			substr( $this->requestRelURI, strlen( $this->requestPathURI ) );
+			substr( $this->requestURI, strlen( $this->requestPathURI ) );
 
 		if ( $debug > 0 )
 		{
@@ -279,7 +288,7 @@ class DynamicRequestHandler extends RequestHandler
 		ob_end_flush();
 
 		echo serializeDoc( $doc, 
-			DirectoryResource::findFile( "layout.xsl", 'style' ) );
+			array_reverse( DirectoryResource::findFiles( "layout.xsl", 'style' ) ) );
 		return true;
 
 	}

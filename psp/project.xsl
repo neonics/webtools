@@ -14,7 +14,7 @@
 >
 
 	<xsl:param name="project"/>
-	<xsl:param name="base" select="concat( $base, '/', $project )"/>
+	<!--<xsl:param name="base" select="concat( $base, '/', $project )"/>-->
 
 	<xsl:template match="project:projects-menu">
 		<xsl:variable name="p"><xsl:choose>

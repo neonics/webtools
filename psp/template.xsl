@@ -52,6 +52,9 @@
 	<xsl:template match="pst:template[@name='main']">
 		<l:page>
 			<l:body>
+				<l:header>
+					<div class="logo"><img src="{$psp:requestBaseURI}img/neonics.png"/></div>
+				</l:header>
 				MAIN TEMPLATE
 				<l:box align="left">
 					<xsl:call-template name="auth:menu"/>

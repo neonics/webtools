@@ -33,20 +33,21 @@ require_once( "Debug.php");
 		return $doc;
 	}
 
-	function serializeDoc( $doc, $sheet )
+	function serializeDoc( $doc, $sheets )
 	{
 		global $debug;
+
+		if ( !is_array( $sheets ) )
+			$sheets = Array( $sheets );
+
+		debug( 'xml', "serialize $doc->documentURI with style-sheet ".$sheets[0] );
+
+		$sheet = loadXSL( $sheets );
 
 		$doc->formatOutput = true;
 		$doc->encoding="utf-8";
 
-		debug( 'xml', "serialize $doc->documentURI with style-sheet $sheet" );
-
-#		debug( 'xml', "  loadXSL lastXSL=$sheet" );
-		$xsl = loadXSL( $sheet );
-
-		debug( 'xml', "serialize");
-		return trim ( $xsl->transformToXml( $doc ) );
+		return trim ( $sheet->transformToXml( $doc ) );
 	}
 
 
@@ -102,6 +103,7 @@ require_once( "Debug.php");
 			return loadXML( $sheets[0], 'sheet' );
 
 		$doc = new DOMDocument();
+		$docURI = null;
 		$xsltns = "http://www.w3.org/1999/XSL/Transform";
 
 		// quick and dirty - php 5.2 has some importNode errors wrt xmlns
@@ -116,15 +118,17 @@ EOF;
 			{
 				$d = loadXML( $s );//->documentElement;
 				#!isset( $docURI ) and
+				$docURI == null and 
 				$docURI = $d->documentURI;
 
+			debug("DOC URI: $docURI");
 				$a .= "<xsl:node>"
 					. preg_replace("@<\?xml[^>]+>@", "", $d->saveXML() )//file_get_contents( $s ))
 					. "</xsl:node>";
 			}
 			#echo "<pre>". str_replace( "<", "&lt;", $a.$b ) ."</pre>"; 
 			$doc->loadXML( $a . $b );
-			$doc->documentURI = $s;
+			$doc->documentURI = $docURI;
 			$doc->xinclude();
 		}
 		else

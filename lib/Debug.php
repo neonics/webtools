@@ -11,7 +11,7 @@
 		// prefix and postfix
 		static $templates = Array(
 			'1' => '<!-- [$cat:$level$pad] $msg -->\n',
-			'2' => '<code style=\'white-space:pre; font-size: 8pt;\'>[<span style=\'color:".$templates[$cat]["color"]."\'>$cat:$level$pad</span>] $msg</code><br/>\n',
+			'2' => '<code style=\'white-space:pre; font-size: 8pt; color:black;\'>[<span style=\'color:".$templates[$cat]["color"]."\'>$cat:$level$pad</span>] $msg</code><br/>\n',
 			'[]' => Array( 'color' => '#33f' ),
 			'default' => Array( 'color' => 'black' ),
 			'resource' => Array( 'color' => '#aa0' ),

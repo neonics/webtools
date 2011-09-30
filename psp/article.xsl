@@ -27,9 +27,12 @@
 	<!-- public -->
 
 	<xsl:template match="article:menu">
+	<!--
 		<l:message type="debug">SLASHMODE: [<xsl:value-of select="$psp:slashmode"/>]</l:message>
 		<l:message type="debug">base <xsl:value-of select="$psp:requestBaseURI"/></l:message>
+		-->
 		<l:menu class="vmenu">
+			<?psp module="article"?>
 			<auth:permission role="author">
 				<auth:success>
 					<l:item class="menutitle">Author</l:item>
@@ -58,20 +61,20 @@
 
 							<xsl:choose>
 								<xsl:when test="$psp:slashmode">
-									<l:item href="{$psp:requestBaseURI}0/edit">Compose new article</l:item>
+									<l:item href="{$psp:requestBaseURI}0/edit">Compose new article[1]</l:item>
 								</xsl:when>
 								<xsl:otherwise>
-									<l:item action="article:edit">Compose new article</l:item>
+									<l:item action="article:edit">Compose new article [2]</l:item>
 								</xsl:otherwise>
 							</xsl:choose>
 
-							<xsl:apply-templates select="php:function('article_index')" mode="index"/>
 						</xsl:otherwise>
 					</xsl:choose>
 
 				</auth:success>
 			</auth:permission>
 
+			<xsl:apply-templates select="php:function('article_index')" mode="index"/>
 
 		</l:menu>
 	</xsl:template>
@@ -105,11 +108,15 @@
 			</xsl:when>
 
 			<xsl:when test="string($article:article)!=''">
-				<xsl:apply-templates select="php:function('article_get', string($article:article))"/>
+				<xsl:apply-templates select="php:function('article_get', string($article:article))" mode="show"/>
+			</xsl:when>
+
+			<xsl:when test="@id">
+				<xsl:apply-templates select="php:function('article_get', string(@id))" mode="show"/>
 			</xsl:when>
 
 			<xsl:otherwise>
-				<xsl:apply-templates select="php:function('article_index')"/>
+				<xsl:apply-templates select="php:function('article_index')" mode="show"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -136,17 +143,32 @@
 
 	<!-- default mode -->
 
-	<xsl:template match="article:articles">
+	<xsl:template match="article:articles|article:article"/>
+
+	<xsl:template match="article:articles" mode="show">
 		<xsl:apply-templates/><!-- select="article:article"/>-->
 	</xsl:template>
 
-	<xsl:template match="article:article">
+	<xsl:template match="article:article" mode="show">
 		
 		<l:link anchor="article{@db:id}"/>
+		
+			<!--
+		<xsl:if test="@title">
 		<l:h1 class="article">
 			<xsl:value-of select="@db:id"/><xsl:text> </xsl:text>
-			<xsl:value-of select="@title"/>
+			<xsl:choose>
+				<xsl:when test="article:content/l:title">
+					<xsl:apply-templates select="article:content/l:title[1]"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="@title"/>
+				</xsl:otherwise>
+			</xsl:choose>
 		</l:h1>
+		</xsl:if>
+				-->
+
 		<auth:permission role="author">
 			<l:h2 class="article">
 				<xsl:choose>

@@ -134,6 +134,11 @@
 		</xsl:choose>
 	</xsl:template>
 
+	<xsl:template match="xsl:param|processing-instruction()|xsl:import|xsl:include|xsl:output">
+		<xsl:comment><xsl:value-of select="name()"/></xsl:comment>
+		<xsl:apply-templates select="." mode="copy"/>
+	</xsl:template>
+
 	<xsl:template name="copy1">
 		<xsl:param name="set"/>
 		<xsl:for-each select="$set">
@@ -154,6 +159,13 @@
       <xsl:apply-templates select="@*|node()"/>
     </xsl:copy>
   </xsl:template>
+
+  <xsl:template match="@*|node()" priority="-1" mode="copy">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="copy"/>
+    </xsl:copy>
+  </xsl:template>
+
 
 
 	<xsl:template match="processing-instruction()">

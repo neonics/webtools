@@ -28,7 +28,10 @@
 		}
 		elseif ( strpos( $p, "/" ) === 0 && strpos( $p, "\\") == 0 )
 		{
-			return null;//warn ( "Not a local path: $p");
+			$p = filename( pathinfo( $p, PATHINFO_DIRNAME ) ) .'/'.
+				filename( $uri );
+			
+			//return null;//warn ( "Not a local path: $p");
 		}
 		else // relative path
 			;

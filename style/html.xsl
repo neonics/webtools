@@ -93,6 +93,13 @@
 		</xsl:element>
 	</xsl:template>
 
+	<xsl:template match="l:embed | l:object">
+		<xsl:element name="{local-name(.)}">
+			<xsl:apply-templates select="@*|node()"/>
+		</xsl:element>
+	</xsl:template>
+
+
 
 
 </xsl:stylesheet>
