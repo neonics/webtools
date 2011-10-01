@@ -179,7 +179,7 @@ class ModuleManager
 	{
 		global $debug;
 
-		$dflt = $arg->isOptional()? $arg->getDefaultValue() : null;
+		$dflt = $arg->isOptional() ? gd( $arg->getDefaultValue(), 'null') : null;
 
 		$a =
 			($arg->isPassedByReference() ? "&" : "").

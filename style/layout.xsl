@@ -20,9 +20,11 @@
 
 	<xsl:param name="psp:requestBaseURI" select="$requestBaseURI"/>
 
+	<xsl:strip-space elements="xsl:*"/>
+
   <xsl:template match="l:page">
   	<html>
-			<xsl:comment>@author: Kenney Westerhof / Neonics.com </xsl:comment>
+			<xsl:comment>Software author: Kenney Westerhof / Neonics.com </xsl:comment>
    		<head>
      		<title><xsl:value-of select="title"/></title>
      		<link rel="stylesheet" type="text/css" href="{$psp:requestBaseURI}css/layout.css"/>
@@ -70,9 +72,7 @@
 		<div id="content">
 			<xsl:apply-templates select="@*|*"/>
 			<div class="copyright">
-				<span>
-				&#169; 2011. All Rights Reserved.
-				</span>
+				<span>&#169; 2011. All Rights Reserved.</span>
 			</div>
 		</div>
 	</xsl:template>

@@ -121,6 +121,13 @@
 		</xsl:choose>
 	</xsl:template>
 
+
+	<xsl:template match="article:link">
+		<l:link page="article?article:id={@article:id}">
+			<xsl:apply-templates/><!-- select="@*[not(name()='article:id')]|*"/>-->
+		</l:link>
+	</xsl:template>
+
 	<!-- internals -->
 
 	<!-- index/menu mode -->
@@ -136,7 +143,7 @@
 				<l:item href="{$psp:requestBaseURI}{@db:id}"><xsl:value-of select="@title"/></l:item>
 			</xsl:when>
 			<xsl:otherwise>
-				<l:item href="#article{@db:id}"><xsl:value-of select="@title"/></l:item>
+				<l:item page="article?article:id={@db:id}"><xsl:value-of select="@title"/></l:item>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -144,6 +151,7 @@
 	<!-- default mode -->
 
 	<xsl:template match="article:articles|article:article"/>
+
 
 	<xsl:template match="article:articles" mode="show">
 		<xsl:apply-templates/><!-- select="article:article"/>-->

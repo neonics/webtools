@@ -33,7 +33,7 @@
 
 	<xsl:template match="xsl:stylesheet">
 		<xsl:copy>
-			<xsl:apply-templates select="@*|node()"/>
+			<xsl:apply-templates select="@*|*"/>
 
 		<!-- this code will copy all templates that are not defined in the
 			first template -->
@@ -135,7 +135,7 @@
 	</xsl:template>
 
 	<xsl:template match="xsl:param|processing-instruction()|xsl:import|xsl:include|xsl:output">
-		<xsl:comment><xsl:value-of select="name()"/></xsl:comment>
+		<xsl:comment>FOO <xsl:value-of select="name()"/></xsl:comment>
 		<xsl:apply-templates select="." mode="copy"/>
 	</xsl:template>
 

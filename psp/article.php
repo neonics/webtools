@@ -139,11 +139,11 @@ EOF;
 	/**
 	 * <article:article/>
 	 */
-	public function get( $aid, $newIfNotFound = true )
+	public function get( $aid = null, $newIfNotFound = true )
 	{
 		global $db;
 
-		$ret= $db->get( "articles", $aid );
+		$ret= $db->get( "articles", gd( $aid, $this->articleId ) );
 
 		return isset( $ret ) ? $ret : ( $newIfNotFound ? $this->newArticle() : null );
 	}
