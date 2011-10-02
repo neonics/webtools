@@ -22,8 +22,6 @@ class AuthModule extends AbstractModule
 	{
 		global $db, $request; // XXX ref
 
-		session_start();
-
 		psp_module( 'db' );
 		$this->authTable = $db->table( "auth", $this->ns );
 

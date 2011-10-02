@@ -27,6 +27,11 @@ class PSPModule extends AbstractModule
 		$xslt->setParameter( $pspNS, "requestQuery", $request->requestQuery );
 	}
 
+	public function init()
+	{
+		session_start();
+	}
+
 
 	/***** PSP Module specifics - XSL called functions *****/
 
