@@ -37,10 +37,15 @@
 
 	<xsl:template match="l:body">
     <body id="body">
-			<xsl:apply-templates select="l:header"/>
+			<xsl:apply-templates select="@*"/>
 			<div id="main">
 				<xsl:apply-templates select="l:menu"/>
 				<table width="100%" border="0" padding="0" cellspacing="0">
+					<tr>
+						<td colspan="3">
+			<xsl:apply-templates select="l:header"/>
+						</td>
+					</tr>
 					<tr>
 
 						<td class="left"><xsl:apply-templates select="l:box[@align='left']"/></td>
@@ -104,6 +109,17 @@
 	</xsl:template>
 	-->
 
+	<xsl:template match="l:messages[not(@module)]">
+		<xsl:comment>Global messages</xsl:comment> 
+		<xsl:apply-templates mode="insert"/>
+	</xsl:template>
+
+	<xsl:template match="l:messages[@module]">
+		<xsl:variable name="m" select="@module"/>
+		<xsl:comment>Module '<xsl:value-of select="@module"/>' messages</xsl:comment> 
+		<xsl:apply-templates select="l:message[@module=$m]" mode="insert"/>
+	</xsl:template>
+
 	<xsl:template match="l:message"/>
 
 	<xsl:template match="l:message" mode="insert">
@@ -136,9 +152,7 @@
 			</xsl:when>
 
 			<xsl:when test="@href">
-				<a href="{@href}">
-					<xsl:apply-templates/>
-				</a>
+				<a href="{@href}"><xsl:apply-templates/></a>
 			</xsl:when>
 
 			<xsl:when test="@action">
@@ -178,6 +192,7 @@
 					<xsl:call-template name="link-page"/>
 				</xsl:variable>
 				<a href="{$page}">
+					<xsl:apply-templates select="@onclick|@id|@class"/>
 					<xsl:apply-templates/>
 				</a>
 			</xsl:when>
@@ -302,26 +317,49 @@
 
 	<xsl:template match="l:login">
 		<xsl:variable name="id" select="generate-id()"/>
-		<form method="POST" action="{@action}">
-			<xsl:apply-templates select="l:field"/>
-			<table class="login">
-				<tr>
-					<th colspan="2">Login</th>
-				</tr>
-				<tr>
-					<td><label for="user{$id}">Username</label></td>
-					<td><input id="user{$id}" type="text" name="{@userfield}"/></td>
-				</tr>
-				<tr>
-					<td><label for="user{$id}">Password</label></td>
-					<td><input id="user{$id}" type="password" name="{@passfield}"/></td>
-				</tr>
-				<tr>
-					<td/>
-					<td><input type="submit"/></td>
-				</tr>
-			</table>
-		</form>
+
+		<script type="text/javascript">
+			function loginLink( b )
+			{
+				document.getElementById('loginForm').style.visibility=b?'visible':'hidden';
+				document.getElementById('loginLink').style.visibility=b?'hidden':'visible';
+				return false;
+			}
+		</script>
+		<a id="loginLink" href="javascript:loginLink(true);void(0);">Login</a>
+		<div style="visibility: hidden" id="loginForm">
+			<div onclick="javascript:loginLink(false);"
+				style="right: 0px;"
+				align="right">X</div>
+			<xsl:if test="//l:message[@module='auth' and @type='error']">
+				<xsl:apply-templates select="//l:message[@module='auth']" mode="insert"/>
+				<script type="text/javascript">
+					loginLink(true);
+				</script>
+			</xsl:if>
+
+			<form method="POST" action="{@action}">
+				<xsl:apply-templates select="l:field"/>
+				<table class="login">
+					<tr>
+						<th colspan="2">Login</th>
+					</tr>
+					<tr>
+						<td><label for="user{$id}">Username</label></td>
+						<td><input id="user{$id}" type="text" name="{@userfield}"/></td>
+					</tr>
+					<tr>
+						<td><label for="user{$id}">Password</label></td>
+						<td><input id="user{$id}" type="password" name="{@passfield}"/></td>
+					</tr>
+					<tr>
+						<td/>
+						<td><input type="submit"/></td>
+					</tr>
+				</table>
+			</form>
+
+		</div>
 	</xsl:template>
 
 	<xsl:template match="l:field">
@@ -371,19 +409,9 @@
   </xsl:template>
 
 
-  <xsl:template match="l:img">
-    <xsl:copy>
-      <xsl:for-each select="@*">
-        <xsl:copy/>
-      </xsl:for-each>
-    </xsl:copy>
-  </xsl:template>
-
-
-
   <xsl:template match="l:list">
     <dl>
-      <xsl:apply-templates/>
+      <xsl:apply-templates select="@*|*"/>
     </dl>
   </xsl:template>
 

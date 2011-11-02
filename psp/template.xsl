@@ -43,19 +43,9 @@
 	<xsl:template match="pst:template">
 		<l:page>
 			<l:body>
-				REQUEST URI: <xsl:value-of select="psp:requestFile"/>
-				<xsl:apply-templates/>
-			</l:body>
-		</l:page>
-	</xsl:template>
-
-	<xsl:template match="pst:template[@name='main']">
-		<l:page>
-			<l:body>
 				<l:header>
 					<div class="logo"><img src="{$psp:requestBaseURI}img/neonics.png"/></div>
 				</l:header>
-				MAIN TEMPLATE
 				<l:box align="left">
 					<xsl:call-template name="auth:menu"/>
 				</l:box>
@@ -69,6 +59,9 @@
 					<l:messagebox type="debug"/>
 				</l:box>
 
+				<l:div>
+				MAIN TEMPLATE
+				</l:div>
 				<xsl:apply-templates select="pst:content"/>
 				<xsl:apply-templates select="pst:edit"/>
 			</l:body>
@@ -94,6 +87,7 @@
 
 	<xsl:template match="pst:menu">
 		<l:box align="left">
+			<xsl:comment> PST MENU </xsl:comment>
 			<xsl:apply-templates/>
 		</l:box>
 	</xsl:template>

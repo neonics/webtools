@@ -30,21 +30,62 @@ class EMailModule extends AbstractModule
 	 */
 	function init()
 	{
-		global $db, $request; // XXX ref
+		global $db, $request, $debug; // XXX ref
+
+		$this->status = 'form';
 
 		if ( $this->isAction( "send" ) )
 		{
+
 			foreach ( $_REQUEST as $k=>$v )
 			{
 				debug( "REQUEST: '$k' => '$v'");
 			}
 
+			$recipientEmail;
+			{
+				$fid = psp_arg( "email:form:id" );
+				$v = gad( $_SESSION, "email:form:id", Array() );
+				$recipientEmail = gad( $v, 'id:'.$fid, null );
+				unset( $v['id:'.$fid] );
+				unset( $v['email:'.$recipientEmail] );
+				$_SESSION["mail:form:id"] = $v;
+			}
+
+
+			if ( !isset( $recipientEmail ) )
+			{
+				$this->errorMessage( "E-Mail recipient is not configured" );
+				echo( "E-Mail recipient is not configured" );
+				$this->status = 'fail';
+				return;
+			}
 
 			$senderName = addslashes( psp_arg( "email:sender:name" ) );
 			$senderEMail = psp_arg( "email:sender:email" );
-			$emailSubject = addslashes( psp_arg( "email:subject" ) );
+			$emailSubject = "FractalFountain webform: " . addslashes( psp_arg( "email:subject" ) );
 			$emailBody = psp_arg( "email:body" );
-debug("sender: $senderEMail");
+			$emailBody = preg_replace("#(?<!\r)\n#si", "\r\n", $emailBody );
+			$emailHeaders = "From: $senderName <$senderEMail>";
+
+			$emailBody = "PAGE: " . requestURL()
+				. "\nRemote Address: ".$_SERVER["REMOTE_ADDR"]
+				. "\n\n$emailBody";
+			if ( true )
+			{
+				$emailBody = str_replace("\r\n", "\n", $emailHeaders)."\n\n$emailBody";
+				$emailHeaders = null;
+			}
+				
+			if ( $debug > 2 )
+			{
+				debug( "To: $recipientEmail" );
+				debug( "Subject: $emailSubject" );
+				debug( "Headers:" );
+				debug( str_replace("<", "&lt;", $emailHeaders) );
+				debug( "Body:\n$emailBody" );
+			}
+
 			$ve=null;
 			if ( !self::validate( $senderEMail, $ve ) )
 			{
@@ -52,21 +93,30 @@ debug("sender: $senderEMail");
 			}
 			else
 			{
-				if ( mail( "doesniedoen@gmail.com",
+				if ( mail( $recipientEmail,//"doesniedoen@gmail.com",
 						$emailSubject,
-						preg_replace("#(?<!\r)\n#si", "\r\n", $emailBody ),
-						"From: \"$senderName\" <$senderEMail>\r\n"
-						#."Return-Path: <>\r\n"
+						$emailBody,
+						$emailHeaders
 					) )
 				{
 					$this->message( "Message sent" );
+					$this->status = 'sent';
 				}
 				else
 				{
+					$err = error_get_last();
+					echo "<pre>ERROR: $err; ";var_dump($err);echo "</pre>";
 					$this->errorMessage( "Sending message failed." );
+					$this->errorMessage( $err );
+					$this->status = 'fail';
 				}
 			}
 		}
+	}
+
+	public function status()
+	{
+		return $this->status;
 	}
 
 	private static function validate( $email, &$errormsg = null )
@@ -144,6 +194,27 @@ address format and the domain exists.
 	}
 
 	/******* XSL functions **********/
+
+	public function form( $email )
+	{
+		//echo "FORM: email=$email<br/>";
+
+	#unset( $_SESSION["mail:form:id"] );
+	#unset( $_SESSION["email:form:id"] );
+
+		$v = gad( $_SESSION, "email:form:id", Array() );
+
+		$id = gad( $v, 'email:'.$email, rand() );
+
+		$v['id:'.$id] = $email;
+		$v['email:'.$email] = $id;
+
+		$_SESSION['email:form:id'] = $v;
+
+		//echo "SESSION HASH: "; var_dump( $v );
+		//var_dump($_SESSION);
+		return $id;
+	}
 }
 
 $email_class = "EMailModule";

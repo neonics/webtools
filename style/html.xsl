@@ -58,9 +58,9 @@
 	</xsl:template>
 
 	<xsl:template match="l:img">
-		<img>
+		<xsl:element name="{local-name(.)}">
 			<xsl:apply-templates select="node()|@*"/>
-		</img>
+		</xsl:element>
 	</xsl:template>
 
 	<xsl:template match="l:dl | l:dt | l:dd | l:ul | l:li">

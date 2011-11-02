@@ -13,6 +13,12 @@
 		return isset( $var ) ? $var : $default;
 	}
 
+	function gad( $array, $key, $default )
+	{
+		return array_key_exists( $key, $array ) && isset( $array[ $key ] )
+			? $array[ $key ] : $default;
+	}
+
 
 	function localFile( $uri, $base = null )
 	{
@@ -80,6 +86,8 @@
 			case "js":  return "text/javascript";
 			case "css": return "text/css";
 			case "html": return "text/html";
+			case "png": return "image/png";
+			case "jpg": return "image/jpeg";
 
 			default: return null;
 		}
@@ -91,5 +99,19 @@
 		debug( 'util', "mime for '$fn': $mime" );
 		if ( isset( $mime ) ) 
 			header( "Content-Type: $mime" );
+	}
+
+
+	function requestURL()
+	{
+		return
+			( $_SERVER["SERVER_PORT"] == 443 ?"https://" : "http://" ) .
+			$_SERVER["SERVER_NAME"] .
+			(
+			$_SERVER["SERVER_PORT"] == 80 ? ""
+				: $SERVER["SERVER_PORT"] == 443 ? ""
+				: ":".$SERVER["SERVER_PORT"]
+			) .
+			$_SERVER["REQUEST_URI"] . gd( $_SERVER["QUERY_STRING"], "" );
 	}
 ?>

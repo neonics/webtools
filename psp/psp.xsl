@@ -12,6 +12,7 @@
 	xmlns:pst="http://neonics.com/2011/psp/template"
 	xmlns:xsp="http://neonics.com/2001/xsp"
 	xmlns:php="http://php.net/xsl" 
+	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
 >
 <!-- exclude-result-prefixes="psp" -->
 
@@ -22,11 +23,13 @@
 			<xsl:when test="@template">
 				<xsl:value-of select="php:function('psp_module', 'template')"/>
 				<pst:template name="{@template}">
-					<xsl:apply-templates/>
+					<xsl:apply-templates select="@*|*"/>
 				</pst:template>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:apply-templates/>
+				<l:page>
+					<xsl:apply-templates/>
+				</l:page>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -35,11 +38,13 @@
 		<xsl:choose>
 			<xsl:when test="../@template">
 				<pst:content>
-					<xsl:apply-templates/>
+					<xsl:apply-templates select="@*|*"/>
 				</pst:content>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:apply-templates/>
+				<l:content>
+					<xsl:apply-templates select="@*|*"/>
+				</l:content>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -47,16 +52,20 @@
 
 	<xsl:template match="psp:element">
 		<xsl:element name="{@name}" prefix="{@prefix}" uri="{@uri}">
-			<xsl:for-each select="psp:attribute">
-				<xsl:attribute name="{@name}" prefix="{@prefix}" uri="{@uri}">
-					<xsl:apply-templates/>
-				</xsl:attribute>
-			</xsl:for-each>
-			<xsl:apply-templates/>
+			<xsl:apply-templates select="psp:attribute|*"/>
 		</xsl:element>
 	</xsl:template>
 
-	<xsl:template match="psp:attribute"/>
+	<xsl:template match="psp:attribute">
+		<xsl:attribute name="{@name}" prefix="{@prefix}" uri="{@uri}">
+			<xsl:apply-templates/>
+		</xsl:attribute>
+	</xsl:template>
+
+
+	<xsl:template match="psp:arg">
+		<xsl:value-of select="php:function('psp_arg', string(.))"/>
+	</xsl:template>
 
 	<xsl:template match="psp:expr">
 		<!--
@@ -155,8 +164,44 @@
 
 
 	<xsl:template match="psp:messages">
-		<xsl:copy-of select="php:function('psp_messages')"/>
+		<xsl:apply-templates select="php:function('psp_messages', string(@module))" mode="psp">
+			<xsl:with-param name="node" select="."/>
+		</xsl:apply-templates>
 	</xsl:template>
+
+	<xsl:template match="l:messages" mode="psp">
+		<xsl:param name="node" select="."/>
+		<xsl:copy>
+			<xsl:apply-templates select="@class|@style|@id"/>
+
+			<xsl:choose>
+				<xsl:when test="$node/@module">
+					<xsl:apply-templates select="l:message[@module=$node/@module]"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:apply-templates select="l:message"/>
+				</xsl:otherwise>
+			</xsl:choose>
+
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="l:message" mode="psp">
+		<xsl:param name="node" select="."/>
+		<xsl:copy>
+			<xsl:apply-templates select="l:message" mode="psp">
+				<xsl:with-param name="node" select="$node"/>
+			</xsl:apply-templates>
+		</xsl:copy>
+	</xsl:template>
+
+
+  <xsl:template match="@*|node()" mode="psp">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="psp"/>
+    </xsl:copy>
+  </xsl:template>
+
 
 
 	<!-- transitional -->

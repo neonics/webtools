@@ -107,7 +107,9 @@ class ArticleModule extends AbstractModule
 	</article>
 
 EOF;
-		return DOMDocument::loadXML( $template )->documentElement;
+		$dd = new DOMDocument();
+		$dd->loadXML( $template );
+		return $dd->documentElement;
 
 /*
 		$a = $articles->createElementNS( $ns, "article" );

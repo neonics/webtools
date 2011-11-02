@@ -33,6 +33,7 @@ h1:first-of-type {
 .message { display:block; }
 
 .message .debug { color: #888; }
+.message .error { color: #f88; }
 
 /* ***************************************** */
 

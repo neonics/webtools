@@ -77,6 +77,7 @@ class Request
 			debug( 'request', "requestRelURI:     $this->requestRelURI" );
 			debug( 'request', "requestRelPathURI: $this->requestRelPathURI" );
 			debug( 'request', "requestFileURI:    $this->requestFileURI" );
+			debug( 'request', "requestQuery:      $this->requestQuery" );
 
 			// no closures...
 			$actions = implode( ' ', 	
@@ -96,14 +97,15 @@ class Request
 }
 
 
-class RequestHandler
+abstract class RequestHandler
 {
 	private static $requestHandlers = Array();
 
-	public static function init( $requestURIRoots, $staticContent )
+	public static function init( $requestURIRoots, $staticContent, $redir )
 	{
 		ob_start();
 
+		self::add( 'redirect', new RedirectRequestHandler( $redir ) );
 		self::add( 'static', new StaticRequestHandler( $staticContent ) );
 		self::add( 'content', new ContentRequestHandler( Array('content/') ) );
 		self::add( 'dynamic', new DynamicRequestHandler() );
@@ -117,7 +119,7 @@ class RequestHandler
 		self::$requestHandlers[ $label ] = $function;
 	}
 
-	public function handle( $request )
+	public static function handle( $request )
 	{
 		global $debug;
 
@@ -127,12 +129,14 @@ class RequestHandler
 		{
 			$debug > 1 and
 			debug( 'request', "delegate handler $k" );
-			if ( $h->handle( $request ) )
+			if ( $h->_handle( $request ) )
 			{
 				exit;
 			}
 		}
 	}
+
+	protected abstract function _handle( $request );
 
 	public static function notFound()
 	{
@@ -145,14 +149,61 @@ class RequestHandler
 
 	public static function sendFile( $fn )
 	{
+		$lmreq = gad( $_SERVER, "HTTP_IF_MODIFIED_SINCE", null );
+		$lmtime = filemtime( $fn );
+
+		if ( isset( $lmreq ) )
+		{
+			$lmreq = strtotime( $lmreq );
+
+			if ( $lmtime == $lmreq )
+			{
+				header( "HTTP/1.1 304 Not modified" );
+				exit;
+			}
+		}
+
 		debug( "200 okay $fn" );
 		header( "HTTP/1.1 200 OK" );
 		// i used to send both, but this no worky in < 5.3
 		//header( "Status 200 OK" );
+		
+		// #clearstatcache()
+
+
+		header( "Last-Modified: " .gmdate( "D, d M Y H:i:s", $lmtime ) . " GMT" );
+
 		sendmime( $fn );
 		readfile( $fn );
 	}
 }
+
+class RedirectRequestHandler extends RequestHandler
+{
+	public function __construct( $redir )
+	{
+		$this->regexp = '@^(' . implode( '|^', array_keys( $redir ) ) . ')@';
+		$this->redir = $redir;
+	}
+
+	public function _handle( $request )
+	{
+		$matches;
+		if ( preg_match( $this->regexp, $request->requestRelPathURI, $matches ) )
+		{
+			debug( 'request', "[redir] match $this->regexp: ".$matches[0] );
+			$request->requestRelPathURI = "";
+			$request->requestFileURI = $this->redir[ $matches[1] ];
+			$request->requestRelURI = $request->requestFileURI;
+			return false;
+		}
+
+		debug( 'request', "[redir] No match for $this->regexp" );
+		return false;
+	}
+}
+
+
 
 class StaticRequestHandler extends RequestHandler
 {
@@ -161,7 +212,7 @@ class StaticRequestHandler extends RequestHandler
 		$this->regexp = '@^' . implode( '|^', $staticContent ) . '@';
 	}
 
-	public function handle( $request )
+	public function _handle( $request )
 	{
 		if ( preg_match( $this->regexp, $request->requestRelURI ) )
 		{
@@ -194,7 +245,7 @@ class ContentRequestHandler extends RequestHandler
 		$this->regexp = '@^(' . implode( '|^', $dirs ) . ')@';
 	}
 
-	public function handle( $request )
+	public function _handle( $request )
 	{
 		$matches;
 
@@ -231,7 +282,7 @@ class ContentRequestHandler extends RequestHandler
 
 class DynamicRequestHandler extends RequestHandler
 {
-	public function handle( $request )
+	public function _handle( $request )
 	{	
 		global $debug;
 

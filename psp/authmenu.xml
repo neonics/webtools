@@ -24,10 +24,7 @@
 	</auth:success>
 	<auth:fail>
 		<menu class="vmenu">
-			<!--
 			<item><auth:login/></item>
-			-->
-			<item page="index" action="show-login">Login</item>
 		</menu>
 	</auth:fail>
 </auth:user>

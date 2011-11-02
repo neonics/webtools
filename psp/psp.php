@@ -9,7 +9,7 @@ class PSPModule extends AbstractModule
 	{
 		parent::__construct( 'psp', "http://neonics.com/2011/psp" );
 
-		eval( 'function psp_messages() { return AbstractModule::messages(); }' );
+		eval( 'function psp_messages($module=null) { return AbstractModule::messages($module); }' );
 		ModuleManager::registerFunction( 'psp_messages' );
 	}
 
@@ -30,6 +30,30 @@ class PSPModule extends AbstractModule
 	public function init()
 	{
 		session_start();
+
+		$fn = "errorHandler";
+
+		#if ( false )
+		{
+		$code = <<<EOF
+			function $fn( \$errno, \$errstr, \$errfile, \$errline, \$errcontext )
+			{
+				switch ( \$errno )
+				{
+					case E_NOTICE: case E_USER_NOTICE: \$errno = "notice";break;
+					case E_WARNING: case E_USER_WARNING: \$errno = "warning";break;
+					case E_ERROR: case E_USER_ERROR: default: \$errno = "error";
+				}
+				AbstractModule::smessage( Array( "\$errstr", "@ \$errfile:\$errline"), "error" );
+
+				echo "<div width='100%' style='color:white; background-color:red;font-weight:bold;'>"
+					."[\$errno] \$errstr<br/>"
+					."<i>  @ \$errfile:\$errline</i></div><br/>";
+			}
+EOF;
+		eval( $code );
+		set_error_handler( $fn );
+		}
 	}
 
 

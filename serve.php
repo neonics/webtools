@@ -18,9 +18,11 @@
 	// 2 - pre-HTML text
 	// 3 - verbose (resources)
 	// 4 - 
-
+#phpinfo();
 	if ( !isset( $debug ) )
 		$debug = 2;
+
+	ini_set('date.timezone', date_default_timezone_get());
 
 	require_once( "lib/Debug.php" );
 	require_once( "lib/RequestHandler.php" );
@@ -34,7 +36,9 @@
 		: Array(), Array( 'css/', 'img/', 'js/', 'ckeditor/')
 	);
 
-	$request = RequestHandler::init( $requestURIRoots, $staticContent );
+	$redir = array( 'wiki/' => 'wiki.html' );
+
+	$request = RequestHandler::init( $requestURIRoots, $staticContent, $redir );
 
 	$pspLogicDir = "psp";
 	$pspContentDir = "content";

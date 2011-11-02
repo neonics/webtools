@@ -9,8 +9,10 @@ RewriteRule ^articles/([^/]+)/?([^/]+)?$  articles.html?article:id=$1&action:art
 #RewriteRule ^articles/(([0123456789]*?)/)?([^/]*)/?$ articles.html?article:id=$2&action:article:$3= [NC,L]
 
 
-RewriteCond %{REQUEST_URI} !\.html$
-RewriteRule ^([^/]+)$    $1/index.html
+#RewriteCond %{REQUEST_URI} !\.html$
+#RewriteRule ^([^/]+)$    $1/index.html
+
+RewriteRule ^wiki/(.*)(\?.*)?$	handle.php?action:wiki:show=&wiki:title=$1&$2 [L]
 
 RewriteRule ^(.*?)\.html handle.php [L]
 

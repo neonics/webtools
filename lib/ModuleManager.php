@@ -40,13 +40,22 @@ abstract class AbstractModule implements IModule
 
 	private static $messages;
 
-	public static function messages()
+	public static function messages( $module = null )
 	{
+		// XXX TODO filter $module
 		return isset( self::$messages )
 			? self::$messages : new DOMNode();
 	}
 
 	protected function message( $msg, $type = null )
+	{
+		self::smessage( $msg, $type, $this );
+	}
+
+	private static $funcToMod = Array(
+		"mail" => "email",
+	);
+	public static function smessage( $msg, $type = null, $mod = null )
 	{
 		$lns = "http://www.neonics.com/xslt/layout/1.0";
 
@@ -54,7 +63,8 @@ abstract class AbstractModule implements IModule
 		{
 			$l = self::$messages = new DOMDocument();
 			$l->appendChild( $l->createElementNS( $lns, 'messages' ) );
-			$l->documentElement->setAttribute( 'module', $this->name );
+			isset( $mod ) and 
+			$l->documentElement->setAttribute( 'module', $mod->name );
 		}
 		else
 		{
@@ -64,11 +74,35 @@ abstract class AbstractModule implements IModule
 		$m = $l->documentElement->appendChild( 
 			$l->createElementNS( $lns, 'message' ) );
 
-		$m->setAttribute( 'module', $this->name );
-		isset( $type ) and $m->setAttribute( 'type', $type );
-		$m->appendChild( $l->createTextNode( $msg ) );
+		if ( ! is_array( $msg ) )
+			$msg = Array($msg);
 
-		debug( 'core', 'add message: ' . $l->saveXML( $m ) );
+		$modname;
+		if (! isset( $mod ) )
+		{
+			$matches;
+			if ( preg_match( "/^(.*?\(.*?<a href=['\"]function\.(.*?)['\"]>.*?<\/a>\s*\]:\s*)/",
+				$msg[0], $matches ) )
+			{
+				$modname = $matches[2];
+				$modname = gad( self::$funcToMod, $modname, $modname );
+				$msg[0] = substr( $msg[0], strlen( $matches[1] ) );
+				$msg[0] = str_replace( "&quot;", "'", $msg[0] );
+				$msg = Array( $msg[0] );
+			}
+		}
+		else
+			$modname = $mod->name;
+
+		isset( $modname ) and $m->setAttribute( 'module', $modname );
+		isset( $type ) and $m->setAttribute( 'type', $type );
+
+		foreach ( $msg as $message )
+		{
+			$m->appendChild( $l->createTextNode( $message ) );
+		}
+
+		debug( 'core', 'add message: ' . str_replace( "<", "&lt;", $l->saveXML( $m ) ) );
 		return $m;
 	}
 
@@ -94,6 +128,28 @@ class ModuleManager
 		if ( array_key_exists( $m, self::$modules ) )
 		{
 			debug( 'module', "duplicate module $m" );
+
+			// bump stylesheet if any to end of list
+			if ( array_key_exists( "sheet", self::$modules[$m] ) )
+			{
+				foreach ( self::$stylesheets as $i => $z )
+				{
+					if ( $z[0] == self::$modules[$m]['sheet'] )
+					{
+						array_splice( self::$stylesheets, $i, 1 );
+						self::$stylesheets[] = $z;
+						debug( 'module', "sheet " . self::$modules[$m]['sheet']
+							. " bumped from #$i to end" );
+						break;
+					}
+				}
+			}
+
+
+			// XXX if no return here, then recursion due to 'addXSL' below.
+			// To have duplicate sheets enabled, remove the return and the addXSL call
+			// however this leads to way too many transformation calls
+			return; 
 		}
 		else
 		{
@@ -142,7 +198,7 @@ class ModuleManager
 
 		if ( $debug > 1 )
 		{
-			#debug( 'module', "module $m" );
+			debug( 'module', "sheets:" );
 			foreach ( self::$stylesheets as $s )
 			{
 				debug( 'module', "  sheet " . $s[0] );
@@ -153,7 +209,7 @@ class ModuleManager
 		}
 	}
 	
-	private function createProxies( $m )
+	private static function createProxies( $m )
 	{
 		global $debug;
 
@@ -229,7 +285,7 @@ EOF;
 	}
 
 
-	public function setParameters( $xslt, $sheet )
+	public static function setParameters( $xslt, $sheet )
 	{
 		global $debug;
 
@@ -251,12 +307,12 @@ EOF;
 		}
 	}
 
-	public function registerFunction( $fname )
+	public static function registerFunction( $fname )
 	{
 		self::$xsltFunctions[] = $fname;
 	}
 
-	public function registerFunctions( $xslt )
+	public static function registerFunctions( $xslt )
 	{
 		global $debug;
 
@@ -270,7 +326,7 @@ EOF;
 
 	private static $sheetToModule = array();
 
-	public function addXSL( $sheet, $m = null )
+	public static function addXSL( $sheet, $m = null )
 	{
 		global $debug;
 		$z = DirectoryResource::findFiles( $sheet, $m==null?'style':'logic' );
@@ -299,6 +355,14 @@ EOF;
 			//array_unshift( self::$stylesheets, $z );
 			// XXX FIXME MAJOR CHANGE TODO CHECK
 			array_push( self::$stylesheets, $z );
+
+			if ( isset ( $m ) )
+			{
+				self::$sheetToModule[$sheet] = $m;
+				self::$modules[$m]["sheet"] = $z[0];
+			}
+ob_flush();
+			loadXSL( $z );
 		}
 		else
 		{
@@ -309,20 +373,14 @@ EOF;
 				debug ("      ". $q[0]);
 			}
 		}
-		#loadXSL( $sheet );
 
-		if ( isset ( $m ) )
-		{
-			self::$sheetToModule[$sheet] = $m;
-			self::$modules[$m]["sheet"] = $z[0];
-		}
 	}
 
 
 	/**
 	 * 'xsp:deinit'
 	 */
-	public function deinit()
+	public static function deinit()
 	{
 		foreach ( self::$modules as $m => $mod )
 		{
@@ -335,7 +393,7 @@ EOF;
 		}
 	}
 
-	public function transform( $doc )
+	public static function transform( $doc )
 	{
 		global $debug;
 
@@ -349,6 +407,14 @@ EOF;
 		debug( 'module', "TRANSFORM DONE");
 
 		return $doc;
+	}
+
+
+	public static function errorMessage( $a, $b = null )
+	{
+		$msg = isset( $b ) ? $b : $a;
+		$mod = isset( $b ) ? $a : $b;
+		AbstractModule::smessage( $msg, 'error', $mod );
 	}
 }
 

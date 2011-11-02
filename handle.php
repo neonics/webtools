@@ -8,7 +8,7 @@ $requestURIRoots = Array(
 
 # loglevel:
 $debug = 2;
-# $debugDumpFiles = 1;
+$debugDumpFiles = 1;
 $logging = 2;  // 1 = file, 2 = http response, 3 = both
 
 # logicDir = "psp";

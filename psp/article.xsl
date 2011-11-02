@@ -97,9 +97,10 @@
 
 					<l:label for="t{generate-id()}">Title</l:label>
 					<l:input id="t{generate-id()}" name="article:title" type="text"
-						value="{$art/@title}"/><l:br/>
+						value="{$art/@title}" size="80"/><l:br/>
 
-					<l:textarea name="article:content">
+					<l:label style="vertical-align:top">Text</l:label>
+					<l:textarea name="article:content" cols="80" rows="25">
 						<xsl:value-of select="$art/article:content"/>
 					</l:textarea>
 
