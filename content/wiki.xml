@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+<?psp module="wiki"?>
+
+<psp:page template="wiki"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:pst="http://neonics.com/2011/psp/template"
+	xmlns:db="http://neonics.com/2011/db/xml"
+  xmlns:wiki="http://neonics.com/2011/wiki"
+	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:auth="http://neonics.com/2000/xsp/auth"
+>
+	<pst:menu>
+		<menu class="vmenu">
+			<item class="menutitle">Wiki</item>
+			<auth:permission role="editor">
+				<item action="wiki:edit">Edit</item>
+				<item action="wiki:delete">Delete</item>
+			</auth:permission>
+		</menu>
+	</pst:menu>
+
+	<pst:content>
+		<wiki:index/>
+
+		<psp:if action="wiki:edit">
+			<psp:then>
+				<l:div>Wiki Edit</l:div>
+				<wiki:edit/>
+			</psp:then>
+			<psp:else>
+					<wiki:show/>
+			</psp:else>
+		</psp:if>
+
+	</pst:content>
+</psp:page>

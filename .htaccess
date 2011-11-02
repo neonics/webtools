@@ -12,7 +12,7 @@ RewriteRule ^articles/([^/]+)/?([^/]+)?$  articles.html?article:id=$1&action:art
 #RewriteCond %{REQUEST_URI} !\.html$
 #RewriteRule ^([^/]+)$    $1/index.html
 
-RewriteRule ^wiki/(.*)(\?.*)?$	handle.php?action:wiki:show=&wiki:title=$1&$2 [L]
+RewriteRule ^wiki/(.*)$	wiki.html?wiki:title=$1&%{QUERY_STRING} [R]
 
 RewriteRule ^(.*?)\.html handle.php [L]
 
