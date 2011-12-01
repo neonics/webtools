@@ -96,7 +96,7 @@
 	function sendmime( $fn )
 	{
 		$mime = mimetype( $fn );
-		debug( 'util', "mime for '$fn': $mime" );
+		#debug( 'util', "mime for '$fn': $mime" );
 		if ( isset( $mime ) ) 
 			header( "Content-Type: $mime" );
 	}
@@ -109,8 +109,8 @@
 			$_SERVER["SERVER_NAME"] .
 			(
 			$_SERVER["SERVER_PORT"] == 80 ? ""
-				: $SERVER["SERVER_PORT"] == 443 ? ""
-				: ":".$SERVER["SERVER_PORT"]
+				: $_SERVER["SERVER_PORT"] == 443 ? ""
+				: ":".$_SERVER["SERVER_PORT"]
 			) .
 			$_SERVER["REQUEST_URI"] . gd( $_SERVER["QUERY_STRING"], "" );
 	}

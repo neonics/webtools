@@ -69,7 +69,7 @@
 	{
 		global $debug, $debugDumpFiles;
 
-		if ( $debug <=4  && ! $debugDumpFiles )
+		if ( /*$debug <2  && */ ! $debugDumpFiles )
 			return;
 
 		static $fileIdx = 0;
@@ -80,6 +80,8 @@
 			debug("Not dumping - not a local file probably: ".$doc->documentURI.", local: " . localFile( $doc->documentURI ) );
 			return;
 		}
+
+		$debug > 3 and
 		debug("SAFEFILE: $f");
 
 		$sheet = isset( $sheet ) ? safeFile(
@@ -90,7 +92,7 @@
 		) : null;
 
 		$p = isset($sheet) ? "-$sheet"  : "";
-		debug("P: $p");
+		$debug > 3 and debug("P: $p");
 
 		$fileIdx++;
 		debug("Dumping file: dump-$f-$fileIdx$p.xml");

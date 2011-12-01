@@ -59,6 +59,13 @@ EOF;
 
 	/***** PSP Module specifics - XSL called functions *****/
 
+	/** set by ModuleManager::processDoc which applies the psp.xsl
+		Architecture here needs some adjustment... consider it WIP.
+	*/
+	public $curDoc; 
+
+	public $nomerge = array();
+
 	public function arg( $key )
 	{
 		return isset( $_REQUEST[ $key ] ) ? $_REQUEST[ $key ] : null;
@@ -98,6 +105,19 @@ EOF;
 							break;
 
 						case "template":
+							break;
+						
+						case "merge":
+							// correlate value to the xslt currently being processed
+							if ( $value == 'no' )
+								$his->nomerge[] = $this->curDoc->documentURI;
+							debug( 'psp', "Marking as 'do not merge': " . $this->curDoc->documentURI );
+							break;
+
+						case "style":
+							global $request;
+							debug( 'psp', "XXX Style $value" );
+							$request->style = $value;
 							break;
 					}
 				}

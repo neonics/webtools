@@ -66,9 +66,17 @@
 
 
 	<xsl:template match="db:result[@size=0]" mode="show">
-		<l:p>
-			Article does not exist.
-		</l:p>
+		<l:div class="wikiarticle">
+			<l:h1 class="wikititle wikinopage">
+				<xsl:value-of select="@title"/>
+			</l:h1>
+			<l:div class="wikitext">
+				<l:p>
+					Article does not exist.
+					<l:link action="wiki:edit">Create new page</l:link>.
+				</l:p>
+			</l:div>
+		</l:div>
 	</xsl:template>
 
 

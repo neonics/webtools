@@ -18,6 +18,8 @@ class Request
 	public $requestFile;
 	public $in;
 
+	public $style = "layout.xsl"; # processing instr: <?psp style href=".."
+
 	public function __construct( $requestURIRoots )
 	{
 		global $debug;
@@ -34,8 +36,16 @@ class Request
 			die ("Regexp error");
 
 			$this->requestURI = $matches[1];
-			$this->requestQuery = array_key_exists( 2, $matches ) ? $matches[2] : null;
+			$this->requestQuery = array_key_exists( 2, $matches ) ? $matches[2] : 
+				# instead of null
+				"?".$_SERVER["QUERY_STRING"];
+
+			#override
 		}
+
+		# oddness ...
+		if ( !isset ( $this->requestQuery ) )
+			$this->requestQuery = "?".$_SERVER["QUERY_STRING"];
 
 		if ( !isset( $requestURIRoots ) )
 			$requestURIRoots = Array( '/' );
@@ -163,7 +173,7 @@ abstract class RequestHandler
 			}
 		}
 
-		debug( "200 okay $fn" );
+		#debug( "200 okay $fn" );
 		header( "HTTP/1.1 200 OK" );
 		// i used to send both, but this no worky in < 5.3
 		//header( "Status 200 OK" );
@@ -339,7 +349,8 @@ class DynamicRequestHandler extends RequestHandler
 		ob_end_flush();
 
 		echo serializeDoc( $doc, 
-			array_reverse( DirectoryResource::findFiles( "layout.xsl", 'style' ) ) );
+			array_reverse( DirectoryResource::findFiles(
+				$request->style, 'style' ) ) );
 		return true;
 
 	}

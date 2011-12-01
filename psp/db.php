@@ -222,7 +222,8 @@ EOF;
 
 		$xslt = new XSLTProcessor();
 		$dd = new DOMDocument();
-		$xslt->importStylesheet( $dd->loadXML( $template ) );
+		$dd->loadXML( $template );
+		$xslt->importStylesheet( $dd );
 		$id = $xslt->transformToXML( $this->tables[ $table ] );
 		$id = empty( $id ) ? 1 : $id+1;
 

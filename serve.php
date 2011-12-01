@@ -38,6 +38,7 @@
 
 	$redir = array( 'wiki/' => 'wiki.html' );
 
+	# global var!
 	$request = RequestHandler::init( $requestURIRoots, $staticContent, $redir );
 
 	$pspLogicDir = "psp";

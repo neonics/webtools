@@ -14,6 +14,7 @@
 	<pst:menu>
 		<menu class="vmenu">
 			<item class="menutitle">Wiki</item>
+			<item slashpage="wiki/">Index</item>
 			<auth:permission role="editor">
 				<item action="wiki:edit">Edit</item>
 				<item action="wiki:delete">Delete</item>
@@ -22,15 +23,19 @@
 	</pst:menu>
 
 	<pst:content>
-		<wiki:index/>
-
-		<psp:if action="wiki:edit">
+		<psp:if arg="wiki:title">
 			<psp:then>
-				<l:div>Wiki Edit</l:div>
-				<wiki:edit/>
+				<psp:if action="wiki:edit">
+					<psp:then>
+						<wiki:edit/>
+					</psp:then>
+					<psp:else>
+						<wiki:show/>
+					</psp:else>
+				</psp:if>
 			</psp:then>
 			<psp:else>
-					<wiki:show/>
+				<wiki:index/>
 			</psp:else>
 		</psp:if>
 

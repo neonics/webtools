@@ -22,7 +22,7 @@ require_once( "Debug.php");
 
 		$sheet = loadXSL( $sheets );
 
-		debug ("transform ".
+		debug ( 'xml', "transform ".
 			filename( $doc->documentURI ).
 			" sheet ".$sheets[0] );
 
@@ -47,7 +47,11 @@ require_once( "Debug.php");
 		$doc->formatOutput = true;
 		$doc->encoding="utf-8";
 
-		return trim ( $sheet->transformToXml( $doc ) );
+		$ret = trim ( $sheet->transformToXml( $doc ) );
+
+		debug( 'xml', "serialize done." );
+
+		return $ret;
 	}
 
 
@@ -72,21 +76,17 @@ require_once( "Debug.php");
 			#debug( 'xml', "load sheet $key" );
 			$doc = mergeXSLT( $sheets );
 
-			{
-				$pspXSL = ModuleManager::$modules[ "psp" ][ "sheet" ];
-				if ( isset( $pspXSL ) && $pspXSL.';' != $key )
-				{
-					$debug > 2 and
-					debug( 'xml', "transforming $key with $pspXSL" );
-					$doc = transform( $doc, $pspXSL );
-				}
-			}
+			$doc = ModuleManager::processDoc( $doc );
+
 #debug( str_replace("<", "&lt;", $doc->saveXML() ) );
 
 			$xslt = new XSLTProcessor();
 			ModuleManager::registerFunctions( $xslt );
 			ModuleManager::setParameters( $xslt, $sheets );
 			$xslt->importStylesheet( $doc );
+
+			# XXX non-existing field
+			$xslt->doc = $doc;
 
 			$xsltCache[ $key ] = $xslt;
 		}
@@ -101,6 +101,14 @@ require_once( "Debug.php");
 
 		if ( count( $sheets ) == 1 )
 			return loadXML( $sheets[0], 'sheet' );
+
+		debug( 'xml', "merging sheets" );
+		// check to see if merge="no" for custom sheet
+#		if ( null == gad( ModuleManager::$modules[ "psp" ][ "instance" ]->nomerge,
+#			$sheets[1], null ) )
+#		{
+#			return loadXML( $sheets[1], 'sheet' );
+#		}
 
 		$doc = new DOMDocument();
 		$docURI = null;
@@ -121,7 +129,7 @@ EOF;
 				$docURI == null and 
 				$docURI = $d->documentURI;
 
-			debug("DOC URI: $docURI");
+				$debug > 3 and debug("DOC URI: $docURI");
 				$a .= "<xsl:node>"
 					. preg_replace("@<\?xml[^>]+>@", "", $d->saveXML() )//file_get_contents( $s ))
 					. "</xsl:node>";
@@ -163,7 +171,7 @@ EOF;
 		if ( $debug > 3 )
 		debug( 'xml', "MERGING: <code style='color:blue;'>" . str_replace( '<', '&lt;', $doc->saveXML() ) ."</code>" );
 
-		$doc->documentURI = $docURI.'-merged-doc';//filename( $docURI );
+		$doc->documentURI = $docURI.'-merge';//filename( $docURI );
 		dumpXMLFile( $doc );
 
 		$xslt = loadXSL( $xsl=DirectoryResource::findFile( 'mergexsl.xsl', 'logic' ) );

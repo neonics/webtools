@@ -116,11 +116,15 @@
 				<xsl:when test="@action">
 					<xsl:value-of select="php:function('psp_isaction', string(@action))"/>
 				</xsl:when>
-				<xsl:when test="@expr" select="php:function('psp_expr', string(@expr))"/>
+				<xsl:when test="@expr">
+					<xsl:value-of select="php:function('psp_expr', string(@expr))"/>
+				</xsl:when>
+				<xsl:when test="@arg">
+					<xsl:value-of select="php:function('psp_arg', string(@arg)) != ''"/>
+				</xsl:when>
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-
 
 		<!-- check psp:if format: -->
 		<xsl:choose>

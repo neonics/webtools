@@ -36,6 +36,7 @@
   </xsl:template>
 
 	<xsl:template match="l:body">
+		<xsl:comment>core layout.xsl</xsl:comment>
     <body id="body">
 			<xsl:apply-templates select="@*"/>
 			<div id="main">
@@ -321,15 +322,15 @@
 		<script type="text/javascript">
 			function loginLink( b )
 			{
-				document.getElementById('loginForm').style.visibility=b?'visible':'hidden';
-				document.getElementById('loginLink').style.visibility=b?'hidden':'visible';
+				document.getElementById('loginForm').style.display=b?'block':'none';
+				document.getElementById('loginLink').style.display=b?'none':'block';
 				return false;
 			}
 		</script>
 		<a id="loginLink" href="javascript:loginLink(true);void(0);">Login</a>
-		<div style="visibility: hidden" id="loginForm">
+		<div style="display: none" id="loginForm">
 			<div onclick="javascript:loginLink(false);"
-				style="right: 0px;"
+				style="display: block; right: 0px;"
 				align="right">X</div>
 			<xsl:if test="//l:message[@module='auth' and @type='error']">
 				<xsl:apply-templates select="//l:message[@module='auth']" mode="insert"/>

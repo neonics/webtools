@@ -62,7 +62,9 @@
 				<l:div>
 				MAIN TEMPLATE
 				</l:div>
+				<l:div>CONTENT
 				<xsl:apply-templates select="pst:content"/>
+				</l:div>
 				<xsl:apply-templates select="pst:edit"/>
 			</l:body>
 
@@ -387,7 +389,7 @@
 
 		<form id="uploadForm" method="post" action="{$psp:requestBaseURI}template.html">
 			<input type="hidden" name="action:template:post"/>
-			<input type="hidden" name="template:referer" value="{$psp:requestURI}{$psp:requestQuery}"/>
+			<input type="text" name="template:referer" value="{$psp:requestURI}{$psp:requestQuery}"/>
 			<input type="hidden" name="template:file" value="{$psp:requestDir}{$psp:requestFile}"/>
 			<textarea style="display:none" id="data" cols="40" name="template:content"/>
 		</form>

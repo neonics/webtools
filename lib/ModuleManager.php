@@ -11,6 +11,10 @@ interface IModule
 
 	public function deinit();
 
+
+	/**
+	 * $xslt->setParameter( ns, name, value );
+	 */
 	public function setParameters( $xslt );
 }
 
@@ -180,6 +184,7 @@ class ModuleManager
 			{
 				if ( $debug > 2 )
 					debug( 'module', "Instantiating module $m" );
+
 				self::$modules[$m]["instance"] = new $$modClass();
 
 				self::createProxies( $m );
@@ -405,6 +410,29 @@ ob_flush();
 		}
 
 		debug( 'module', "TRANSFORM DONE");
+
+		return $doc;
+	}
+
+	public static function processDoc( $doc )
+	{
+		global $debug;
+
+		$pspXSL = ModuleManager::$modules[ "psp" ][ "sheet" ];
+		if ( isset( $pspXSL ) && $pspXSL != $doc->documentURI )
+		{
+			$debug > 2 and
+			debug( 'xml', "transforming ".$doc->documentURI . " with $pspXSL" );
+
+			ModuleManager::$modules[ "psp" ][ "instance" ]->curDoc = $doc;
+
+			$doc = transform( $doc, $pspXSL );
+
+			ModuleManager::$modules[ "psp" ][ "instance" ]->curDoc = null; 
+
+			$debug > 3 and
+			dumpXMLFile( $doc, $pspXSL );
+		}
 
 		return $doc;
 	}

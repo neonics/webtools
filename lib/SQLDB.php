@@ -1,79 +1,11 @@
 <?php
-class WikiArticlesTable extends DBTable
-{
-	public function __construct( $dbh, $ns, $pfx, $name, $tablename )
-	{
-	debug( 'sqldb', "NAMESPACE: $ns; pfx: $pfx; tablename: $tablename" );
-		parent::__construct(
-			$dbh,
-			array
-			(
-				'ns' => $ns,
-				'prefix' => $pfx,
-				'name' => $name,
-				'tablename' => $tablename,
-				'columns' => array
-				(
-					'id' => array
-					(
-						'type' => 'int',
-						'sql' => 'serial not null primary key',
-						'xml' => 'attribute',
-						'key' => true
-					),
-					'title' => array
-					(
-						'type' => 'string',
-						'sql' => 'varchar(255) not null',
-						'xml' => 'attribute'
-					),
-					'date' => array
-					(
-						'type' => 'date',
-						'sql' => 'date',
-						'xml' => 'attribute'
-					),
-					'status' => array
-					(
-						'type' => 'string',
-						'sql' => 'varchar(64)',
-						'xml' => 'attribute'
-					),
-					'text' => array
-					(
-						'type' => 'string',
-						'sql' => 'text',
-						'xml' => 'element'
-					)
-				),
-				'virtual' => array (
-					'xmltext' => array
-					(
-						'type' => 'virtual',
-						'xml' => 'element'
-					)
-				)
-			)
-		);
-	}
-
-	/** WikiParser */
-	public function getXmlText()
-	{
-		debug( 'sqldb', "[table] getText" );
-		$text = $this->row[ 'text' ];
-		$text = preg_replace( "/\[(.*?)\]/", "<a href='\${1}'>\${1}</a>", $text );
-		return $text;
-	}
-}
-
 
 class DBTable
 {
 	protected $row;
 	public $definition;
 	private static $definitions = array();
-	private $dbh;
+	protected $dbh;
 
 	public function __construct( $dbh, $definition )
 	{
@@ -146,6 +78,7 @@ class DBTable
 
 				if ( isset( $sqlFile ) )
 				{
+					debug( 'sqldb', "Loading sqlfile: $sqlFile" );
 					$sql = file_get_contents( dirname( __FILE__ )."/wiki.sql" );
 				}
 				else
@@ -162,12 +95,20 @@ class DBTable
 		}
 	}
 
+	private function getSQL( $columnDescription )
+	{
+		$driverName = $this->dbh->getAttribute( PDO::ATTR_DRIVER_NAME );
+		debug( 'sqldb', "Database Driver: $driverName" );
+		return gad( $columnDescription, "sql:$driverName",
+			gad( $columnDescription, "sql", null ) );
+	}
+
 	private function makeCreateQuery()
 	{
 		$cols = "";
 		foreach ( $this->definition["columns"] as $cn => $c )
 		{
-			$cols[] = "$cn ".$c['sql']."\n";
+			$cols[] = "$cn ".$this->getSQL( $c )."\n";
 		}
 	
 		$sql = "create table " . $this->definition["tablename"] . " (\n"
@@ -198,6 +139,8 @@ class DBTable
 			switch ( gad( $c, "xml", "element" ) )
 			{
 				case "element":
+					if ( $c['type'] != 'xml' )
+						$value = htmlspecialchars( $value );
 					$els.="  <$pfx:$cn>".$value."</$pfx:$cn>\n";
 					break;
 				case "attribute":
@@ -398,7 +341,15 @@ class SQLDB
 	public static function connect( $dbi )
 	{
 		$dbi['options'][ PDO::ATTR_PERSISTENT ] = true;
+		try
+		{
 		return new PDO( $dbi['dsn'], $dbi['user'], $dbi['password'], $dbi['options']);
+		}
+		catch ( PDOException $e )
+		{
+			ModuleManager::errorMessage( 'sqldb', $e->getMessage() );
+			die ("Cannot connect to database: " . $e->getmessage() );
+		}
 	}
 
 	private function hash( $s, $m = 'md5' )

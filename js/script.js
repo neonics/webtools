@@ -18,11 +18,14 @@ function visible(name)
 function hide(name)
 {
 	document.getElementById(name).style.display='none';
+	document.getElementById(name).style.visibility='hidden';
 }
 
 function show(name)
 {
 	document.getElementById(name).style.display='block';
+	// some places still use visibility - to keep layout..
+	document.getElementById(name).style.visibility='visible';
 }
 
 

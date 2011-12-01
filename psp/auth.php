@@ -155,7 +155,7 @@ class AuthModule extends AbstractModule
 		return $u;
 	}
 
-	function listUsers()
+	public function listUsers()
 	{
 		global $db;
 		// TODO: Sanitize, roles as list
@@ -166,13 +166,13 @@ class AuthModule extends AbstractModule
 	//		$db->xpath( 'auth', "''" );
 	}
 
-	function user()
+	public function user()
 	{
 		global $request;
 		return isset( $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] );
 	}
 
-	function username()
+	public function username()
 	{
 		$user = $this->getSessionUser();
 		return $user
@@ -180,7 +180,7 @@ class AuthModule extends AbstractModule
 			: "";
 	}
 
-	function roles()
+	public function roles()
 	{
 		$user = $this->getSessionUser();
 
@@ -189,7 +189,7 @@ class AuthModule extends AbstractModule
 			: "";
 	}
 
-	function permission( $role )
+	public function permission( $role )
 	{
 		global $debug;
 

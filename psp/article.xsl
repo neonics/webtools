@@ -31,7 +31,7 @@
 		<l:message type="debug">SLASHMODE: [<xsl:value-of select="$psp:slashmode"/>]</l:message>
 		<l:message type="debug">base <xsl:value-of select="$psp:requestBaseURI"/></l:message>
 		-->
-		<l:menu class="vmenu">
+		<l:menu class="vmenu {@class}">
 			<?psp module="article"?>
 			<auth:permission role="author">
 				<auth:success>
@@ -61,10 +61,10 @@
 
 							<xsl:choose>
 								<xsl:when test="$psp:slashmode">
-									<l:item href="{$psp:requestBaseURI}0/edit">Compose new article[1]</l:item>
+									<l:item href="{$psp:requestBaseURI}0/edit">Compose new article</l:item>
 								</xsl:when>
 								<xsl:otherwise>
-									<l:item action="article:edit">Compose new article [2]</l:item>
+									<l:item action="article:edit">Compose new article</l:item>
 								</xsl:otherwise>
 							</xsl:choose>
 
@@ -117,7 +117,7 @@
 			</xsl:when>
 
 			<xsl:otherwise>
-				<xsl:apply-templates select="php:function('article_index')" mode="show"/>
+				<xsl:apply-templates select="php:function('article_get', '1')" mode="show"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -155,7 +155,7 @@
 
 
 	<xsl:template match="article:articles" mode="show">
-		<xsl:apply-templates/><!-- select="article:article"/>-->
+		<xsl:apply-templates mode="show"/><!-- select="article:article"/>-->
 	</xsl:template>
 
 	<xsl:template match="article:article" mode="show">

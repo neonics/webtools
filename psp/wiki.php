@@ -5,6 +5,115 @@
 global $pspBaseDir;
 require_once( "$pspBaseDir/lib/SQLDB.php" );
 
+
+
+class WikiArticlesTable extends DBTable
+{
+	public function __construct( $dbh, $ns, $pfx, $name, $tablename )
+	{
+	debug( 'sqldb', "NAMESPACE: $ns; pfx: $pfx; tablename: $tablename" );
+		parent::__construct(
+			$dbh,
+			array
+			(
+				'ns' => $ns,
+				'prefix' => $pfx,
+				'name' => $name,
+				'tablename' => $tablename,
+				'columns' => array
+				(
+					'id' => array
+					(
+						'type' => 'int',
+						'sql:pgsql' => 'serial not null primary key',
+						'sql:mysql' => 'int not null auto_increment primary key',
+						'xml' => 'attribute',
+						'key' => true
+					),
+					'title' => array
+					(
+						'type' => 'string',
+						'sql' => 'varchar(255) not null',
+						'xml' => 'attribute'
+					),
+					'date' => array
+					(
+						'type' => 'date',
+						'sql:pgsql' => 'timestamptz',
+						'sql:mysql' => 'datetime',
+						'xml' => 'attribute'
+					),
+					'status' => array
+					(
+						'type' => 'string',
+						'sql' => 'varchar(64)',
+						'xml' => 'attribute'
+					),
+					'text' => array
+					(
+						'type' => 'string',
+						'sql' => 'text',
+						'xml' => 'element'
+					)
+				),
+				'virtual' => array (
+					'xmltext' => array
+					(
+						'type' => 'xml',
+						'xml' => 'element'
+					)
+				)
+			)
+		);
+
+	}
+
+	private function search( $titlePart )
+	{
+		$q = "SELECT title from ".$this->definition["tablename"]
+			. " where title like :q" ;
+
+		$sth = $this->dbh->prepare( $q );
+		$sth->execute( array( ":q" => str_replace( "*", "%", $titlePart ) ) );
+
+		$index = "";
+		foreach ( $sth->fetchAll() as $a )
+		{
+			$index .= preg_replace( "/^(.*?)\/([^\/]+)$/", "[[\${0}|\${2}]]<br/>", $a[0] );
+		}
+
+		return $index;
+	}
+
+
+	/** WikiParser */
+	public function getXmlText()
+	{
+		debug( 'sqldb', "[table] getText" );
+		$text = $this->row[ 'text' ];
+
+		$matches; $r = "/\[\[wiki:search\|(.*?)\]\]/";
+		if ( preg_match( $r, $text, $matches) )
+		{
+			$index = $this->search( $matches[1] );
+			#$index = "Search Results for: ". $matches[1];
+			$text = preg_replace( $r, $index, $text );
+		}
+
+		$text = preg_replace( "/&/", "&amp;", $text );
+
+		$text = preg_replace( "/\[\[(.*?)\|(.*?)\]\]/", "<a href='\${1}'>\${2}</a>", $text );
+		$text = preg_replace( "/\[\[(.*?)\|(.*?)\]\]/", "<a href='\${1}'>\${2}</a>", $text );
+		$text = preg_replace( "/\[\[(.*?)\]\]/", "<a href='\${1}'>\${1}</a>", $text );
+		$text = "<p>".preg_replace( "/\n\r?\n\r?/", "</p>\n\n<p>", $text )."</p>";
+
+		return $text;
+	}
+}
+
+
+
+
 class WikiModule extends AbstractModule
 {
 	private $db;
@@ -30,6 +139,8 @@ class WikiModule extends AbstractModule
 	public function init()
 	{
 		global $request; // XXX ref
+		global $dbi; // XXX handle.php config
+		$this->dbi = $dbi;
 
 		$this->db = new SQLDB( $this->dbi );
 		#new PDO( $this->dsn, $this->dbuser, $this->dbpass, $this->dboptions );
