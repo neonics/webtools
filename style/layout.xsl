@@ -394,13 +394,13 @@
       </tr>
     </table>
 		-->
-		<div class="section">
+		<div class="section {@class}">
 			<xsl:apply-templates/>
 		</div>
   </xsl:template>
 
 	<xsl:template match="l:title">
-		<h1><xsl:apply-templates/></h1>
+		<h1 class="{@class}"><xsl:apply-templates/></h1>
 	</xsl:template>
 
   <xsl:template match="l:para|l:p">
