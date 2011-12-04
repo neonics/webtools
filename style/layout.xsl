@@ -374,7 +374,7 @@
 	</xsl:template>
 
   <xsl:template match="l:section">
-    <xsl:variable name="depth" select="1+count(ancestor::l:section)"/>
+    <xsl:variable name="depth" select="count(ancestor::l:section)"/>
 		<!--
     <table border="0" width="100%">
       <tr>
@@ -394,7 +394,10 @@
       </tr>
     </table>
 		-->
-		<div class="section {@class}">
+		<div class="section {@class}" style="margin-left: {$depth}em;">
+			<xsl:if test="@title">
+				<h1><xsl:value-of select="@title"/></h1>
+			</xsl:if>
 			<xsl:apply-templates/>
 		</div>
   </xsl:template>
