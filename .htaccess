@@ -1,7 +1,7 @@
 ErrorDocument 404 /webtools/404.html
 
 RewriteEngine On
-RewriteBase /webtools
+RewriteBase /webtools/
 RewriteRule ^articles/$ articles.html [R]
 RewriteRule ^articles/([^/]+)/?([^/]+)?$  articles.html?article:id=$1&action:article:$2= [L]
 #RewriteRule ^(articles/[^/]+?)$ $1/ [R]
@@ -12,16 +12,19 @@ RewriteRule ^articles/([^/]+)/?([^/]+)?$  articles.html?article:id=$1&action:art
 #RewriteCond %{REQUEST_URI} !\.html$
 #RewriteRule ^([^/]+)$    $1/index.html
 
+RewriteRule ^$    index.html [R,L]
+
 RewriteRule ^wiki/(.*)$	wiki.html?wiki:title=$1&%{QUERY_STRING} [R]
 
 RewriteRule ^(.*?)\.html handle.php [L]
 
 # This is handled internally
-RewriteRule ^lib	404.html
-RewriteRule ^content	404.html
-RewriteRule ^psp	404.html
-RewriteRule ^js		404.html
-RewriteRule ^css	404.html
-RewriteRule ^style	404.html
+RewriteRule ^lib	404.html [R=404,L]
+RewriteRule ^content	404.html [R=404,L]
+RewriteRule ^psp	404.html [R=404,L]
+RewriteRule ^style	404.html [R=404,L]
+
+RewriteRule ^js		handle.php [L]
+RewriteRule ^css	handle.php [L]
 
 
