@@ -43,20 +43,44 @@
 				<xsl:apply-templates select="php:function('project_index')" mode="single"/>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:apply-templates select="php:function('project_index')"/>
+				<xsl:apply-templates select="php:function('project_index')" mode="list"/>
 			</xsl:otherwise>
 		</xsl:choose>
 
 	</xsl:template>
+
+	<xsl:template match="project:projects" mode="list">
+		<xsl:apply-templates select="project:project" mode="list"/>
+	</xsl:template>
+
+	<xsl:template match="project:project" mode="list">
+		<l:h1 class="project">
+			<l:link page="{@uri}">
+			<xsl:value-of select="@title"/>
+			</l:link>
+		</l:h1>
+		<l:p>
+			<xsl:apply-templates select="project:description/project:summary" mode="list"/>
+		</l:p>
+	</xsl:template>
+
+	<xsl:template match="project:summary" mode="list">
+		<l:section>
+			<xsl:apply-templates select="@class"/>
+			<xsl:apply-templates/>
+		</l:section>
+	</xsl:template>
+
 
 	<xsl:template match="project:projects">
 		<xsl:apply-templates select="project:project"/>
 	</xsl:template>
 
 
+
 	<xsl:template match="project:projects" mode="menu">
 		<l:menu class="vmenu">
-			<l:item class="menutitle">Projects</l:item>
+			<l:item page="projects/index" class="menutitle">Projects</l:item>
 			<l:menu class="vmenu">
 				<xsl:for-each select="project:project">
 					<l:item page="{@uri}">
@@ -111,14 +135,20 @@
 	<xsl:template match="project:project">
 		<l:h1 class="project"><xsl:value-of select="@title"/></l:h1>
 		<l:div>
-			<xsl:apply-templates select="project:description | l:description"/>
+			<xsl:apply-templates select="project:description"/>
 		</l:div>
 	</xsl:template>
 
 	<xsl:template match="project:data"/>
 
-	<xsl:template match="l:description | project:description">
+	<xsl:template match="project:description">
 		<xsl:apply-templates/>
+	</xsl:template>
+
+	<xsl:template match="project:summary">
+		<l:section class="summary">
+			<xsl:apply-templates select="@*|*"/>
+		</l:section>
 	</xsl:template>
 
 	<xsl:template match="project:*">
