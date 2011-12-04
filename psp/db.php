@@ -293,9 +293,14 @@ $db;
 
 function db_init()
 {
-	global $db, $dbNS;
+	global $db, $dbNS, $pspBaseDir;
 
 	$dbDir = DirectoryResource::findFile( "db" );
+
+	if ( !isset( $dbDir) || empty( $dbDir ) )
+	{
+		die("XML Database not found.");
+	}
 	debug( 'db',  "Initializing DB $dbDir" ); #fancy: ../localname()
 	$db = new XMLDB( $dbDir, $dbNS );
 }
