@@ -44,7 +44,22 @@
 		<l:page>
 			<l:body>
 				<l:header>
-					<div class="logo"><img src="{$psp:requestBaseURI}img/neonics.png"/></div>
+					<div class="logo">
+						<img src="{$psp:requestBaseURI}img/neonics.png"/><br/>
+						<span>
+							Conscious Computing
+						</span>
+					</div>
+					<l:menu class="mainmenu">
+						<l:item page="home">Home</l:item>
+						<l:item page="install">Install</l:item>
+						<l:item page="db">Database</l:item>
+						<l:item page="auth">Authentication</l:item>
+						<l:item page="issues">Issues</l:item>
+						<l:item page="template">Templates</l:item>
+						<l:item page="wiki">Wiki</l:item>
+						<l:item page="article">Articles</l:item>
+					</l:menu>
 				</l:header>
 				<l:box align="left">
 					<xsl:call-template name="auth:menu"/>
@@ -59,12 +74,16 @@
 					<l:messagebox type="debug"/>
 				</l:box>
 
-				<l:div>
-				MAIN TEMPLATE
-				</l:div>
-				<l:div>CONTENT
-				<xsl:apply-templates select="pst:content"/>
-				</l:div>
+				<xsl:choose>
+					<xsl:when test="pst:content">
+					<xsl:apply-templates select="pst:content"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<l:content>
+						</l:content>
+					</xsl:otherwise>
+				</xsl:choose>
+
 				<xsl:apply-templates select="pst:edit"/>
 			</l:body>
 
