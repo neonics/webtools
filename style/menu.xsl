@@ -78,4 +78,8 @@
 	</xsl:template>
 
 
+	<xsl:template match="l:item/l:label">
+		<xsl:apply-templates/>
+	</xsl:template>
+
 </xsl:stylesheet>
