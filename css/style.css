@@ -12,6 +12,15 @@ p {
 div.logo {
 }
 
+.logo span {
+	font-size: 18pt;
+	font-style: italic;
+	float: right;
+	margin-top: -3px;
+	position: relative;
+	color: #897;
+}
+
 a.bloglink
 {
 	padding-left: 40px;
@@ -28,10 +37,13 @@ a {
 .copyright {
 	position: fixed;
 	width: 100%;
-	text-align: center;
+	text-align: right;
 	z-index: 1;
-	bottom: 20px;
+	bottom: 0px;
 	left: 0px;
+	font-size: 8pt;
+	color: #333;
+	font-style: italic;
 }
 
 .copyright span {
@@ -92,4 +104,8 @@ td.section_title {
 	font-size: font-size: 16pt;
 	font-weight: bold;
 	color: #beb;
+}
+
+ul li {
+	margin-left: 1em;
 }
