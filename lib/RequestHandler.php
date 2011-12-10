@@ -236,7 +236,7 @@ class StaticRequestHandler extends RequestHandler
 			}
 			else
 			{
-				ob_end_flush();
+				ob_end_clean(); # ob_end_flush();
 				RequestHandler::notFound();
 				exit;
 			}
