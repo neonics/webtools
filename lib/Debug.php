@@ -30,7 +30,7 @@
 		$pad = array_reduce( array_keys($templates ), "sortLength" );
 		$pad = str_repeat( ' ', strlen($pad)-strlen($cat) );
 
-		#if ( $logLevel & 1 )
+		if ( $logging & 1 )
 		error_log( sprintf( "[%s%s] %s", $cat, $pad, $msg ) );
 
 		$msg = str_replace( "[", "[<span style='font-weight:bold;color:".$templates['[]']['color']."'>", $msg );
