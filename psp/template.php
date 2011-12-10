@@ -31,9 +31,6 @@ class TemplateModule extends AbstractModule
 	{
 		global $db, $request; // XXX ref
 
-		psp_module( "db" );
-		$db->table( "templates", $this->ns );
-
 		if ( isset( $_REQUEST["template:id"] ) && $_REQUEST["template:id"] != "" )
 			$this->templateId = $_REQUEST["template:id"];
 
@@ -64,6 +61,9 @@ class TemplateModule extends AbstractModule
 			// XXX TODO security checks - relative paths, file overwrite etc..
 			// TODO: versioning [draft, commit/publish]
 			// TODO: separate to specific content module - provides DBResource
+
+			psp_module( "db" );
+			$db->table( "templates", $this->ns );
 
 			$templateDir = "$db->base/content";
 			if ( ! is_dir( $templateDir ) )

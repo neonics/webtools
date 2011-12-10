@@ -51,7 +51,7 @@
 						</span>
 					</div>
 					<l:menu class="mainmenu">
-						<l:item page="home">Home</l:item>
+						<l:item page="index">Home</l:item>
 						<l:item page="install">Install</l:item>
 						<l:item page="db">Database</l:item>
 						<l:item page="auth">Authentication</l:item>
