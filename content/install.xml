@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<?psp module="db"?>
+
+<psp:page template="article"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:pst="http://neonics.com/2011/psp/template"
+	xmlns:db="http://neonics.com/2011/db/xml"
+  xmlns:auth="http://neonics.com/2000/xsp/auth"
+>
+	<pst:menu>
+	</pst:menu>
+
+	<pst:content>
+		<h1>Installation</h1>
+		<h2>Installed webroot</h2>
+		<p>List of webroots is not required to be known in webtools,
+		however, using an installation script to initialize such a webroot
+		allows for a list to be maintained here.
+		</p>
+		<link action="init">Initialize webroot</link><br/>
+		<p>Possible maintenance actions:
+			<ul>
+				<li>Initialize new webroot</li>
+				<li>Install 3rd party module</li>
+				<li>Override module (i.e. template.xsl)</li>
+				<li>Edit logic/style XSL files</li>
+				<li>Edit CSS files</li>
+				<li>CMS: Manage files (images, js etc) - complete remote web deployment</li>
+				<li>Create/edit content (partially implemented in template module)</li>
+				<li>Configure modules (db connections)</li>
+			</ul>
+		</p>
+
+		<p>
+			Internal release - runtime archiving of the software for downloading.
+		</p>
+
+		<p>
+			Each module-root-page, i.e. content/X.xml for module psp/X.php and psp/X.xsl, such as the article module, may in the initialize phase, either specified
+			int he code or in the root-page itself, redirect or go to the installation page, in order to set up databases. Thus, the first time a module/feature
+			is accessed, it may be configured.<br/>
+			Alternatively, the installation page (this page) may list all
+			modules and check their configuration and initialization status.
+		</p>
+
+		<p>Feature: dynamic menu; listing content/*.xml recursively building
+		a sitemap.</p>
+
+		<p>Sitemap feature: have one single sitemap.xml containing the
+		entire website's structure; since usually the content/*.xml files
+		are very small, there really is no need for them since all these
+		xml files are already templated in psp/template.xsl aswell,
+		followed by the style/layout.xsl, and so 3 layers of templates
+		is overkill. Perhaps the psp/template, currently providing page-level
+		templates, structuring navigation and content, may provide
+		widgets instead - which then may be removed from the layout.xsl.
+		</p>
+
+	</pst:content>
+</psp:page>

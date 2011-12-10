@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<?psp module="db"?>
+
+<psp:page template="article"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:pst="http://neonics.com/2011/psp/template"
+	xmlns:db="http://neonics.com/2011/db/xml"
+  xmlns:auth="http://neonics.com/2000/xsp/auth"
+>
+	<pst:menu>
+	</pst:menu>
+
+	<pst:content>
+		<h1>Issue Tracker</h1>
+		<p>Issues: bugs, features, rfc</p>
+	</pst:content>
+</psp:page>
