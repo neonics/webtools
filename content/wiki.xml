@@ -23,21 +23,32 @@
 	</pst:menu>
 
 	<pst:content>
-		<psp:if arg="wiki:title">
-			<psp:then>
-				<psp:if action="wiki:edit">
+		<wiki:initialized>
+
+			<wiki:success>
+
+				<psp:if arg="wiki:title">
 					<psp:then>
-						<wiki:edit/>
+						<psp:if action="wiki:edit">
+							<psp:then>
+								<wiki:edit/>
+							</psp:then>
+							<psp:else>
+								<wiki:show/>
+							</psp:else>
+						</psp:if>
 					</psp:then>
 					<psp:else>
-						<wiki:show/>
+						<wiki:index/>
 					</psp:else>
 				</psp:if>
-			</psp:then>
-			<psp:else>
-				<wiki:index/>
-			</psp:else>
-		</psp:if>
+
+			</wiki:success>
+
+			<wiki:fail>
+				<l:p>Wiki Database not initialized.</l:p>
+			</wiki:fail>
+		</wiki:initialized>
 
 	</pst:content>
 </psp:page>

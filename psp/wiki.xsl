@@ -17,6 +17,23 @@
 
 	<xsl:param name="base"/>
 
+	<xsl:template match="wiki:initialized">
+		<xsl:variable name="initok" select="php:function('wiki_initialized')"/>
+		<xsl:value-of select="php:function('wiki_foo', 'Hello')"/>
+		<xsl:choose>
+			<xsl:when test="$initok"><!--php:function('wiki_initialized')">-->
+		<xsl:value-of select="php:function('wiki_foo', 'init okay')"/>
+				<xsl:apply-templates select="wiki:success/*"/>
+			</xsl:when>
+			<xsl:otherwise>
+		<xsl:value-of select="php:function('wiki_foo', 'Not initialized')"/>
+				<xsl:apply-templates select="wiki:fail/*"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template match="wiki:success|wiki:fail"/>
+
 	<!-- **********  index *********** -->
 
 	<!-- 'call' tag -->

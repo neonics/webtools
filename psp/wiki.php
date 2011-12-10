@@ -142,6 +142,9 @@ class WikiModule extends AbstractModule
 		global $dbi; // XXX handle.php config
 		$this->dbi = $dbi;
 
+		if ( ! isset( $dbi ) )
+			return;
+
 		$this->db = new SQLDB( $this->dbi );
 		#new PDO( $this->dsn, $this->dbuser, $this->dbpass, $this->dboptions );
 
@@ -193,8 +196,20 @@ class WikiModule extends AbstractModule
 		}
 	}
 
+	public function initialized()
+	{
+		debug( 'wiki', 'initialized: ' .( isset( $this->dbi ) == true ));
+		return isset( $this->dbi ) == true;
+	}
+
+	public function foo( $msg )
+	{
+		debug( 'wiki', "XSLT Message: $msg");
+	}
+
 	public function index()
 	{
+		if ( ! $this->initialized() ) return null;
 		return $this->table->index();
 	}
 
