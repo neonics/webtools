@@ -1,3 +1,7 @@
+/**
+ * @author Kenney Westerhof <kenney@neonics.com>
+ */
+
 (function()
 {
 CKEDITOR.plugins.add( 'xmllayout',
@@ -22,7 +26,7 @@ CKEDITOR.plugins.add( 'xmllayout',
 				{
 					$ : function (element )
 					{
-						//alert("Element: " + element.name);
+					//	alert("DF: Element: " + element.name);
 					},
 
 					paypal: function( element )
@@ -35,6 +39,35 @@ CKEDITOR.plugins.add( 'xmllayout',
 						fake.attributes[ 'src' ] = 'img/paypal-buynow.png';//CKEDITOR.getUrl('../draft/img/paypal-buynow.png');
 
 						return fake;
+					},
+
+					'l:title' : function( element )
+					{
+						return editor.createFakeParserElement2( element, "", "h2" );
+					},
+
+					'l:section' : function( element )
+					{
+						var s = editor.createFakeParserElement2( element, "", "div" );
+						var d = "";
+						for ( var i in s.attributes )
+							d+= i + "=>" + s.attributes[i] +"\n";
+							alert(d);
+
+						var h2= new CKEDITOR.htmlParser.element( "h2" );
+						h2.add( new CKEDITOR.htmlParser.text( element.attributes["title"] ) );
+						s.children.unshift( h2 );
+
+						s.attributes["title"] = element.attributes["title"];
+						s.attributes['data-cke-allowed-attributes'] =
+							'title';
+
+						return s;
+					},
+
+					'l:link' : function ( element )
+					{
+						return editor.createFakeParserElement2( element, "", "a" );
 					},
 
 					title : function( element )
@@ -107,6 +140,7 @@ CKEDITOR.plugins.add( 'xmllayout',
 								for ( var i in aaa )
 								{
 									el.attributes[aaa[i]] = element.attributes[aaa[i]];
+									alert( element.name+": set fake: " + element.attributes[aaa[i]] );
 								}
 							}
 
@@ -119,6 +153,32 @@ CKEDITOR.plugins.add( 'xmllayout',
 						}
 
 						return element;
+					},
+
+/*
+					'l:section' : function(element)
+					{
+						alert( "FOO section: " + element.attributes["title"] );
+						return element;
+					},
+*/
+					'h2' : function( element )
+					{
+						//alert( "FOO " + element );
+						if ( element.parent.name == 'l:section' )
+						{
+						element.parent.attributes["title"] = element.children[0].value;
+
+						alert( element.parent.name + ": " + element.parent.attributes["title"]);
+						 element.children.shift();
+						delete element.name;
+alert( "FR: " + htmlFilterRules );
+						htmlFilterRules.elements.$( element.parent );
+
+						return null;
+						}
+						else
+							return element;
 					}
 				}
 			};
