@@ -130,6 +130,21 @@ EOF;
 		}
 	}
 
+
+	public function accessLogs()
+	{
+		$al = DirectoryResource::findFile( "access.xml" );
+		if ( isset( $al ) )
+		{
+			$al = "<accessLogs xmlns='".$this->ns."'>\n" . file_get_contents( $al ) . "</accessLogs>";
+
+			$doc = new DOMDocument();
+			$doc->loadXML( $al );
+
+			return $doc->documentElement;
+		}
+	}
+
 	/****** Utility ******/
 
 	/**

@@ -208,6 +208,41 @@
 
 
 
+
+	<xsl:template match="psp:accessLogs">
+		<xsl:apply-templates select="php:function('psp_accessLogs')" mode="logs"/>
+	</xsl:template>
+
+	<xsl:template match="psp:accessLogs" mode="logs">
+		<l:table class="accessLogs">
+			<l:tr>
+				<l:th>Time</l:th>
+				<l:th>Remote</l:th>
+				<l:th>Referer</l:th>
+				<l:th>Host</l:th>
+				<l:th>M</l:th>
+				<l:th>URI</l:th>
+				<l:th>Protocol</l:th>
+				<l:th>User Agent</l:th>
+			</l:tr>
+			<xsl:for-each select="*">
+				<xsl:if test="contains( @uri, '.html' )">
+				<l:tr>
+					<l:td><xsl:value-of select="@time"/></l:td>
+					<l:td><xsl:value-of select="@remote"/></l:td>
+					<l:td><xsl:value-of select="@referer"/></l:td>
+					<l:td><xsl:value-of select="@host"/></l:td>
+					<l:td><xsl:value-of select="name(.)"/></l:td>
+					<l:td><xsl:value-of select="@uri"/></l:td>
+					<l:td><xsl:value-of select="@protocol"/></l:td>
+					<l:td><xsl:value-of select="@agent"/></l:td>
+				</l:tr>
+				</xsl:if>
+			</xsl:for-each>
+		</l:table>
+	</xsl:template>
+
+
 	<!-- transitional -->
 	<xsl:template match="xsp:*">
 		<xsl:apply-templates/>

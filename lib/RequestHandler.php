@@ -3,6 +3,7 @@
 require_once( "Util.php" );
 require_once( "ModuleManager.php" );
 require_once( "XML.php" );
+require_once( "Resource.php" );
 
 class Request
 {
@@ -13,6 +14,8 @@ class Request
 	public $requestRelPathURI;# bar/
 	public $requestFileURI;		# baz.html
 	public $requestQuery;			# ?foo   # '?' included for easy xsl
+
+	public $basedir;
 
 	public $requestDir;
 	public $requestFile;
@@ -115,6 +118,7 @@ abstract class RequestHandler
 	{
 		ob_start();
 
+		self::add( 'log', new LogRequestHandler() );
 		self::add( 'redirect', new RedirectRequestHandler( $redir ) );
 		self::add( 'static', new StaticRequestHandler( $staticContent ) );
 		self::add( 'content', new ContentRequestHandler( Array('content/') ) );
@@ -209,6 +213,68 @@ class RedirectRequestHandler extends RequestHandler
 		}
 
 		debug( 'request', "[redir] No match for $this->regexp" );
+		return false;
+	}
+}
+
+
+class LogRequestHandler extends RequestHandler
+{
+	public function __construct()
+	{
+	}
+
+	public function _handle( $request )
+	{
+		$dir = DirectoryResource::findFile( "db" );
+		if ( isset( $dir ) )
+		{
+			$accessLog = "$dir/access.log";
+			$accessLogXML = "$dir/access.xml";
+
+			// .............. RA Host Time Reqst 200 size useragent
+			$line = sprintf( "%s %s %s [%s] \"%s\" %d %d \"%s\"\n",
+				$_SERVER["REMOTE_ADDR"],
+				gad( $_SERVER, "HTTP_HOST", '-'),
+				gad( $_SERVER, "HTTP_REFERER", '-'),
+				date( "Y-m-d H:i:s O", $_SERVER["REQUEST_TIME"]),
+				// apache style date:
+				//date( "M/d/Y:H:i:s O", $_SERVER["REQUEST_TIME"]),
+
+				$_SERVER["REQUEST_METHOD"] . " " .
+					$_SERVER["REQUEST_URI"] . " " .
+					$_SERVER["SERVER_PROTOCOL"],
+
+				0, 0,
+
+				$_SERVER["HTTP_USER_AGENT"] // or $_SERVER[]
+			);
+
+			$xmlline = sprintf( "<%s remote='%s' referer='%s' time='%s' host='%s' uri='%s' protocol='%s' agent='%s' code='%d'/>\n",
+				
+				$_SERVER["REQUEST_METHOD"],
+
+				$_SERVER["REMOTE_ADDR"],
+				gad( $_SERVER, "HTTP_REFERER", '-' ),
+
+				date( "Y-m-d H:i:s O", $_SERVER["REQUEST_TIME"]),
+				// apache style date:
+				//date( "M/d/Y:H:i:s O", $_SERVER["REQUEST_TIME"]),
+
+				gad( $_SERVER, "HTTP_HOST", '-'),
+
+				$_SERVER["REQUEST_URI"],
+				$_SERVER["SERVER_PROTOCOL"],
+
+				$_SERVER["HTTP_USER_AGENT"],
+
+				0, 0
+			);
+
+
+			file_put_contents( $accessLog, $line, LOCK_EX | FILE_APPEND );
+			file_put_contents( $accessLogXML, $xmlline, LOCK_EX | FILE_APPEND );
+		}
 		return false;
 	}
 }
