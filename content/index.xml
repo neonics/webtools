@@ -3,22 +3,23 @@
 <psp:page template="main"
 	xmlns="http://www.neonics.com/xslt/layout/1.0"
 	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:pst="http://neonics.com/2011/psp/template"
+	xmlns:db="http://neonics.com/2011/db/xml"
   xmlns:auth="http://neonics.com/2000/xsp/auth"
 >
-	<psp:body>
-		<psp:title>Neonics PSP</psp:title>
-		<psp:content>
+	<pst:menu>
+	</pst:menu>
 
-			<auth:user>
-				<auth:success>
-					<p>Site under construction</p>
-				</auth:success>
-				<auth:fail>
-					<psp:if action="show-login">
-						<auth:login/>
-					</psp:if>
-				</auth:fail>
-			</auth:user>
-		</psp:content>
-	</psp:body>
+	<pst:content>
+		<auth:user>
+			<auth:success>
+				<p>Site under construction</p>
+			</auth:success>
+			<auth:fail>
+				<psp:if action="show-login">
+					<auth:login/>
+				</psp:if>
+			</auth:fail>
+		</auth:user>
+	</pst:content>
 </psp:page>
