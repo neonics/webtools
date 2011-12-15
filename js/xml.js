@@ -74,3 +74,17 @@ function transform( xml, xsl )
 		alert("Error: " + e + "\n" + serialize( xsl ) );
 	}
 }
+
+function getElementById( xml, id )
+{
+	return xml.evaluate( "//*[@id='"+id+"']",
+		xml,
+		null,
+		//function() {'http://www.w3.org/XML/1998/namespace';},
+		XPathResult.ORDERED_NODE_ITERATOR_TYPE,
+		//XPathResult.FIRST_ORDERED_NODE_TYPE,
+		null)
+		//.singleNodeValue;
+		.iterateNext();
+}
+

@@ -123,13 +123,26 @@
 	</xsl:template>
 
 	<xsl:template name="pst-edit">
-		<l:edit class="drag">
-			<pre id="debug" style="display: none"/>
+		<xsl:variable name="rb" select="$psp:requestBaseURI"/>
 
-			<div id="navtree" style="border: 1px solid green"/>
-			<script type="text/javascript" src="js/xml.js"/>
+		<l:edit class="drag">
+			<pre id="debug" class="drag" style="display: none"/>
+
+			<div id="navtree" class="drag"/>
+			<script type="text/javascript" src="{$rb}js/xml.js"/>
 			<script type="text/javascript">
 				debug = document.getElementById('debug');
+
+				if ( typeof editables == 'undefined' )
+				{
+					editables = [];
+				}
+
+				var lns = "http://www.neonics.com/xslt/layout/1.0";
+				editables.push(
+					'section:' + lns,
+					'p:' + lns
+				);
 
 				contentFile = "<xsl:value-of select="concat($psp:requestDir,$psp:requestFile)"/>";
 
@@ -141,13 +154,18 @@
 				removeidxsl = xmlRequest( rb + 'js/removeid.xsl' );
 				contentDoc = transform( xml, addidxsl );
 
+				//if you're back here, try rm db/content/buggyfile
+				<xsl:text disable-output-escaping="yes">
+				// debug.innerHTML += serialize( contentDoc ).replace( /&lt;/g, '&amp;lt;') +"\n";
+				</xsl:text>
+
 				xsl = xmlRequest( rb + 'js/edit.xsl' );
 				res = transform( contentDoc, xsl ).documentElement;
 
 				document.getElementById( 'navtree' ).appendChild( res );
 
 				function getContentNode( id ) {
-					return contentDoc.getElementById( id );
+					return getElementById( contentDoc, id );
 				}
 			</script>
 
@@ -156,15 +174,15 @@
 				</textarea>
 			</form>
 
-			<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
-			<script type="text/javascript" src="ckeditor/_samples/sample.js"></script>
+			<script type="text/javascript" src="{$rb}ckeditor/ckeditor.js"></script>
+			<script type="text/javascript" src="{$rb}ckeditor/_samples/sample.js"></script>
 
 			<style type="text/css">
 				.fold { display: inline; width: 2em; cursor: se-resize; }
 				.node:after { content ' (' attr(id) ')'; }
 
-				.node { color: blue; font-size: 10pt;}
-				dl.node dd { color: black; margin-left: 1em;}
+				.node { color: #ccf; font-size: 10pt;}
+				dl.node dd { color: white; margin-left: 1em; }
 				dl.node dt { cursor: pointer; }
 				.visible { visibility: visible; display: block; }
 				.hidden { visibility: hidden; display: none; }
@@ -173,8 +191,6 @@
 					position: absolute;
 					top: 20px;
 					left: 100px;
-					border: 8px solid green;
-					background-color: #efe;
 					width: 80%;
 					z-index: 100;
 				}
@@ -230,7 +246,7 @@
 					if ( editable &amp;&amp; editable == 'yes' )
 						return true;
 
-					if ( editables != null )
+					if ( typeof editables != 'undefined' &amp;&amp; editables != null )
 					{
 						debug.innerHTML += "check " + q.localname + ":" + q.namespaceURI+"\n";
 						if ( editables.indexOf( q.localName + ':' + q.namespaceURI ) >=0 )

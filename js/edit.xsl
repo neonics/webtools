@@ -10,15 +10,16 @@
 	xmlns:pst="http://neonics.com/2011/psp/template"
 	exclude-result-prefixes="pst"
 
-
 	xmlns:layout="http://www.neonics.com/xslt/layout/1.0"
 	xmlns:xi="http://www.w3.org/2001/XInclude"
 
 	xmlns:auth="http://neonics.com/2000/xsp/auth"
 
 	xmlns:l="http://www.w3.org/1999/xhtml"
+
 >
 <!--
+	xmlns:xml="http://www.w3.org/1998/XML/namespace"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:x="http://www.w3.org/1999/xhtml"
 	-->
@@ -26,7 +27,7 @@
 	<xsl:template match="node()" priority="-1">
 		<xsl:variable name="fold">
 			<xsl:choose>
-				<xsl:when test="count(ancestor::*) > 2">hidden</xsl:when>
+				<xsl:when test="count(ancestor::*) > 3">hidden</xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
@@ -61,11 +62,16 @@
 
 	<xsl:template match="node()" mode="edit-label" priority="-1">
 		NODE:
-		<xsl:value-of select="name()"/> ns=<xsl:value-of select="namespace-uri()"/>
+		<l:b>
+		<xsl:value-of select="name()"/>
+		</l:b>
+		ns=<xsl:value-of select="namespace-uri()"/>
+
 		<xsl:for-each select="@*">
 			<xsl:text> </xsl:text><xsl:value-of select="name()"/>='<xsl:value-of select="."/>'
 		</xsl:for-each>
 	</xsl:template>
+
 
 	<xsl:template match="comment()">
 		<xsl:comment>
@@ -122,15 +128,30 @@
 	</xsl:template>
 
 
-	<xsl:template match="l:slide" mode="edit-label">
+	<xsl:template match="l:slide|layout:slide" mode="edit-label">
+		<l:span class="editable">
 		Slide:
 		<xsl:if test="@xml:lang">[<xsl:value-of select="@xml:lang"/>] </xsl:if>
 		<xsl:value-of select="l:title"/>
+		</l:span>
 	</xsl:template>
 
 
-	<xsl:template match="l:slide" mode="edit-content">
+	<xsl:template match="l:slide|layout:slide" mode="edit-content">
 		<xsl:apply-templates select="*" mode="copy"/>
+	</xsl:template>
+
+
+	<xsl:template match="layout:section" mode="edit-label">
+		<l:span style='font-weight: bold;' class="editable">
+		Section <xsl:value-of select="@title"/>
+		</l:span>
+	</xsl:template>
+
+	<xsl:template match="layout:p" mode="edit-label">
+		<l:span style='font-weight: bold;' class="editable">
+		Paragraph
+		</l:span>
 	</xsl:template>
 
 
