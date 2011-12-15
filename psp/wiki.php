@@ -100,11 +100,18 @@ class WikiArticlesTable extends DBTable
 			$text = preg_replace( $r, $index, $text );
 		}
 
+		$text = str_replace( "\r", "", $text );
+
+		$text = preg_replace( "/(^|\n)== (.*?) ==\n/", "<h2>\${2}</h2>", $text );
+		$text = preg_replace( "/(^|\n)=== (.*?) ===\n/", "<h3>\${2}</h3>", $text );
+		$text = preg_replace( "/(^|\n)==== (.*?) ====\n/", "<h4>\${2}</h4>", $text );
+
 		$text = preg_replace( "/&/", "&amp;", $text );
 
 		$text = preg_replace( "/\[\[(.*?)\|(.*?)\]\]/", "<a href='\${1}'>\${2}</a>", $text );
 		$text = preg_replace( "/\[\[(.*?)\|(.*?)\]\]/", "<a href='\${1}'>\${2}</a>", $text );
 		$text = preg_replace( "/\[\[(.*?)\]\]/", "<a href='\${1}'>\${1}</a>", $text );
+
 		$text = "<p>".preg_replace( "/\n\r?\n\r?/", "</p>\n\n<p>", $text )."</p>";
 
 		return $text;
