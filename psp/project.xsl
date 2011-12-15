@@ -27,6 +27,7 @@
 					<l:item class="menutitle">
 						<l:label>Project <xsl:value-of select="$p"/></l:label>
 					</l:item>
+					<l:item page="projects/{$p}/index">Index</l:item>
 					<xsl:apply-templates select="php:function('project_index')" mode="pmenu"/>
 				</l:menu>
 			</xsl:when>
@@ -79,7 +80,7 @@
 
 
 	<xsl:template match="project:projects" mode="menu">
-		<l:menu class="vmenu">
+		<l:menu class="vmenu projects">
 			<l:item page="projects/index" class="menutitle">Projects</l:item>
 			<l:menu class="vmenu">
 				<xsl:for-each select="project:project">
@@ -105,9 +106,8 @@
 
 	<xsl:template match="project:documentation" mode="pmenu">
 		<l:menu class="hmenu">
-			<l:item>Documentation (</l:item>
-			<xsl:apply-templates select="project:format"/>
-			<l:item><l:label>)</l:label></l:item>
+			<l:item href="{project:format[@type='html']/@href}">Documentation</l:item>
+			<xsl:apply-templates select="project:format[not(@type='html')]"/>
 		</l:menu>
 	</xsl:template>
 
@@ -128,7 +128,9 @@
 	</xsl:template>
 
 	<xsl:template match="project:format">
-		<l:item href="{@href}"><xsl:value-of select="@type"/></l:item>
+		<l:item class="subtitle"> (</l:item>
+		<l:item href="{@href}" class="subtitle"><xsl:value-of select="@type"/></l:item>
+		<l:item class="subtitle">) </l:item>
 	</xsl:template>
 
 
