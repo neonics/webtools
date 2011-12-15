@@ -30,6 +30,7 @@
      		<link rel="stylesheet" type="text/css" href="{$psp:requestBaseURI}css/layout.css"/>
      		<link rel="stylesheet" type="text/css" href="{$psp:requestBaseURI}css/style.css"/>
 				<script type="text/javascript" src="{$psp:requestBaseURI}js/script.js"/>
+				<script type="text/javascript" src="{$psp:requestBaseURI}js/dragdrop.js"/>
 			</head>
     	<xsl:apply-templates select="l:body"/>
   	</html>
@@ -37,7 +38,7 @@
 
 	<xsl:template match="l:body">
 		<xsl:comment>core layout.xsl</xsl:comment>
-    <body id="body">
+    <body id="body" onload="InitDragDrop()">
 			<xsl:apply-templates select="@*"/>
 			<div id="main">
 				<xsl:apply-templates select="l:menu"/>
@@ -250,8 +251,8 @@
 
 
 	<xsl:template match="l:edit">
-		<div>
-			<xsl:apply-templates/>
+		<div id="edit" class="{@class}">
+			<xsl:apply-templates select="@*|*"/>
 		</div>
 		<!--
 		<div id="edit" style="position: absolute; top: 0px; left: 0px;">
@@ -368,7 +369,7 @@
 	</xsl:template>
 
 	<xsl:template match="l:box">
-		<div class="{@align} {@class}">
+		<div class="drag {@align} {@class}">
 			<xsl:apply-templates select="@*|*"/>
 		</div>
 	</xsl:template>
@@ -396,7 +397,9 @@
 		-->
 		<div class="section {@class}" style="margin-left: {$depth}em;">
 			<xsl:if test="@title">
-				<h1><xsl:value-of select="@title"/></h1>
+				<xsl:element name="h{ 1 + $depth }">
+					<xsl:value-of select="@title"/>
+				</xsl:element>
 			</xsl:if>
 			<xsl:apply-templates/>
 		</div>
