@@ -109,3 +109,9 @@ td.section_title {
 ul li {
 	margin-left: 1em;
 }
+
+
+table.accessLogs {
+	font-size: 9pt;
+}
+
