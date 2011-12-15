@@ -16,10 +16,16 @@ InitDragDrop(); function InitDragDrop() {
 
 function dragDebug( msg )
 {
-	return;
+	//return;
 	if ( !_debug ) _debug = $('debug');
 	if ( _debug ) _debug.innerHTML = msg;
-//	alert("DEBUG: " + msg );
+	//alert("DEBUG: " + msg );
+}
+
+function hasClass( target, cls )
+{
+	cssClasses = target.className.split(' ');
+	return cssClasses.indexOf( cls ) >= 0;
 }
 
 function OnMouseDown(e) {
@@ -28,46 +34,67 @@ function OnMouseDown(e) {
 	// IE uses srcElement, others use target
 	var target = e.target != null ? e.target : e.srcElement;
 
-	drag = false;
-	cssClasses = target.className.split(' ');
-	if ( cssClasses.indexOf( 'drag' ) >= 0)
-		drag=true;
+	var path = target;
 
-	dragDebug( drag ? 'draggable element clicked' : 'NON-draggable element clicked' );
+	drag = hasClass( target, 'drag' );
+	while ( ! drag && target.parentNode
+		&& ! target.parentNode.nodeName == 'textarea'
+		&& ! target.parentNode.nodeName == 'input'
+	)
+	{
+		target = target.parentNode;
+		path += target + " . " + path;
+		drag = hasClass( target, 'drag' );
+	}
 
- // for IE, left click == 1
- // for Firefox, left click == 0
- if ((e.button == 1 && window.event != null || e.button == 0) && drag )
- {
-	 // grab the mouse position
-	 _startX = e.clientX; _startY = e.clientY;
-	 // grab the clicked element's position
-	 if ( target.style.left )
-	 {
-	 _offsetX = ExtractNumber(target.style.left);
-	 _offsetY = ExtractNumber(target.style.top);
-	 }
-	 else
-	 {
-	 _offsetX = target.offsetLeft;
-	 _offsetY = target.offsetTop;
-	 }
+	dragDebug( ( drag ? 'draggable element clicked' : 'NON-draggable element clicked' ) + ": " + target  + " (" + path + " )");
 
-	 // bring the clicked element to the front while it is being dragged
-	 _oldZIndex = target.style.zIndex; target.style.zIndex = 10000;
-	 // we need to access the element in OnMouseMove
-	 _dragElement = target;
-	 // tell our code to start moving the element with the mouse
-	 document.onmousemove = OnMouseMove;
-	 // cancel out any text selections
-	 document.body.focus();
-	 // prevent text selection in IE
-	 document.onselectstart = function () { return false; };
-	 // prevent IE from trying to drag an image
-	 target.ondragstart = function() { return false; };
-	 // prevent text selection (except IE)
-	 return false;
- }
+	// for IE, left click == 1
+	// for Firefox, left click == 0
+	if ((e.button == 1 && window.event != null || e.button == 0) && drag )
+	{
+		// grab the mouse position
+		_startX = e.clientX; _startY = e.clientY;
+		// grab the clicked element's position
+
+		if ( target.style.left )
+		{
+			_offsetX = ExtractNumber(target.style.left);
+			_offsetY = ExtractNumber(target.style.top);
+		}
+		else if ( hasClass( target, 'left' ) )
+		{
+			_offsetX = 0;
+			_offsetY = 0;
+		}
+		else
+		{
+			_offsetX = target.offsetLeft;
+			_offsetY = target.offsetTop;
+		}
+/*
+		if ( target.style.left )
+		{
+			_offsetX = target.offsetLeft + ExtractNumber(target.style.left);
+			_offsetY = target.offsetTop + ExtractNumber(target.style.top);
+		}
+*/
+
+		// bring the clicked element to the front while it is being dragged
+		_oldZIndex = target.style.zIndex; target.style.zIndex = 10000;
+		// we need to access the element in OnMouseMove
+		_dragElement = target;
+		// tell our code to start moving the element with the mouse
+		document.onmousemove = OnMouseMove;
+		// cancel out any text selections
+		document.body.focus();
+		// prevent text selection in IE
+		document.onselectstart = function () { return false; };
+		// prevent IE from trying to drag an image
+		target.ondragstart = function() { return false; };
+		// prevent text selection (except IE)
+		return false;
+	}
 }
 
 function OnMouseMove(e) {
@@ -75,7 +102,7 @@ function OnMouseMove(e) {
  // this is the actual "drag code" 
 _dragElement.style.left = (_offsetX + e.clientX - _startX) + 'px';
 _dragElement.style.top = (_offsetY + e.clientY - _startY) + 'px';
-dragDebug( '(' + _dragElement.style.left + ', ' + _dragElement.style.top + ')' );
+//dragDebug( '(' + _dragElement.style.left + ', ' + _dragElement.style.top + ')' );
  }
 
 
