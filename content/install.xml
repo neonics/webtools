@@ -13,8 +13,25 @@
 	</pst:menu>
 
 	<pst:content>
-		<h1>Installation</h1>
-		<h2>Installed webroot</h2>
+		<section title="Installation">
+
+		<section title="Installed Webroot">
+
+			<section title="Resource Paths">
+				<pre><psp:expr>
+					trim( implode( "\n",
+						array_map(
+							function( $r ) {
+								return $r->label . "  " . $r->baseDir;
+							},
+							DirectoryResource::$resources
+						)
+					) )
+				</psp:expr>
+				</pre>
+			</section>
+
+		</section>
 		<p>List of webroots is not required to be known in webtools,
 		however, using an installation script to initialize such a webroot
 		allows for a list to be maintained here.
@@ -58,5 +75,6 @@
 		widgets instead - which then may be removed from the layout.xsl.
 		</p>
 
+		</section>
 	</pst:content>
 </psp:page>
