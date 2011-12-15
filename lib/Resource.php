@@ -4,7 +4,7 @@
 	{
 		// either a fallback-chain and one global resource, 
 		// or global static access to all resources, iteratable.
-		private static $resources = Array();
+		public static $resources = Array();
 
 		public $label;
 
@@ -51,7 +51,7 @@
 		}
 
 
-		public static function findFile( $relFile, $type = "default" )
+		public static function findFile( $relFile, $type = "default", $label = null )
 		{
 			global $debug;
 
@@ -59,6 +59,9 @@
 
 			foreach ( self::$resources as $r )
 			{
+				if ( isset( $label ) && $label != $r->label )
+					continue;
+
 				$debug > 3 and
 				debug( 'resource', "[$r->label] ? checking Resource: " . $r->baseDir );
 
@@ -162,6 +165,8 @@
 		else
 			if ( !isset( $requestBaseDir ) )
 				$requestBaseDir = $pspBaseDir;
+
+		$request->basedir = $requestBaseDir;
 
 		// also add db/content provider
 		$dbdir = DirectoryResource::findFile( "db" );
