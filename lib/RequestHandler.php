@@ -152,13 +152,22 @@ abstract class RequestHandler
 
 	protected abstract function _handle( $request );
 
-	public static function notFound()
+	public static function notFound( $request )
 	{
-		debug( "404 not found" );
+		debug( "404 not found: " . $request->requestBaseURI . "404.html" );
 		header( "HTTP/1.1 404 Not found" );
+
+		global $requestURIRoots;
+		$r = new Request( $requestURIRoots );
+		$r->requestBaseURI = $request->requestBaseURI;
+		$r->requestRelURI = "404.html";
+		RequestHandler::handle( $r );
+
+		exit;
+
 		//header( "Status: 404 Not found" );
 
-		//	header( "Location: $request->requestBaseURI"."404.html" );
+		#header( "Location: $request->requestBaseURI"."404.html" );
 	}
 
 	public static function sendFile( $fn )
@@ -178,7 +187,7 @@ abstract class RequestHandler
 		}
 
 		#debug( "200 okay $fn" );
-		header( "HTTP/1.1 200 OK" );
+		header( "HTTP/1.1 200 OK", false );
 		// i used to send both, but this no worky in < 5.3
 		//header( "Status 200 OK" );
 		
@@ -303,7 +312,7 @@ class StaticRequestHandler extends RequestHandler
 			else
 			{
 				ob_end_clean(); # ob_end_flush();
-				RequestHandler::notFound();
+				RequestHandler::notFound( $request );
 				exit;
 			}
 
@@ -345,7 +354,7 @@ class ContentRequestHandler extends RequestHandler
 			else
 			{
 				ob_end_flush();
-				RequestHandler::notFound();
+				RequestHandler::notFound( $request );
 				exit;
 			}
 
@@ -396,7 +405,20 @@ class DynamicRequestHandler extends RequestHandler
 
 			if ( ! is_file( $in ) )
 			{
-				RequestHandler::notFound();
+				// Fallback for plain .html files
+				if ( preg_match( "/\.html$/", $request->requestRelURI ) )
+				{
+					$in = DirectoryResource::findFile( $request->requestRelURI, "content" );
+					if ( is_file( $in ) )
+					{
+						debug( 'request', "Fallback to $in" );
+						ob_end_clean();
+						RequestHandler::sendFile( $in );
+						exit;
+					}
+				}
+
+				RequestHandler::notFound( $request );
 				exit;
 			}
 
