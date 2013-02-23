@@ -17,6 +17,7 @@ class PSPModule extends AbstractModule
 	{
 		global $pspNS, $request, $requestURI, $requestPathURI, $slashmode;
 		global $requestBaseURI;
+		global $theme;
 
 		$xslt->setParameter( $pspNS, "slashmode", $slashmode );
 		$xslt->setParameter( $pspNS, "requestURI", $request->requestURI );
@@ -26,6 +27,7 @@ class PSPModule extends AbstractModule
 		$xslt->setParameter( $pspNS, "requestFile", $request->requestFile );
 		$xslt->setParameter( $pspNS, "requestQuery", $request->requestQuery );
 		$xslt->setParameter( $pspNS, "requestPage", preg_replace( "/\.xml$/", "", $request->requestFile ) );
+		$xslt->setParameter( $pspNS, "theme", $theme );
 	}
 
 	public function init()

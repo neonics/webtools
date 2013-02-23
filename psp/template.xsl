@@ -39,6 +39,9 @@
 	<xsl:param name="psp:requestQuery" select="$requestQuery"
 		xmlns:psp="http://neonics.com/2011/psp"
 	/>
+	<xsl:param name="psp:theme" select="$theme"
+		xmlns:psp="http://neonics.com/2011/psp"
+	/>
 
 	<xsl:template match="pst:template">
 		<l:page>

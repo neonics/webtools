@@ -43,6 +43,7 @@ if (get_magic_quotes_gpc()) {
 	require_once( "lib/Util.php" );
 
 	$requestURIRoots;
+	$theme;
 
 	$staticContent = array_merge( isset( $staticContent )
 		? $staticContent
