@@ -101,7 +101,10 @@
 
 					<l:label style="vertical-align:top">Text</l:label>
 					<l:textarea name="article:content" cols="80" rows="25">
-						<xsl:value-of select="$art/article:content"/>
+						<!-- strips html tags -->
+						<!--<xsl:value-of select="$art/article:content"/>-->
+						<!--<xsl:apply-templates select="$art/article:content" mode="edit"/>-->
+						<xsl:value-of select="php:function('article_getcontent', string($art/article:content))"/>
 					</l:textarea>
 
 					<l:input type="submit" name="action:article:post"/>
@@ -121,7 +124,21 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
+<!--
+	<xsl:template match="article:content//p" mode="edit">
+		<xsl:apply-templates mode="edit"/>
+	</xsl:template>
 
+	<xsl:template match="article:content//p/text()" mode="edit">
+		<xsl:value-of select="normalize-space(.)"/>
+		<xsl:text>&#160;
+</xsl:text>
+	</xsl:template>
+
+	<xsl:template match="article:content//*" mode="edit">
+		<xsl:apply-templates mode="edit"/>
+	</xsl:template>
+-->
 
 	<xsl:template match="article:link">
 		<l:link page="article?article:id={@article:id}">

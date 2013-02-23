@@ -113,7 +113,7 @@ class XMLDB {
 
 			$xpath = new DOMXPath( $doc );
 			$xpath->registerNamespace( "db", $dbNS );
-			$xpath->registerNamespace( $table, $this->tableToNS[ $table ] );	
+			$xpath->registerNamespace( $table, $this->tableToNS[ $table ] );
 			$this->xpath[ $table ] = $xpath;
 
 			#echo "<pre>".str_replace("<", "&lt;", $doc->saveXML() )."</pre>";
@@ -193,7 +193,7 @@ class XMLDB {
 			$t->documentElement->appendChild( $t->createTextNode( "\n  " ) );
 			$t->documentElement->appendChild( $row );
 			$t->documentElement->appendChild( $t->createTextNode( "\n" ) );
-				
+
 		}
 	}
 
@@ -241,15 +241,42 @@ EOF;
 		if ( strstr( "./@", substr( $expr, 0, 1 ) ) === false )
 			$expr = "./$expr";
 		$expr = str_replace( "/", "/$table:", $expr );
-		
-
 
 		$nodelist = $this->xpath[$table]->query( $expr, $row );
 
-		debug( 'db',  "SET(".$row->nodeName.", $expr, $value) nodes=".$nodelist->length );
+		debug( 'db',  "SET(".$row->nodeName.", $expr, (".gettype($value).") ".(is_string($value)?$value:"")." nodes=".$nodelist->length );
+
+		debug( 'db', "table: " . $table );
 
 		if ( $nodelist->length == 1 )
-			$nodelist->item(0)->nodeValue = $value;
+		{
+			if ( is_string( $value ) )
+				$nodelist->item(0)->nodeValue = $value;
+			else if ( is_object( $value ) )
+			{
+				if ( 0 )
+				{
+				$n = $nodelist->item(0)->cloneNode(false);
+				$n->appendChild( $row->ownerDocument->importNode($value, true) );
+
+				# getting a 'not found' error..
+				$row->ownerDocument->documentElement->replaceChild(
+					$n,
+					$nodelist->item(0)//->parentNode
+				);
+				}
+				else
+				{
+					while ( $nodelist->item(0)->hasChildNodes() )
+						$nodelist->item(0)->removeChild(
+							$nodelist->item(0)->childNodes->item(0)
+						);
+
+					$nodelist->item(0)->appendChild( $row->ownerDocument->importNode($value, true) );
+				}
+			}
+			else die("DB: invalid value type: ".gettype($value));
+		}
 		else if ( $nodelist->length > 1 )
 			die( "DB: not setting ".$nodelist->length." nodes; expression: $expr" );
 		else

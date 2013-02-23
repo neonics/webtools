@@ -22,7 +22,7 @@ class ArticleModule extends AbstractModule
 
 
 	/***** Public Interface *****/
-	
+
 
 	/**
 	 *
@@ -53,7 +53,7 @@ class ArticleModule extends AbstractModule
 			$title = psp_arg( "article:title" );
 			$content = psp_arg( "article:content" );
 			$aid = psp_arg( "article:id" );
-			$status = $cmd == "publish" ? "published" : 
+			$status = $cmd == "publish" ? "published" :
 				( $cmd=="save-draft"?"draft":"unknown" );
 
 			echo "Storing article, command=$cmd<br>";
@@ -70,7 +70,18 @@ class ArticleModule extends AbstractModule
 
 				$db->set( $old, "@title", $title );
 				$db->set( $old, "@status", $status );
-				$db->set( $old, "content", $content );
+
+				$dd = new DOMDocument();
+				$str= "<p><p>".
+							str_replace("\n", "</p>\n<p>",
+								str_replace("\r","", trim( $content ))
+							)."</p></p>";
+
+				echo "<br>CONTENT STRING<br>".str_replace( "<","&lt;",$str);
+
+				$dd->loadXML( $str );
+
+				$db->set( $old, "content", $dd->documentElement );
 
 				/*
 				$new->setAttribute( "status", $status );
@@ -78,7 +89,6 @@ class ArticleModule extends AbstractModule
 				$old->setAttribute( "title", $title );
 				$old->getElementsByTagNameNS( $old->namespaceURI, "content" )
 					->item(1)->nodeValue = $content;
-
 				$db->put( "articles", $new, $aid );
 				*/
 			}
@@ -148,6 +158,11 @@ EOF;
 		$ret= $db->get( "articles", gd( $aid, $this->articleId ) );
 
 		return isset( $ret ) ? $ret : ( $newIfNotFound ? $this->newArticle() : null );
+	}
+
+	public function getcontent( $val )
+	{
+		return $val;
 	}
 
 }
