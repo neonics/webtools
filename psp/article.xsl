@@ -179,10 +179,9 @@
 		
 		<l:link anchor="article{@db:id}"/>
 		
-			<!--
 		<xsl:if test="@title">
 		<l:h1 class="article">
-			<xsl:value-of select="@db:id"/><xsl:text> </xsl:text>
+			<!--<xsl:value-of select="@db:id"/><xsl:text> </xsl:text>-->
 			<xsl:choose>
 				<xsl:when test="article:content/l:title">
 					<xsl:apply-templates select="article:content/l:title[1]"/>
@@ -191,10 +190,24 @@
 					<xsl:value-of select="@title"/>
 				</xsl:otherwise>
 			</xsl:choose>
+			<auth:permission role="author">
+				<xsl:choose>
+					<xsl:when test="$psp:slashmode">
+						<l:link href="{$psp:requestBaseURI}{@db:id}/edit"><l:i>SM Edit</l:i></l:link>
+					</xsl:when>
+					<xsl:otherwise>
+						<l:link action="article:edit" style="display:inline">
+							<l:arg name="article:id" value="{@db:id}"/>
+							<l:i style="padding-left: 1em; font-size: 80%;">(Edit)</l:i>
+						</l:link>
+					</xsl:otherwise>
+				</xsl:choose>
+			</auth:permission>
+
 		</l:h1>
 		</xsl:if>
-				-->
 
+<!--
 		<auth:permission role="author">
 			<l:h2 class="article">
 				<xsl:choose>
@@ -210,6 +223,7 @@
 				</xsl:choose>
 			</l:h2>
 		</auth:permission>
+-->
 
 		<l:div class="article">
 			<xsl:apply-templates select="article:content"/>

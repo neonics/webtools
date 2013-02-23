@@ -163,7 +163,7 @@
 					<xsl:call-template name="link-page"/>
 				</xsl:variable>
 
-				<form method="post" id="{$id}" style="visibility: hidden;">
+				<form method="post" id="{$id}" style="visibility: hidden; display:inline;">
 					<xsl:if test="@page">
 						<xsl:attribute name="action">
 							<xsl:call-template name="link-page"/>
