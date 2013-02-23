@@ -52,8 +52,8 @@
 
 						<td class="left"><xsl:apply-templates select="l:box[@align='left']"/></td>
 						<td>
+							<xsl:apply-templates select="l:banner"/>
 							<xsl:apply-templates select="l:content"/>
-
 							<xsl:apply-templates select="l:edit"/>
 						</td>
 
@@ -71,7 +71,7 @@
     </body>
 	</xsl:template>
 
-	<xsl:template match="l:header|l:footer">
+	<xsl:template match="l:header|l:footer|l:banner">
 		<xsl:apply-templates/>
 	</xsl:template>
 

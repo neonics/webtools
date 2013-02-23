@@ -67,7 +67,7 @@ abstract class AbstractModule implements IModule
 		{
 			$l = self::$messages = new DOMDocument();
 			$l->appendChild( $l->createElementNS( $lns, 'messages' ) );
-			isset( $mod ) and 
+			isset( $mod ) and
 			$l->documentElement->setAttribute( 'module', $mod->name );
 		}
 		else
@@ -75,7 +75,7 @@ abstract class AbstractModule implements IModule
 			$l = self::$messages;
 		}
 
-		$m = $l->documentElement->appendChild( 
+		$m = $l->documentElement->appendChild(
 			$l->createElementNS( $lns, 'message' ) );
 
 		if ( ! is_array( $msg ) )
@@ -153,7 +153,7 @@ class ModuleManager
 			// XXX if no return here, then recursion due to 'addXSL' below.
 			// To have duplicate sheets enabled, remove the return and the addXSL call
 			// however this leads to way too many transformation calls
-			return; 
+			return;
 		}
 		else
 		{
@@ -207,13 +207,13 @@ class ModuleManager
 			foreach ( self::$stylesheets as $s )
 			{
 				debug( 'module', "  sheet " . $s[0] );
-				
+
 				for ($i=1; $i<count($s); $i++)
 					debug( 'module', "        ".$s[$i]);
 			}
 		}
 	}
-	
+
 	private static function createProxies( $m )
 	{
 		global $debug;
@@ -221,7 +221,7 @@ class ModuleManager
 		$mi = self::$modules[ $m ][ "instance" ];
 
 		$rc = new ReflectionClass( $mi );
-		
+
 		$methods = $rc->getMethods( ReflectionMethod::IS_PUBLIC );
 
 		foreach ( $methods as $method )
@@ -272,7 +272,7 @@ class ModuleManager
 		// php < 5.3 has no closures....
 		$fargs = join( ", ", array_map( "ModuleManager::makeFuncStr", $method->getParameters() ) );
 
-		$margs = join(", ", array_map( "ModuleManager::makeArgStr", 
+		$margs = join(", ", array_map( "ModuleManager::makeArgStr",
 			$method->getParameters() ) );
 
 		$code = <<<EOF
@@ -294,8 +294,9 @@ EOF;
 	{
 		global $debug;
 
-		$debug > 2 and
-		debug( 'module', "  setParameters $sheet");
+# commented out because of warning that $sheet is an array
+#		$debug > 2 and
+#		debug( 'module', "  setParameters $sheet");
 
 		foreach ( array_keys( self::$modules ) as $m )
 		{
@@ -428,7 +429,7 @@ ob_flush();
 
 			$doc = transform( $doc, $pspXSL );
 
-			ModuleManager::$modules[ "psp" ][ "instance" ]->curDoc = null; 
+			ModuleManager::$modules[ "psp" ][ "instance" ]->curDoc = null;
 
 			$debug > 3 and
 			dumpXMLFile( $doc, $pspXSL );

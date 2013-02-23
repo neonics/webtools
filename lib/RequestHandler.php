@@ -39,12 +39,15 @@ class Request
 			die ("Regexp error");
 
 			$this->requestURI = $matches[1];
-			$this->requestQuery = array_key_exists( 2, $matches ) ? $matches[2] : 
+			$this->requestQuery = array_key_exists( 2, $matches ) ? $matches[2] :
 				# instead of null
 				"?".$_SERVER["QUERY_STRING"];
 
 			#override
 		}
+
+		$debug > 2 and
+		debug('request', "\n\nREQUEST CONSTRUCTED - ".$this->requestURI."\n\n");
 
 		# oddness ...
 		if ( !isset ( $this->requestQuery ) )
@@ -93,7 +96,7 @@ class Request
 			debug( 'request', "requestQuery:      $this->requestQuery" );
 
 			// no closures...
-			$actions = implode( ' ', 	
+			$actions = implode( ' ',
 				array_map( "Request::a",
 					array_filter( array_keys( $_REQUEST ), "Request::b"
 					)
@@ -137,8 +140,9 @@ abstract class RequestHandler
 	{
 		global $debug;
 
-		#$debug > 2 and
+		$debug > 2 and
 		debug( 'request', "Request $request->requestURI" );
+
 		foreach ( self::$requestHandlers as $k => $h )
 		{
 			$debug > 1 and
@@ -154,12 +158,14 @@ abstract class RequestHandler
 
 	public static function notFound( $request )
 	{
-		debug( "404 not found: " . $request->requestBaseURI . "404.html" );
+		debug( 'request', "404 not found: " . $request->requestBaseURI . "404.html" );
 		header( "HTTP/1.1 404 Not found" );
 
 		global $requestURIRoots;
-		$r = new Request( $requestURIRoots );
-		$r->requestBaseURI = $request->requestBaseURI;
+		# re-use the same Request object, just update the URI.
+#		$r = new Request( $requestURIRoots );
+#		$r->requestBaseURI = $request->requestBaseURI;
+		$r = $request;
 		$r->requestRelURI = "404.html";
 		RequestHandler::handle( $r );
 
@@ -190,7 +196,7 @@ abstract class RequestHandler
 		header( "HTTP/1.1 200 OK", false );
 		// i used to send both, but this no worky in < 5.3
 		//header( "Status 200 OK" );
-		
+
 		// #clearstatcache()
 
 
@@ -260,7 +266,7 @@ class LogRequestHandler extends RequestHandler
 			);
 
 			$xmlline = sprintf( "<%s remote='%s' referer='%s' time='%s' host='%s' uri='%s' protocol='%s' agent='%s' code='%d'/>\n",
-				
+
 				$_SERVER["REQUEST_METHOD"],
 
 				$_SERVER["REMOTE_ADDR"],
@@ -368,7 +374,7 @@ class ContentRequestHandler extends RequestHandler
 class DynamicRequestHandler extends RequestHandler
 {
 	public function _handle( $request )
-	{	
+	{
 		global $debug;
 
 		$in;
@@ -391,7 +397,7 @@ class DynamicRequestHandler extends RequestHandler
 		{
 			$requestDir = pathinfo( $request->requestRelURI, PATHINFO_DIRNAME );
 			if ( $requestDir == '.' ) $requestDir = ""; else $requestDir.='/';
-			
+
 			$requestFile = pathinfo( $request->requestRelURI, PATHINFO_FILENAME )
 				. '.xml';
 
@@ -436,7 +442,10 @@ class DynamicRequestHandler extends RequestHandler
 
 		ob_end_flush();
 
-		echo serializeDoc( $doc, 
+		$debug and
+		debug('handler', "serialize style=" . $request->style );
+
+		echo serializeDoc( $doc,
 			array_reverse( DirectoryResource::findFiles(
 				$request->style, 'style' ) ) );
 		return true;

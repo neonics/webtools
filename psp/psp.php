@@ -25,6 +25,7 @@ class PSPModule extends AbstractModule
 		$xslt->setParameter( $pspNS, "requestDir", $request->requestDir );
 		$xslt->setParameter( $pspNS, "requestFile", $request->requestFile );
 		$xslt->setParameter( $pspNS, "requestQuery", $request->requestQuery );
+		$xslt->setParameter( $pspNS, "requestPage", preg_replace( "/\.xml$/", "", $request->requestFile ) );
 	}
 
 	public function init()
@@ -62,7 +63,7 @@ EOF;
 	/** set by ModuleManager::processDoc which applies the psp.xsl
 		Architecture here needs some adjustment... consider it WIP.
 	*/
-	public $curDoc; 
+	public $curDoc;
 
 	public $nomerge = array();
 
@@ -106,7 +107,7 @@ EOF;
 
 						case "template":
 							break;
-						
+
 						case "merge":
 							// correlate value to the xslt currently being processed
 							if ( $value == 'no' )

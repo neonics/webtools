@@ -41,6 +41,9 @@ require_once( "Debug.php");
 			$sheets = Array( $sheets );
 
 		debug( 'xml', "serialize $doc->documentURI with style-sheet ".$sheets[0] );
+		foreach ( $sheets as $s ) {
+			$debug > 1 and debug ('xml', "   - sheet $s");
+		}
 
 		$sheet = loadXSL( $sheets );
 
@@ -69,7 +72,7 @@ require_once( "Debug.php");
 			$key .= $s.';';
 
 		$xslt = isset( $xsltCache[$key] ) ? $xsltCache[$key] : null;
-		
+
 		if ( $xslt == null )
 		{
 			#$debug > 1 and
@@ -126,7 +129,7 @@ EOF;
 			{
 				$d = loadXML( $s );//->documentElement;
 				#!isset( $docURI ) and
-				$docURI == null and 
+				$docURI == null and
 				$docURI = $d->documentURI;
 
 				$debug > 3 and debug("DOC URI: $docURI");
@@ -134,7 +137,7 @@ EOF;
 					. preg_replace("@<\?xml[^>]+>@", "", $d->saveXML() )//file_get_contents( $s ))
 					. "</xsl:node>";
 			}
-			#echo "<pre>". str_replace( "<", "&lt;", $a.$b ) ."</pre>"; 
+			#echo "<pre>". str_replace( "<", "&lt;", $a.$b ) ."</pre>";
 			$doc->loadXML( $a . $b );
 			$doc->documentURI = $docURI;
 			$doc->xinclude();
