@@ -52,7 +52,7 @@ CKEDITOR.plugins.add( 'xmllayout',
 						var d = "";
 						for ( var i in s.attributes )
 							d+= i + "=>" + s.attributes[i] +"\n";
-							alert(d);
+						//	alert(d);
 
 						var h2= new CKEDITOR.htmlParser.element( "h2" );
 						h2.add( new CKEDITOR.htmlParser.text( element.attributes["title"] ) );
@@ -140,7 +140,7 @@ CKEDITOR.plugins.add( 'xmllayout',
 								for ( var i in aaa )
 								{
 									el.attributes[aaa[i]] = element.attributes[aaa[i]];
-									alert( element.name+": set fake: " + element.attributes[aaa[i]] );
+									//alert( element.name+": set fake: " + element.attributes[aaa[i]] );
 								}
 							}
 

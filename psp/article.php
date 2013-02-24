@@ -110,11 +110,12 @@ class ArticleModule extends AbstractModule
 		global $db;
 
 		$title = htmlspecialchars( $title );
+		$ns = $this->ns;
 
 		$template = <<<EOF
-  <article status="draft" title="$title">
-		<content>$content</content>
-	</article>
+  <a:article xmlns:a="$ns" status="draft" title="$title">
+		<a:content>$content</a:content>
+	</a:article>
 
 EOF;
 		$dd = new DOMDocument();

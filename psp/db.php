@@ -209,6 +209,7 @@ class XMLDB {
 	xmlns:table="$tableNS"
 	xmlns:db="$dbNS"
 >
+	<xsl:output method="text"/>
 	<xsl:template match="/*">
 		<xsl:for-each select="table:*/@db:id">
 			<xsl:sort data-type="number" order="descending"/>
@@ -220,6 +221,7 @@ class XMLDB {
 </xsl:stylesheet>
 EOF;
 
+		#debug('db', "newID template:\n".$template);
 		$xslt = new XSLTProcessor();
 		$dd = new DOMDocument();
 		$dd->loadXML( $template );

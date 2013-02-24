@@ -27,7 +27,7 @@
 	<xsl:template match="node()" priority="-1">
 		<xsl:variable name="fold">
 			<xsl:choose>
-				<xsl:when test="count(ancestor::*) > 3">hidden</xsl:when>
+				<xsl:when test="count(ancestor::*) > 2">hidden</xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>

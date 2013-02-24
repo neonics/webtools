@@ -49,9 +49,24 @@
 									<l:item href="..">Cancel</l:item>
 								</xsl:when>
 								<xsl:otherwise>
-									<l:item action="action:article:save-draft">Save Draft</l:item>
-									<l:item action="action:article:preview">Preview</l:item>
-									<l:item action="action:article:post">Publish</l:item>
+									<script type="text/javascript">
+										function submitarticle(action)
+										{
+											var form = document.getElementById( 'articleedit' );
+											var act = document.getElementById( 'articleaction' );
+											act.name = 'action:article:' + action;
+											form.submit();
+										}
+									</script>
+								<!--
+									<l:item action="article:save-draft">Save Draft</l:item>
+									<l:item action="article:preview">Preview</l:item>
+									<l:item action="article:post">Publish</l:item>
+									<l:item href="{$psp:requestPathURI}">Cancel</l:item>
+								-->
+									<l:item href="javascript:submitarticle('save-draft')">Save Draft</l:item>
+									<l:item href="javascript:submitarticle('preview')">Preview</l:item>
+									<l:item href="javascript:submitarticle('post')">Publish</l:item>
 									<l:item href="{$psp:requestPathURI}">Cancel</l:item>
 								</xsl:otherwise>
 							</xsl:choose>
@@ -64,7 +79,7 @@
 									<l:item href="{$psp:requestBaseURI}0/edit">Compose new article</l:item>
 								</xsl:when>
 								<xsl:otherwise>
-									<l:item action="article:edit">Compose new article</l:item>
+									<l:item action="article:edit" page="article">Compose new article</l:item>
 								</xsl:otherwise>
 							</xsl:choose>
 
@@ -89,11 +104,12 @@
 			<xsl:when test="php:function('psp_isaction', 'article:edit')">
 				<xsl:variable name="art" select="php:function('article_get', string($article:article))"/>
 
-				<l:form method="post">
+				<l:form method="post" id="articleedit">
 					<xsl:if test="$psp:slashmode">
 						<xsl:attribute name="action">../<xsl:value-of select="article:article"/></xsl:attribute>
 					</xsl:if>
 					<l:input type="hidden" name="article:id" value="{$article:article}"/>
+					<l:input type="hidden" name="action:article:post" value="" id="articleaction"/>
 
 					<l:label for="t{generate-id()}">Title</l:label>
 					<l:input id="t{generate-id()}" name="article:title" type="text"

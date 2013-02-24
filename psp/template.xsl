@@ -168,7 +168,7 @@
 				document.getElementById( 'navtree' ).appendChild( res );
 
 				function getContentNode( id ) {
-					return getElementById( contentDoc, id );
+					return contentDoc.getElementById( id );
 				}
 			</script>
 
