@@ -52,6 +52,21 @@ function show2(name, ap)
 	s.position='';
 }
 
+function hide3(name)
+{
+	var s = document.getElementById(name).style;
+	s.visibility='hidden';
+	s.display='none';
+}
+
+function show3(name, ap)
+{
+	var s = document.getElementById(name).style;
+	s.visibility='visible';
+	s.display='block';
+}
+
+
 function gup( name )
 {
 	name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
