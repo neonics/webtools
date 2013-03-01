@@ -53,7 +53,7 @@ abstract class AbstractModule implements IModule
 
 	protected function message( $msg, $type = null )
 	{
-		self::smessage( $msg, $type, $this );
+		return self::smessage( $msg, $type, $this );
 	}
 
 	private static $funcToMod = Array(
