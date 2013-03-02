@@ -1,0 +1,21 @@
+/* Font sizes:
+ *
+ * 1		7pt	9px	.55em	x-small
+ *			10px	.6em
+ * 	H6	8pt	11px	.7em
+ *		9pt	12px	.75em
+ * 2	H5	10pt	13px	.8em	small
+ *		10.5pt	14px	.9em		*
+ *		11pt	15px	.95em
+ * 3	H4	12pt	16px	1em	medium
+ *		13pt	17px	1.05em		*
+ * 4		13.5pt	18px	1.1em	large
+ *	H3	14pt	19px	1.2em
+ *		15pt	20px	1.25em
+ *		16pt	21px	1.3em
+ *		16.5pt	22px	1.4em
+ *		17pt	23px	1.45em
+ * 5	H2	18pt	24px	1.5em	x-large
+ * 6	H1	24pt	32px	2em	xx-large
+ */
+

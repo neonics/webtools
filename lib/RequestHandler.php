@@ -15,6 +15,8 @@ class Request
 	public $requestFileURI;		# baz.html
 	public $requestQuery;			# ?foo   # '?' included for easy xsl
 
+	public $requestLang;
+
 	public $basedir;
 
 	public $requestDir;
@@ -84,6 +86,8 @@ class Request
 
 		$this->requestFileURI =
 			substr( $this->requestURI, strlen( $this->requestPathURI ) );
+
+		$this->requestLang = $_REQUEST["l"] or null;
 
 		if ( $debug > 0 )
 		{

@@ -28,6 +28,8 @@ class PSPModule extends AbstractModule
 		$xslt->setParameter( $pspNS, "requestQuery", $request->requestQuery );
 		$xslt->setParameter( $pspNS, "requestPage", preg_replace( "/\.xml$/", "", $request->requestFile ) );
 		$xslt->setParameter( $pspNS, "theme", $theme );
+		if ($request->requestLang)
+		$xslt->setParameter( "", "lang", $request->requestLang );
 	}
 
 	public function init()

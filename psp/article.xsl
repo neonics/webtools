@@ -21,6 +21,7 @@
 	<xsl:param name="psp:slashmode" select="$slashmode"/>
 	<xsl:param name="psp:requestPathURI" select="$requestPathURI"/>
 	<xsl:param name="article:article" select="$article"/>
+	<xsl:param name="lang" select="'en'"/>
 
 	<xsl:strip-space elements="article:*"/>
 
@@ -136,10 +137,20 @@
 			</xsl:when>
 
 			<xsl:otherwise>
+			<!--
 				<xsl:apply-templates select="php:function('article_get', '1')" mode="show"/>
+			-->
+
+				<xsl:apply-templates select="php:function('article_index')" mode="showfirst"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
+
+	<xsl:template match="article:articles" mode="showfirst">
+		<xsl:apply-templates select="article:article[not(article:content/@xml:lang) or article:content/@xml:lang=$lang][position()=1]" mode="show"/>
+	</xsl:template>
+
+
 <!--
 	<xsl:template match="article:content//p" mode="edit">
 		<xsl:apply-templates mode="edit"/>
@@ -168,7 +179,7 @@
 
 	<xsl:template match="article:articles" mode="index">
 		<l:item class="menutitle">Articles</l:item>
-		<xsl:apply-templates select="article:article" mode="index"/>
+		<xsl:apply-templates select="article:article[not(article:content/@xml:lang) or article:content/@xml:lang=$lang]" mode="index"/>
 	</xsl:template>
 
 	<xsl:template match="article:article" mode="index">
@@ -177,7 +188,7 @@
 				<l:item href="{$psp:requestBaseURI}{@db:id}"><xsl:value-of select="@title"/></l:item>
 			</xsl:when>
 			<xsl:otherwise>
-				<l:item page="article?article:id={@db:id}"><xsl:value-of select="@title"/></l:item>
+				<l:item page="article?article:id={@db:id}&amp;l={$lang}"><xsl:value-of select="@title"/></l:item>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
