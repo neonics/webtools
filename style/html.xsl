@@ -17,13 +17,10 @@
 			<xsl:if test="@whitespace">whitespace: <xsl:value-of select="@whitespace"/>;</xsl:if>
 		</xsl:variable>
 
-		<p style="{$style}">
+		<p style="{$style} {@style}">
 			<xsl:for-each select="@*">
 				<xsl:choose>
-					<xsl:when test="name(.)='style'">
-						<xsl:value-of select="$style"/><xsl:value-of select="."/>
-					</xsl:when>
-					<xsl:when test="@align | @whitespace"/>
+					<xsl:when test="@align | @whitespace | @style"/>
 					<xsl:otherwise>
 						<xsl:copy/>
 					</xsl:otherwise>

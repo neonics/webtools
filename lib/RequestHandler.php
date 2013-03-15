@@ -290,6 +290,7 @@ class LogRequestHandler extends RequestHandler
 				0, 0
 			);
 
+			$xmlline = str_replace( "&", "&amp;", $xmlline );
 
 			file_put_contents( $accessLog, $line, LOCK_EX | FILE_APPEND );
 			file_put_contents( $accessLogXML, $xmlline, LOCK_EX | FILE_APPEND );
