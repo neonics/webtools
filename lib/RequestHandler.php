@@ -87,7 +87,7 @@ class Request
 		$this->requestFileURI =
 			substr( $this->requestURI, strlen( $this->requestPathURI ) );
 
-		$this->requestLang = $_REQUEST["l"] or null;
+		$this->requestLang = isset( $_REQUEST["l"] ) ? $_REQUEST["l"] : null;
 
 		if ( $debug > 0 )
 		{

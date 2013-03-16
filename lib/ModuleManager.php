@@ -323,7 +323,7 @@ EOF;
 		global $debug;
 
 		$debug > 2 and
-		debug( 'module', "Registering functions: " . join(', ', self::$xsltFunctions ) );
+		debug( 'module', "Registering xslt functions: " . join(', ', self::$xsltFunctions ) );
 			$xslt->registerPHPFunctions(
 				self::$xsltFunctions
 			);
