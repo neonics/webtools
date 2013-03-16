@@ -9,7 +9,7 @@
 	xmlns:feed="http://neonics.com/2013/psp/feed"
 	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
 	xmlns:atom="http://www.w3.org/2005/Atom"
-	exclude-result-prefixes="atom"
+	exclude-result-prefixes="atom feed"
 >
 	<xsl:template match="feed:feed">
 		<xsl:apply-templates select="php:function('feed_fetch', string(@href))"/>
@@ -25,12 +25,7 @@
 	<xsl:template match="atom:entry">
 		<h2><xsl:value-of select="atom:title"/></h2>
 		<div>
-		<!--
-		<l:unescape>
-			<xsl:apply-templates select="atom:content" disable-output-escaping="yes"/>
-		</l:unescape>
-		-->
-		<xsl:value-of select="atom:content" disable-output-escaping="yes"/>
+			<xsl:value-of select="atom:content" disable-output-escaping="yes"/>
 		</div>
 	</xsl:template>
 
