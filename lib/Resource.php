@@ -2,7 +2,7 @@
 
 	class DirectoryResource
 	{
-		// either a fallback-chain and one global resource, 
+		// either a fallback-chain and one global resource,
 		// or global static access to all resources, iteratable.
 		public static $resources = Array();
 
@@ -26,7 +26,7 @@
 			$this->addResourceRelPath( "default", "" );
 		}
 
-		public static function debugFile( $f ) 
+		public static function debugFile( $f )
 		{
 			foreach ( self::$resources as $r )
 			{
@@ -176,4 +176,25 @@
 			$dr->addResourceRelPath( 'content', gd( $contentDir, $pspContentDir ) );
 		}
 	}
+
+
+	function relativePath( $from, $to )
+	{
+		$pba = explode( "/", rtrim( str_replace( "\\", "/", $to  ) ) );
+		$rba = explode( "/", rtrim( str_replace( "\\", "/", $from) ) );
+
+		while ( count($pba)>0 && count($rba) >0 && $pba[0] == $rba[0] )
+		{
+				array_shift( $pba );
+				array_shift( $rba );
+		}
+
+		$a= str_pad( "", count( $rba ) * 3, '../' ).implode( "/", $pba );
+	}
+
+	function file_to_uri( $path )
+	{
+		return "file:///" . str_replace( "\\", "/", $path );
+	}
+
 ?>

@@ -81,6 +81,8 @@ require_once( "Debug.php");
 
 			$doc = ModuleManager::processDoc( $doc );
 
+			dumpXMLFile( $doc );
+
 #debug( str_replace("<", "&lt;", $doc->saveXML() ) );
 
 			$xslt = new XSLTProcessor();

@@ -166,6 +166,13 @@
 		<xsl:value-of select="php:function('psp_pi', name(.), string(.))"/>
 	</xsl:template>
 
+	<xsl:template match="psp:xsl-include">
+		<xsl:element name="xsl:include">
+			<xsl:attribute name="href">
+				<xsl:value-of select="php:function('psp_xsl_uri', string(@href))"/>
+			</xsl:attribute>
+		</xsl:element>
+	</xsl:template>
 
 	<xsl:template match="psp:messages">
 		<xsl:apply-templates select="php:function('psp_messages', string(@module))" mode="psp">

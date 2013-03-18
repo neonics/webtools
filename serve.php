@@ -47,7 +47,8 @@ if (get_magic_quotes_gpc()) {
 
 	$staticContent = array_merge( isset( $staticContent )
 		? $staticContent
-		: Array(), Array( 'css/', 'img/', 'js/', 'ckeditor/')
+		: Array(),
+		Array( 'css/', 'img/', 'js/', 'ckeditor/')
 	);
 
 	$redir = array( 'wiki/' => 'wiki.html' );

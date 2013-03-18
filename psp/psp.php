@@ -18,7 +18,6 @@ class PSPModule extends AbstractModule
 		global $pspNS, $request, $requestURI, $requestPathURI, $slashmode;
 		global $requestBaseURI;
 		global $theme;
-
 		$xslt->setParameter( $pspNS, "slashmode", $slashmode );
 		$xslt->setParameter( $pspNS, "requestURI", $request->requestURI );
 		$xslt->setParameter( $pspNS, "requestPathURI", $request->requestPathURI );
@@ -135,6 +134,11 @@ EOF;
 		}
 	}
 
+	public function xsl_uri( $href )
+	{
+		global $pspBaseDir;
+		return file_to_uri( $pspBaseDir ) . '/' . $href;
+	}
 
 	public function accessLogs()
 	{
