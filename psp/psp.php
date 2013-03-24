@@ -27,8 +27,9 @@ class PSPModule extends AbstractModule
 		$xslt->setParameter( $pspNS, "requestQuery", $request->requestQuery );
 		$xslt->setParameter( $pspNS, "requestPage", preg_replace( "/\.xml$/", "", $request->requestFile ) );
 		$xslt->setParameter( $pspNS, "theme", $theme );
-		if ($request->requestLang)
-		$xslt->setParameter( "", "lang", $request->requestLang );
+		$xslt->setParameter( "", "lang", defined($request->requestLang)?$request->requestLang:'en');
+		$xslt->setParameter( "$pspNS", "lang", defined($request->requestLang)?$request->requestLang:'en');
+#		if ($request->requestLang)
 	}
 
 	public function init()
@@ -114,8 +115,10 @@ EOF;
 						case "merge":
 							// correlate value to the xslt currently being processed
 							if ( $value == 'no' )
-								$his->nomerge[] = $this->curDoc->documentURI;
-							debug( 'psp', "Marking as 'do not merge': " . $this->curDoc->documentURI );
+							{
+								$this->nomerge[] = $this->curDoc->documentURI;
+								debug( 'psp', "Marking as 'do not merge': " . $this->curDoc->documentURI );
+							}
 							break;
 
 						case "style":

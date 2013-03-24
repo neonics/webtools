@@ -6,8 +6,10 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
 >
 	<xsl:param name="base"/>
+	<!-- declared elsewhere xsl:param name="psp:lang" select="$lang"/-->
 
 	<xsl:template match="l:menu">
 		<ul class="menu {@class}">
@@ -33,6 +35,7 @@
 
 
 	<xsl:template match="l:menu/l:item">
+		<!-- toggle visibility of -->
 		<xsl:variable name="el">
 			document.getElementById( "<xsl:value-of select="generate-id(l:menu)"/>" )
 		</xsl:variable>

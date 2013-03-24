@@ -108,12 +108,6 @@ require_once( "Debug.php");
 			return loadXML( $sheets[0], 'sheet' );
 
 		debug( 'xml', "merging sheets" );
-		// check to see if merge="no" for custom sheet
-#		if ( null == gad( ModuleManager::$modules[ "psp" ][ "instance" ]->nomerge,
-#			$sheets[1], null ) )
-#		{
-#			return loadXML( $sheets[1], 'sheet' );
-#		}
 
 		$doc = new DOMDocument();
 		$docURI = null;
@@ -130,12 +124,25 @@ EOF;
 			foreach ( $sheets as $s )
 			{
 				$d = loadXML( $s );//->documentElement;
+				$d = ModuleManager::processDoc( $d );
+
+				// check to see if merge="no" for custom sheet
+				if ( in_array( $d->documentURI, ModuleManager::$modules[ "psp" ][ "instance" ]->nomerge ) )
+				{
+					if ( $debug > 1 )
+					debug('xml', "skip merge");
+					return $d;
+					#return loadXML( $sheets[1], 'sheet' );
+				}
+
+
 				#!isset( $docURI ) and
+				# takes the first docuri
 				$docURI == null and
 				$docURI = $d->documentURI;
-
 				$debug > 3 and debug("DOC URI: $docURI");
-				$a .= "<xsl:node>"
+
+				$a .= "<xsl:node base='".file_to_uri(dirname($d->documentURI))."'>"
 					. preg_replace("@<\?xml[^>]+>@", "", $d->saveXML() )//file_get_contents( $s ))
 					. "</xsl:node>";
 			}
@@ -160,6 +167,7 @@ EOF;
 				$docURI = $d->documentURI;
 
 				$n = $doc->createElementNS( $xsltns, "xsl:node" );
+				$n->setAttribute( "base", $docURI );
 
 				$doc->documentElement->appendChild( $n );
 

@@ -221,9 +221,12 @@ class RedirectRequestHandler extends RequestHandler
 
 	public function _handle( $request )
 	{
+		global $debug;
+
 		$matches;
 		if ( preg_match( $this->regexp, $request->requestRelPathURI, $matches ) )
 		{
+			if ( $debug )
 			debug( 'request', "[redir] match $this->regexp: ".$matches[0] );
 			$request->requestRelPathURI = "";
 			$request->requestFileURI = $this->redir[ $matches[1] ];
@@ -231,7 +234,8 @@ class RedirectRequestHandler extends RequestHandler
 			return false;
 		}
 
-		debug( 'request', "[redir] No match for $this->regexp" );
+		if ( $debug )
+		debug( 'request', "[redir] no match for $this->regexp" );
 		return false;
 	}
 }
@@ -310,6 +314,8 @@ class StaticRequestHandler extends RequestHandler
 
 	public function _handle( $request )
 	{
+		global $debug;
+
 		if ( preg_match( $this->regexp, $request->requestRelURI ) )
 		{
 			$fn = DirectoryResource::findFile( $request->requestRelURI );
@@ -329,6 +335,7 @@ class StaticRequestHandler extends RequestHandler
 
 			return true;
 		}
+		if ( $debug )
 		debug( 'request', "[static] no match for $this->regexp" );
 		return false;
 	}
@@ -343,6 +350,7 @@ class ContentRequestHandler extends RequestHandler
 
 	public function _handle( $request )
 	{
+		global $debug;
 		$matches;
 
 		if ( preg_match( $this->regexp, $request->requestRelURI, $matches ) )
@@ -371,6 +379,7 @@ class ContentRequestHandler extends RequestHandler
 
 			return true;
 		}
+		if ( $debug )
 		debug( 'request', "[content] no match for $this->regexp" );
 		return false;
 	}
@@ -451,8 +460,11 @@ class DynamicRequestHandler extends RequestHandler
 		debug('handler', "serialize style=" . $request->style );
 
 		echo serializeDoc( $doc,
-			array_reverse( DirectoryResource::findFiles(
-				$request->style, 'style' ) ) );
+			array_reverse(
+				DirectoryResource::findFiles(
+				$request->style, 'style' )
+			)
+		);
 		return true;
 
 	}

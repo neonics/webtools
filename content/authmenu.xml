@@ -1,0 +1,39 @@
+<?psp module="auth"?>
+
+<auth:user
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:auth="http://neonics.com/2000/xsp/auth"
+>
+	<auth:success>
+		<menu class="vmenu drag">
+			<item class="menutitle">
+				<label>Welcome, <auth:username/></label>
+			</item>
+
+			<item>
+				Roles: <auth:roles/>
+			</item>
+
+			<auth:permission role="editor">
+				<item action="template:edit">Edit Page</item>
+			</auth:permission>
+
+			<item action="auth:logout">
+				<label xml:lang="en">Logout</label>
+			</item>
+		</menu>
+	</auth:success>
+	<auth:fail>
+		<!--
+		<menu class="vmenu">
+			<item><auth:login/></item>
+			-->
+			<!--
+			<item page="index" action="show-login">Login</item>
+			-->
+			<!--
+		</menu>
+		-->
+		<auth:login/>
+	</auth:fail>
+</auth:user>

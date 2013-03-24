@@ -51,7 +51,42 @@
 	<xsl:template match="xsl:stylesheet">
 		<xsl:comment> STYLE SHEET </xsl:comment>
 		<xsl:copy>
-			<xsl:apply-templates select="@*|*"/>
+			<xsl:apply-templates select="@*"/>
+
+			<xsl:variable name="s" select="."/>
+
+			<!--<xsl:apply-templates select="@*|*"/>-->
+			<xsl:apply-templates select="processing-instruction()"/>
+			<!--
+			<xsl:apply-templates select="xsl:import"/>
+			<xsl:for-each select="/xsl:merge/xsl:node[position()&gt;1]/xsl:stylesheet/xsl:import">
+				<xsl:variable name="n" select="@href"/>
+				<xsl:if test="not($s/xsl:import[@href=$n])">
+					<xsl:apply-templates select="."/>
+				</xsl:if>
+			</xsl:for-each>
+
+			<xsl:apply-templates select="xsl:include"/>
+			<xsl:for-each select="/xsl:merge/xsl:node[position()&gt;1]/xsl:stylesheet/xsl:include">
+				<xsl:variable name="n" select="@href"/>
+				<xsl:if test="not($s/xsl:include[@href=$n])">
+					<xsl:apply-templates select="."/>
+				</xsl:if>
+			</xsl:for-each>
+			-->
+			<xsl:apply-templates select="//xsl:import|//xsl:include"/>
+
+			<xsl:apply-templates select="xsl:output"/>
+			<xsl:apply-templates select="xsl:param"/>
+			<!-- copy non-conflicting original params -->
+			<xsl:for-each select="/xsl:merge/xsl:node[position()&gt;1]/xsl:stylesheet/xsl:param">
+				<xsl:variable name="n" select="@name"/>
+				<xsl:if test="not($s/xsl:param[@name=$n])">
+					<xsl:apply-templates select="."/>
+				</xsl:if>
+			</xsl:for-each>
+
+			<xsl:apply-templates select="xsl:template"/>
 
 			<xsl:comment>
 			new stylesheet copy done.
@@ -59,7 +94,6 @@
 
 			<!-- this code will copy all templates that are not defined in the
 			first template -->
-			<xsl:variable name="s" select="."/>
 
 			<xsl:for-each select="/xsl:merge/xsl:node[position()&gt;1]/xsl:stylesheet/xsl:template">
 				<!--<xsl:apply-templates select="." mode="skipped"/>-->
@@ -173,10 +207,28 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="xsl:param|processing-instruction()|xsl:import|xsl:include|xsl:output">
+	<xsl:template match="xsl:param|processing-instruction()|xsl:output">
 		<xsl:comment>FOO <xsl:value-of select="name()"/></xsl:comment>
 		<xsl:apply-templates select="." mode="copy"/>
 	</xsl:template>
+
+	<xsl:template match="xsl:import|xsl:include">
+		<xsl:copy>
+			<xsl:for-each select="@*">
+				<xsl:choose>
+					<xsl:when test="name(.)='href'"><!-- TODO: check contains protocol -->
+						<xsl:attribute name="href"><xsl:value-of select="../../../@base"/>/<xsl:value-of select="."/></xsl:attribute>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:copy/>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:for-each>
+			<xsl:apply-templates select="*" mode="copy"/>
+		</xsl:copy>
+	</xsl:template>
+
+
 
 	<xsl:template name="copy1">
 		<xsl:param name="set"/>

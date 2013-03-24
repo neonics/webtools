@@ -44,7 +44,7 @@
 	/>
 
 	<xsl:template match="pst:template">
-		<l:page>
+		<l:page css="{$psp:theme}">
 			<l:body>
 				<l:header>
 					<div class="logo">

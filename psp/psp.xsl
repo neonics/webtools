@@ -174,6 +174,14 @@
 		</xsl:element>
 	</xsl:template>
 
+	<xsl:template match="psp:xsl-import">
+		<xsl:element name="xsl:import">
+			<xsl:attribute name="href">
+				<xsl:value-of select="php:function('psp_xsl_uri', string(@href))"/>
+			</xsl:attribute>
+		</xsl:element>
+	</xsl:template>
+
 	<xsl:template match="psp:messages">
 		<xsl:apply-templates select="php:function('psp_messages', string(@module))" mode="psp">
 			<xsl:with-param name="node" select="."/>

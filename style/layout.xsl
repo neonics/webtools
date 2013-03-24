@@ -19,16 +19,18 @@
 	/>
 
 	<xsl:param name="psp:requestBaseURI" select="$requestBaseURI"/>
+	<xsl:param name="psp:lang" select="$lang"/>
 
 	<xsl:strip-space elements="xsl:*"/>
 
   <xsl:template match="l:page">
+		<xsl:variable name="themecss"><xsl:if test="@css"><xsl:value-of select="@css"/>/</xsl:if></xsl:variable>
   	<html>
 			<xsl:comment>Software author: Kenney Westerhof / Neonics.com </xsl:comment>
    		<head>
      		<title><xsl:value-of select="title"/></title>
-     		<link rel="stylesheet" type="text/css" href="{$psp:requestBaseURI}css/layout.css"/>
-     		<link rel="stylesheet" type="text/css" href="{$psp:requestBaseURI}css/style.css"/>
+     		<link rel="stylesheet" type="text/css" href="{$psp:requestBaseURI}css/{$themecss}layout.css"/>
+     		<link rel="stylesheet" type="text/css" href="{$psp:requestBaseURI}css/{$themecss}style.css"/>
 				<script type="text/javascript" src="{$psp:requestBaseURI}js/script.js"/>
 				<script type="text/javascript" src="{$psp:requestBaseURI}js/dragdrop.js"/>
 			</head>

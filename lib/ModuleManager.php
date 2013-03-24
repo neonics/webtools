@@ -410,6 +410,7 @@ ob_flush();
 			dumpXMLFile( $doc, $sheets[0] );
 		}
 
+		if ( $debug )
 		debug( 'module', "TRANSFORM DONE");
 
 		return $doc;
