@@ -36,15 +36,14 @@ Produces:
 >
 
 	<xsl:template match="auth:menu">
-		<xsl:processing-instruction name="psp">module="auth"</xsl:processing-instruction>
 
 		<auth:user
 			xmlns="http://www.neonics.com/xslt/layout/1.0"
-			xmlns:auth="http://neonics.com/2000/xsp/auth"
 		>
 			<auth:success>
+		<xsl:message>auth:user success</xsl:message>
 				<menu class="vmenu">
-					<item>
+					<item class="menutitle">
 						<label>Welcome, <auth:username/></label>
 					</item>
 					<item>
@@ -56,6 +55,7 @@ Produces:
 				</menu>
 			</auth:success>
 			<auth:fail>
+		<xsl:message>auth:user fail</xsl:message>
 				<menu class="vmenu">
 					<!--
 					<item><auth:login/></item>
@@ -142,6 +142,7 @@ Produces:
 
 	<xsl:template match="auth:login">
 		<l:login userfield="username" passfield="password">
+			<xsl:apply-templates select="@*"/>
 			<l:field type="hidden" name="action:auth:login"/>
 		</l:login>
 	</xsl:template>

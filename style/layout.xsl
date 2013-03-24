@@ -318,28 +318,46 @@
 		-->
 	</xsl:template>
 
-
+	<!-- @label -->
+	<!-- @hidden -->
 	<xsl:template match="l:login">
 		<xsl:variable name="id" select="generate-id()"/>
 
-		<script type="text/javascript">
-			function loginLink( b )
-			{
-				document.getElementById('loginForm').style.display=b?'block':'none';
-				document.getElementById('loginLink').style.display=b?'none':'block';
-				return false;
-			}
-		</script>
-		<a id="loginLink" href="javascript:loginLink(true);void(0);">Login</a>
-		<div style="display: none" id="loginForm">
-			<div onclick="javascript:loginLink(false);"
-				style="display: block; right: 0px;"
-				align="right">X</div>
+		<xsl:if test="@hidden">
+			<script type="text/javascript">
+				function loginLink( b )
+				{
+					document.getElementById('loginForm').style.display=b?'block':'none';
+					document.getElementById('loginLink').style.display=b?'none':'block';
+					return false;
+				}
+			</script>
+			<a id="loginLink" href="javascript:loginLink(true);void(0);">
+				<xsl:choose>
+					<xsl:when test="@label">
+						<xsl:value-of select="@label"/>
+					</xsl:when>
+					<xsl:otherwise>
+						Login
+					</xsl:otherwise>
+				</xsl:choose>
+			</a>
+		</xsl:if>
+
+		<div id="loginForm">
+			<xsl:if test="@hidden">
+				<xsl:attribute name="style">display:none</xsl:attribute>
+				<div onclick="javascript:loginLink(false);"
+					style="display: block; right: 0px; color: red"
+					align="right"><a>X</a></div>
+			</xsl:if>
 			<xsl:if test="//l:message[@module='auth' and @type='error']">
 				<xsl:apply-templates select="//l:message[@module='auth']" mode="insert"/>
-				<script type="text/javascript">
-					loginLink(true);
-				</script>
+				<xsl:if test="@hidden">
+					<script type="text/javascript">
+						loginLink(true);
+					</script>
+				</xsl:if>
 			</xsl:if>
 
 			<form method="POST" action="{@action}">

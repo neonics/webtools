@@ -68,7 +68,7 @@
 									<l:item href="javascript:submitarticle('save-draft')">Save Draft</l:item>
 									<l:item href="javascript:submitarticle('preview')">Preview</l:item>
 									<l:item href="javascript:submitarticle('post')">Publish</l:item>
-									<l:item href="{$psp:requestPathURI}">Cancel</l:item>
+									<l:item href="">Cancel</l:item>
 								</xsl:otherwise>
 							</xsl:choose>
 

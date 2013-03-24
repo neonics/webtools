@@ -29,6 +29,7 @@ class ArticleModule extends AbstractModule
 	 */
 	function init()
 	{
+		global $debug;
 		global $db; // XXX ref
 
 		psp_module( "db" );
@@ -56,16 +57,20 @@ class ArticleModule extends AbstractModule
 			$status = $cmd == "publish" ? "published" :
 				( $cmd=="save-draft"?"draft":"unknown" );
 
+			if ( $debug > 1 )
+			{
 			echo "Storing article, command=$cmd<br>";
 			echo "Id: $aid long ? ".(is_long($aid)?"Y":"N")."<br>";
 			echo "Title: $title<br>";
 			echo "Status: $status<br>";
 			echo "Content: $content<br>";
+			}
 
 			$old = $db->get( "articles", $aid );
 
 			if ( isset( $old ) )
 			{
+				if ( $debug > 1 )
 				echo "Replacing<br>";
 
 				$db->set( $old, "@title", $title );
@@ -77,6 +82,7 @@ class ArticleModule extends AbstractModule
 								str_replace("\r","", trim( $content ))
 							)."</p></p>";
 
+				if ( $debug > 1 )
 				echo "<br>CONTENT STRING<br>".str_replace( "<","&lt;",$str);
 
 				$dd->loadXML( $str );
@@ -94,10 +100,12 @@ class ArticleModule extends AbstractModule
 			}
 			else
 			{
+				if ( $debug > 1 )
 				echo "Appending<br>";
 				$db->put( "articles", $this->newArticle( $title, $content ) );
 			}
 
+			if ( $debug > 1 )
 			echo "<br>STORING<br>";
 			$db->store( "articles" );
 		}

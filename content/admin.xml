@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<?psp module="auth"?>
+
+<psp:page template="main"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:db="http://neonics.com/2011/db/xml"
+  xmlns:auth="http://neonics.com/2000/xsp/auth"
+	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+>
+	<psp:content>
+		<xi:include href="authmenu.xml"/>
+	</psp:content>
+</psp:page>
