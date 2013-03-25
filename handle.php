@@ -3,13 +3,14 @@
 $pspBaseDir = ".";
 
 $requestURIRoots = Array(
+	'/',
 	'/webtools',
 );
 
 # loglevel:
-$debug = 2;
-$debugDumpFiles = 1;
-$logging = 2;  // 1 = file, 2 = http response, 3 = both
+$debug = 0;
+$debugDumpFiles = 0;
+$logging = 1;  // 1 = file, 2 = http response, 3 = both
 
 # logicDir = "psp";
 # styleDir = "style";
