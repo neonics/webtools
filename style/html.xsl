@@ -84,7 +84,7 @@
 		</xsl:element>
 	</xsl:template>
 
-	<xsl:template match="l:form | l:input | l:label | l:textarea">
+	<xsl:template match="l:form | l:input | l:label | l:textarea | l:style">
 		<xsl:element name="{local-name(.)}">
 			<xsl:apply-templates select="@*|node()"/>
 		</xsl:element>

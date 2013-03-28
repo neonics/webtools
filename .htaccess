@@ -3,6 +3,10 @@ ErrorDocument 404 /404.html
 RewriteEngine On
 RewriteBase /
 
+RewriteRule ^$		index.html [R,L]
+
+RewriteRule ^admin$	admin/	   [R]
+RewriteRule ^admin/(.*?)$ admin.html?psp:slashmode=1&psp:slashpath=$1&psp:slashpage=admin&%{QUERY_STRING} [L]
 
 RewriteRule ^articles/$ articles.html [R]
 RewriteRule ^articles/([^/]+)/?([^/]+)?$  articles.html?article:id=$1&action:article:$2= [L]
@@ -14,17 +18,13 @@ RewriteRule ^articles/([^/]+)/?([^/]+)?$  articles.html?article:id=$1&action:art
 #RewriteCond %{REQUEST_URI} !\.html$
 #RewriteRule ^([^/]+)$    $1/index.html
 
-RewriteRule ^$    index.html [R,L]
-
-
-RewriteRule ^(.*?)\.html handle.php [L]
 
 RewriteRule ^wiki/(.*)$	wiki.html?wiki:title=$1&%{QUERY_STRING} [R]
 
+RewriteRule ^(.*?)\.html handle.php [L]
 
 # This is handled internally
 RewriteRule ^lib/	404.html [R=404,L]
-RewriteRule ^content/	404.html [R=404,L]
 RewriteRule ^psp/	404.html [R=404,L]
 RewriteRule ^style/	404.html [R=404,L]
 RewriteRule ^db/	404.html [R=404,L]
@@ -32,5 +32,5 @@ RewriteRule ^db/	404.html [R=404,L]
 RewriteRule ^img/	handle.php [L]
 RewriteRule ^js/	handle.php [L]
 RewriteRule ^css/	handle.php [L]
+RewriteRule ^content/	handle.php [L]
 RewriteRule ^ckeditor/	handle.php [L]
-

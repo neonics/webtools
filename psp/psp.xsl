@@ -68,6 +68,14 @@
 	</xsl:template>
 
 	<xsl:template match="psp:expr">
+		<xsl:choose>
+			<xsl:when test="@slasharg and @one">
+				<xsl:value-of select="php:function('psp_slasharg', string(@slasharg), string(@one))"/>
+			</xsl:when>
+			<xsl:when test="@slasharg">
+				<xsl:value-of select="php:function('psp_slasharg', string(@slasharg))"/>
+			</xsl:when>
+
 		<!--
 		<xsl:variable name="content">
 			<xsl:for-each select="text()|psp:expr|psp:text">
@@ -84,7 +92,10 @@
 			""
 		</xsl:variable>
 		-->
-		<xsl:value-of select="php:function('psp_expr', string(.))"/>
+			<xsl:otherwise>
+				<xsl:value-of select="php:function('psp_expr', string(.))"/>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 
@@ -121,6 +132,9 @@
 				</xsl:when>
 				<xsl:when test="@arg">
 					<xsl:value-of select="php:function('psp_arg', string(@arg)) != ''"/>
+				</xsl:when>
+				<xsl:when test="@slashpath">
+					<xsl:value-of select="php:function('psp_slashpath', string(@slashpath)) != ''"/>
 				</xsl:when>
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>

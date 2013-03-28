@@ -36,12 +36,12 @@
 		{
 			$p = filename( pathinfo( $p, PATHINFO_DIRNAME ) ) .'/'.
 				filename( $uri );
-			
+
 			//return null;//warn ( "Not a local path: $p");
 		}
 		else // relative path
 			;
-		
+
 		return $p;
 	}
 
@@ -73,7 +73,7 @@
 
 	function stripDoubleSlash( $a )
 	{
-		return preg_replace( "/\/\//", "/", $a );
+		return str_replace( "//", "/", $a );
 	}
 
 
@@ -97,7 +97,7 @@
 	{
 		$mime = mimetype( $fn );
 		#debug( 'util', "mime for '$fn': $mime" );
-		if ( isset( $mime ) ) 
+		if ( isset( $mime ) )
 			header( "Content-Type: $mime" );
 	}
 

@@ -7,7 +7,8 @@ require_once( "Debug.php");
 
 	function loadXML( $in, $debugType = "xml" )
 	{
-		debug( 'xml', "load $debugType $in" );
+		global $debug;
+		$debug and debug( 'xml', "load $debugType $in" );
 		$doc = new DOMDocument();
 		$doc->load( $in );
 		$doc->xinclude();
@@ -107,7 +108,7 @@ require_once( "Debug.php");
 		if ( count( $sheets ) == 1 )
 			return loadXML( $sheets[0], 'sheet' );
 
-		debug( 'xml', "merging sheets" );
+		$debug and debug( 'xml', "merging sheets" );
 
 		$doc = new DOMDocument();
 		$docURI = null;
@@ -200,5 +201,11 @@ EOF;
 		return $doc;
 	}
 
+
+function removeChildren( &$node )
+{
+	$node->parentNode->replaceChild( $n = $node->cloneNode(false), $node );
+	$node = $n;
+}
 
 ?>

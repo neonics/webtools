@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <?psp module="auth"?>
+<?psp module="admin"?>
 
 <psp:page template="main"
 	xmlns="http://www.neonics.com/xslt/layout/1.0"
@@ -8,9 +9,36 @@
 	xmlns:db="http://neonics.com/2011/db/xml"
   xmlns:auth="http://neonics.com/2000/xsp/auth"
 	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:admin="http://neonics.com/2013/psp/admin"
 	xmlns:xi="http://www.w3.org/2001/XInclude"
 >
 	<psp:content>
 		<xi:include href="authmenu.xml"/>
+
+		<menu>
+			<item slashpath="site">Edit Site</item>
+		</menu>
+
+		<psp:if slashpath="site">
+			<div class="admin-site">
+				<p>Site overview</p>
+				<menu>
+					<item slashpath="site/menu">Edit Menu</item>
+					<admin:site-pages/>
+				</menu>
+
+
+				<psp:if slashpath="site/menu">
+					<admin:site-overview/>
+				</psp:if>
+
+				<psp:if slashpath="site/page">
+					<p> PAGE: <psp:expr slasharg="site/page"/></p>
+					<admin:site-page-edit><psp:attribute name="page"><psp:expr slasharg="site/page" one="0"/></psp:attribute>
+					</admin:site-page-edit>
+				</psp:if>
+
+			</div>
+		</psp:if>
 	</psp:content>
 </psp:page>

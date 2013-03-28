@@ -10,6 +10,7 @@
 	exclude-result-prefixes="l"
 >
 
+	<xsl:include href="admin.xsl"/>
 	<xsl:include href="menu.xsl"/>
 	<xsl:include href="html.xsl"/>
 
@@ -19,6 +20,7 @@
 	/>
 
 	<xsl:param name="psp:requestBaseURI" select="$requestBaseURI"/>
+	<xsl:param name="psp:slashpage" select="$slashpage"/>
 	<xsl:param name="psp:lang" select="$lang"/>
 
 	<xsl:strip-space elements="xsl:*"/>
@@ -182,7 +184,8 @@
 				</a>
 			</xsl:when>
 
-			<xsl:when test="@slashpage">
+			<!-- for now equal treatment - it's an XOR -->
+			<xsl:when test="@slashpage|@slashpath">
 				<xsl:variable name="page">
 					<xsl:call-template name="link-slashpage"/>
 				</xsl:variable>
@@ -208,6 +211,7 @@
 		</xsl:choose>
 	</xsl:template>
 
+
 	<xsl:template name="link-page">
 		<xsl:variable name="pre">
 			<xsl:choose>
@@ -230,24 +234,25 @@
 	</xsl:template>
 
 	<xsl:template name="link-slashpage">
+		<xsl:variable name="v"><xsl:value-of select="@slashpage"/><xsl:value-of select="@slashpath"/></xsl:variable>
 		<xsl:variable name="pre">
 			<xsl:choose>
-				<xsl:when test="contains(@slashpage, '?')">
-					<xsl:value-of select="substring-before(@slashpage, '?')"/> 
+				<xsl:when test="contains($v, '?')">
+					<xsl:value-of select="substring-before($v, '?')"/> 
 				</xsl:when>
 				<xsl:otherwise>
-					<xsl:value-of select="@slashpage"/>
+					<xsl:value-of select="$v"/>
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 
 		<xsl:variable name="post">
-			<xsl:if test="contains(@slashpage, '?')">
-				<xsl:value-of select="concat('?', substring-after(@slashpage, '?'))"/> 
+			<xsl:if test="contains($v, '?')">
+				<xsl:value-of select="concat('?', substring-after($v, '?'))"/> 
 			</xsl:if>
 		</xsl:variable>
 
-		<xsl:value-of select="concat($psp:requestBaseURI, $pre, $post)"/>
+		<xsl:value-of select="concat($psp:requestBaseURI, $psp:slashpage, '/', $pre, $post)"/>
 	</xsl:template>
 
 

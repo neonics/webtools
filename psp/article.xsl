@@ -15,7 +15,8 @@
 	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
 	xmlns:auth="http://neonics.com/2000/xsp/auth"
 	xmlns:db="http://neonics.com/2011/db/xml"
-	exclude-result-prefixes="article auth"
+	xmlns:xhtml="http://www.w3.org/1999/xhtml"
+	exclude-result-prefixes="article auth db xhtml"
 >
 	<xsl:param name="psp:requestBaseURI" select="$requestBaseURI"/>
 	<xsl:param name="psp:slashmode" select="$slashmode"/>
@@ -105,10 +106,11 @@
 			<xsl:when test="php:function('psp_isaction', 'article:edit')">
 				<xsl:variable name="art" select="php:function('article_get', string($article:article))"/>
 
-				<l:form method="post" id="articleedit">
+				<l:form method="post" id="articleedit" onsubmit="return updateFormContent();">
 					<xsl:if test="$psp:slashmode">
 						<xsl:attribute name="action">../<xsl:value-of select="article:article"/></xsl:attribute>
 					</xsl:if>
+
 					<l:input type="hidden" name="article:id" value="{$article:article}"/>
 					<l:input type="hidden" name="action:article:post" value="" id="articleaction"/>
 
@@ -117,14 +119,62 @@
 						value="{$art/@title}" size="80"/><l:br/>
 
 					<l:label style="vertical-align:top">Text</l:label>
-					<l:textarea name="article:content" cols="80" rows="25">
-						<!-- strips html tags -->
-						<!--<xsl:value-of select="$art/article:content"/>-->
-						<!--<xsl:apply-templates select="$art/article:content" mode="edit"/>-->
-						<xsl:value-of select="php:function('article_getcontent', string($art/article:content))"/>
-					</l:textarea>
+					<l:input type="hidden" name="article:content:format" value="xml-with-wrapper"/>
+					<l:input type="hidden" id="edit_content" name="article:content"/>
 
-					<l:input type="submit" name="action:article:post"/>
+					<style type="text/css">
+						#rich-edit { min-height: 2em; }
+						#edit-toolbar { margin: .5em; }
+						#edit-toolbar span { border: 1px solid #888; padding:.2em; }
+					</style>
+
+					<div id="edit-toolbar">
+						<span
+							onclick="applyStyle('bold');"
+							onmousedown='event.preventDefault();'
+							style="font-weight: bold;"
+						>
+							B
+						</span>
+					</div>
+
+
+					<div id="rich-edit" contenteditable="true" >
+						<xsl:apply-templates select="$art/article:content" mode="content"/>
+					</div>
+
+				<script type="text/javascript" src="{$requestBaseURI}js/xml.js"/>
+				<script type="text/javascript">
+					<xsl:text disable-output-escaping="yes">
+					var editel = document.getElementById('rich-edit');
+
+					function updateFormContent()
+					{
+						/*
+						v = "";
+						
+						var cl = editel.childNodes;
+
+						for ( var i = 0; i &lt; cl.length; i ++ )
+							v += serialize( cl.item( i ) );
+
+						document.getElementById( "edit_content" ).value = v;
+						*/
+
+						document.getElementById( "edit_content" ).value = serialize( editel );
+
+						return true;
+					}
+
+					function applyStyle( cmd, value )
+					{
+						document.execCommand( cmd, false, value );
+						editel.focus();
+					}
+					editel.focus();
+					</xsl:text>
+				</script>
+				<l:input type="submit" name="action:article:post"/>
 				</l:form>
 			</xsl:when>
 
@@ -137,35 +187,28 @@
 			</xsl:when>
 
 			<xsl:otherwise>
-			<!--
-				<xsl:apply-templates select="php:function('article_get', '1')" mode="show"/>
-			-->
-
 				<xsl:apply-templates select="php:function('article_index')" mode="showfirst"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
+	<!-- done instead of copy-of so exclude-namespace-uri has effect -->
+  <xsl:template match="article:content" priority="-2" mode="content">
+     <xsl:apply-templates select="@*|node()" mode="content"/>
+  </xsl:template>
+
+  <xsl:template match="@*|node()|*" priority="-2" mode="content">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="content"/>
+    </xsl:copy>
+  </xsl:template>
+
+
+
 	<xsl:template match="article:articles" mode="showfirst">
-		<xsl:apply-templates select="article:article[not(article:content/@xml:lang) or article:content/@xml:lang=$lang][position()=1]" mode="show"/>
+		<xsl:apply-templates select="php:function('article_get', string( article:article[not(article:content/@xml:lang) or article:content/@xml:lang=$lang][position()=1]/@db:id ))" mode="show"/>
 	</xsl:template>
 
-
-<!--
-	<xsl:template match="article:content//p" mode="edit">
-		<xsl:apply-templates mode="edit"/>
-	</xsl:template>
-
-	<xsl:template match="article:content//p/text()" mode="edit">
-		<xsl:value-of select="normalize-space(.)"/>
-		<xsl:text>&#160;
-</xsl:text>
-	</xsl:template>
-
-	<xsl:template match="article:content//*" mode="edit">
-		<xsl:apply-templates mode="edit"/>
-	</xsl:template>
--->
 
 	<xsl:template match="article:link">
 		<l:link page="article?article:id={@article:id}">
@@ -188,7 +231,10 @@
 				<l:item href="{$psp:requestBaseURI}{@db:id}"><xsl:value-of select="@title"/></l:item>
 			</xsl:when>
 			<xsl:otherwise>
-				<l:item page="article?article:id={@db:id}&amp;l={$lang}"><xsl:value-of select="@title"/></l:item>
+				<l:item page="article?article:id={@db:id}&amp;l={$lang}">
+					<xsl:if test="0=string-length(@title)"><i>no title</i></xsl:if>
+					<xsl:value-of select="@title"/>
+				</l:item>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -203,11 +249,10 @@
 	</xsl:template>
 
 	<xsl:template match="article:article" mode="show">
-		
 		<l:link anchor="article{@db:id}"/>
 		
 		<xsl:if test="@title">
-		<l:h1 class="article">
+			<l:h1 class="article">
 			<!--<xsl:value-of select="@db:id"/><xsl:text> </xsl:text>-->
 			<xsl:choose>
 				<xsl:when test="article:content/l:title">
@@ -231,7 +276,7 @@
 				</xsl:choose>
 			</auth:permission>
 
-		</l:h1>
+			</l:h1>
 		</xsl:if>
 
 <!--
@@ -262,6 +307,7 @@
 		<xsl:apply-templates/>
 		</div>
 	</xsl:template>
+
 
   <xsl:template match="@*|node()" priority="-2">
     <xsl:copy>

@@ -29,7 +29,7 @@ class ArticleModule extends AbstractModule
 	 */
 	function init()
 	{
-		global $debug;
+		global $debug, $request;
 		global $db; // XXX ref
 
 		psp_module( "db" );
@@ -53,60 +53,58 @@ class ArticleModule extends AbstractModule
 		{
 			$title = psp_arg( "article:title" );
 			$content = psp_arg( "article:content" );
+			$content_fmt = psp_arg( "article:content:format", "text" );
 			$aid = psp_arg( "article:id" );
 			$status = $cmd == "publish" ? "published" :
 				( $cmd=="save-draft"?"draft":"unknown" );
 
 			if ( $debug > 1 )
 			{
-			echo "Storing article, command=$cmd<br>";
-			echo "Id: $aid long ? ".(is_long($aid)?"Y":"N")."<br>";
-			echo "Title: $title<br>";
-			echo "Status: $status<br>";
-			echo "Content: $content<br>";
+				debug('article', "Storing article, command=$cmd" );
+				debug('article', "Id: $aid long ? ".(is_long($aid)?"Y":"N") );
+				debug('article', "Title: $title" );
+				debug('article', "Status: $status" );
+				debug('article', "Content: $content" );
 			}
 
 			$old = $db->get( "articles", $aid );
 
-			if ( isset( $old ) )
+			if ( !isset( $old ) )
 			{
-				if ( $debug > 1 )
-				echo "Replacing<br>";
+				$old = $db->newrow( 'articles' );
+			}
 
+
+			{
 				$db->set( $old, "@title", $title );
 				$db->set( $old, "@status", $status );
+				$db->set( $old, "content/@xml:lang", $request->requestLang );
+
+				$str = str_replace( "\r","", trim( $content ) );
+
+				switch ( $content_fmt )
+				{
+					case 'text':
+						$str = "\n<p>".implode( "</p>\n<p>", explode( "\n\n", $str ) )."</p>\n";
+						break;
+					case 'xml':
+						$str = "<DUMMY>".$str."</DUMMY>";
+					case 'xml-with-wrapper':
+						break;
+				}
+
+				debug('article', "DUMP Content:\n$str");
 
 				$dd = new DOMDocument();
-				$str= "<p><p>".
-							str_replace("\n", "</p>\n<p>",
-								str_replace("\r","", trim( $content ))
-							)."</p></p>";
-
-				if ( $debug > 1 )
-				echo "<br>CONTENT STRING<br>".str_replace( "<","&lt;",$str);
-
 				$dd->loadXML( $str );
 
-				$db->set( $old, "content", $dd->documentElement );
-
-				/*
-				$new->setAttribute( "status", $status );
-
-				$old->setAttribute( "title", $title );
-				$old->getElementsByTagNameNS( $old->namespaceURI, "content" )
-					->item(1)->nodeValue = $content;
-				$db->put( "articles", $new, $aid );
-				*/
+				$db->set( $old, "content", $dd->documentElement->childNodes );
 			}
-			else
-			{
-				if ( $debug > 1 )
-				echo "Appending<br>";
-				$db->put( "articles", $this->newArticle( $title, $content ) );
-			}
+			#else
+			#{
+		#		$db->put( "articles", $this->newArticle( $title, $content ) );
+	#		}
 
-			if ( $debug > 1 )
-			echo "<br>STORING<br>";
 			$db->store( "articles" );
 		}
 	}
@@ -115,20 +113,22 @@ class ArticleModule extends AbstractModule
 
 	private function newArticle( $title = "", $content = "" )
 	{
-		global $db;
+		/*
+		global $db, $request;
 
 		$title = htmlspecialchars( $title );
 		$ns = $this->ns;
 
 		$template = <<<EOF
-  <a:article xmlns:a="$ns" status="draft" title="$title">
-		<a:content>$content</a:content>
+  <a:article xmlns:a="$ns" xmlns="http://www.w3.org/1999/xhtml" status="draft" title="$title">
+		<a:content xml:lang='$request->requestLang'>$content</a:content>
 	</a:article>
 
 EOF;
 		$dd = new DOMDocument();
 		$dd->loadXML( $template );
 		return $dd->documentElement;
+		*/
 
 /*
 		$a = $articles->createElementNS( $ns, "article" );
@@ -166,7 +166,9 @@ EOF;
 
 		$ret= $db->get( "articles", gd( $aid, $this->articleId ) );
 
-		return isset( $ret ) ? $ret : ( $newIfNotFound ? $this->newArticle() : null );
+		return isset( $ret ) ? $ret : ( $newIfNotFound
+			? $db->table( 'articles' )->createElementNS( $this->ns, 'article' )
+			: null );
 	}
 
 	public function getcontent( $val )

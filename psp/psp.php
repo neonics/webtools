@@ -15,10 +15,13 @@ class PSPModule extends AbstractModule
 
 	public function setParameters( $xslt )
 	{
-		global $pspNS, $request, $requestURI, $requestPathURI, $slashmode;
+		global $pspNS, $request, $requestURI, $requestPathURI;
 		global $requestBaseURI;
 		global $theme;
-		$xslt->setParameter( $pspNS, "slashmode", $slashmode );
+
+		$xslt->setParameter( $pspNS, "slashmode", $request->slashmode );
+		$xslt->setParameter( $pspNS, "slashpage", $request->slashpage );
+		$xslt->setParameter( $pspNS, "slashpath", $request->slashpath );
 		$xslt->setParameter( $pspNS, "requestURI", $request->requestURI );
 		$xslt->setParameter( $pspNS, "requestPathURI", $request->requestPathURI );
 		$xslt->setParameter( $pspNS, "requestBaseURI", $request->requestBaseURI );
@@ -27,9 +30,9 @@ class PSPModule extends AbstractModule
 		$xslt->setParameter( $pspNS, "requestQuery", $request->requestQuery );
 		$xslt->setParameter( $pspNS, "requestPage", preg_replace( "/\.xml$/", "", $request->requestFile ) );
 		$xslt->setParameter( $pspNS, "theme", $theme );
-		$xslt->setParameter( "", "lang", defined($request->requestLang)?$request->requestLang:'en');
-		$xslt->setParameter( "$pspNS", "lang", defined($request->requestLang)?$request->requestLang:'en');
-#		if ($request->requestLang)
+
+		$xslt->setParameter( "", "lang", $request->requestLang);
+		$xslt->setParameter( $pspNS, "lang", $request->requestLang);
 	}
 
 	public function init()
@@ -71,9 +74,9 @@ EOF;
 
 	public $nomerge = array();
 
-	public function arg( $key )
+	public function arg( $key, $default = null )
 	{
-		return isset( $_REQUEST[ $key ] ) ? $_REQUEST[ $key ] : null;
+		return isset( $_REQUEST[ $key ] ) ? $_REQUEST[ $key ] : $default;
 	}
 
 	public function expr( $data )
@@ -85,6 +88,38 @@ EOF;
 	{
 		return isset( $_REQUEST["action:$data"] );
 	}
+
+	public function slashpath( $data )
+	{
+		global $request;
+		return ( strlen( $data ) < strlen( $request->slashpath )
+				? strpos( $request->slashpath, $data.'/' )
+				: strpos( $request->slashpath, $data )
+		) === 0;
+	}
+
+	public function slasharg( $data, $one=1 )
+	{
+		global $request;
+		$idx = strlen( $data ) < strlen( $request->slashpath )
+				? strpos( $request->slashpath, $data.'/' )
+				: strpos( $request->slashpath, $data );
+		if ( $idx === 0 )
+		{
+			$idx2 = strpos( $request->slashpath, '/', strlen( $data ) + 1 );
+			if ( $idx2 === false || $one == 0 )
+			{
+				return substr( $request->slashpath, strlen( $data )+1 );
+			}
+			else
+			{
+				return substr( $request->slashpath, strlen( $data )+1, $idx2 - strlen( $data) - 1 );
+			}
+		}
+		else
+			return null;
+	}
+
 
 	public function module( $modname )
 	{

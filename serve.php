@@ -62,7 +62,5 @@ if (get_magic_quotes_gpc()) {
 
 	setupPaths( dirname( __FILE__ ) );
 
-	$slashmode;
-
 	RequestHandler::handle( $request );
 ?>

@@ -15,6 +15,11 @@ class Request
 	public $requestFileURI;		# baz.html
 	public $requestQuery;			# ?foo   # '?' included for easy xsl
 
+	# slash url example:   /admin/foo/bar
+	public $slashmode;				# redirect parameter: 1 or null
+	public $slashpath;				# redirect parameter: foo/bar
+	public $slashpage;				# redirect parameter: admin
+
 	public $requestLang;
 
 	public $basedir;
@@ -29,24 +34,43 @@ class Request
 	{
 		global $debug;
 
-		if ( array_key_exists( "REDIRECT_URL", $_SERVER ) )
-		{
-			$this->requestURI = $_SERVER["REDIRECT_URL"];
-			if ( array_key_exists( "REQUEST_QUERY_STRING", $_SERVER) )
-				$this->requestQuery = "?".$_SERVER["REQUEST_QUERY_STRING"];
-		}
-		else
-		{
 		if ( !preg_match( "@^(.*?)(\?.*)?$@", $_SERVER["REQUEST_URI"], $matches ) )
 			die ("Regexp error");
 
-			$this->requestURI = $matches[1];
-			$this->requestQuery = array_key_exists( 2, $matches ) ? $matches[2] :
-				# instead of null
-				"?".$_SERVER["QUERY_STRING"];
+		$this->requestURI = $matches[1];
+	#	$this->requestQuery = array_key_exists( 2, $matches ) ? $matches[2] :
+	#		# instead of null
+	#		"?".$_SERVER["QUERY_STRING"];
+		$this->requestQuery = $_SERVER['QUERY_STRING'];
 
-			#override
+		# check if there was an internal redirect - if so, the target refers to the file
+		# to load.
+		# REDIRECT_URL : the .htaccess target
+		# REDIRECT_QUERY_STRING: the .htaccess target query string + orig q string
+		#
+		# EXAMPLE .htaccess:
+		#
+		#  RewriteRule ^admin/(.*?)$ admin.html?psp:slashmode=1&%{QUERY_STRING} [L]
+		#
+		# need the %{QUERY_STRING} so the original query ends up in REDIRECT_QUERY_STRING.
+		# This also affects the $_SERVER['QUERY_STRING'] which contains the whole query.
+		# $_SERVER['REQUEST_URI'] contains the original URI + query string.
+		$requestOrigURI;
+
+		if ( array_key_exists( "REDIRECT_URL", $_SERVER ) )
+		{
+			$requestOrigURI = $_SERVER["REDIRECT_URL"];
+			#if ( array_key_exists( "REDIRECT_QUERY_STRING", $_SERVER) )
+			#	$this->requestQuery = "?".$_SERVER["REDIRECT_QUERY_STRING"];
 		}
+		else
+		{
+			$requestOrigURI = $this->requestURI;
+		}
+
+
+		debug('', '');
+		debug('request', "REQUEST $this->requestURI\n");
 
 		$debug > 2 and
 		debug('request', "\n\nREQUEST CONSTRUCTED - ".$this->requestURI."\n\n");
@@ -73,7 +97,8 @@ class Request
 			$requestBaseURI = '/';
 
 		$this->requestRelURI =
-			substr( $this->requestURI, strlen( $this->requestBaseURI ) );
+			#substr( $this->requestURI, strlen( $this->requestBaseURI ) );
+			substr( $requestOrigURI, strlen( $this->requestBaseURI ) );
 
 		$this->requestPathURI = stripDoubleSlash(
 			endsWith( $this->requestURI, "/" )
@@ -87,10 +112,16 @@ class Request
 		$this->requestFileURI =
 			substr( $this->requestURI, strlen( $this->requestPathURI ) );
 
-		$this->requestLang = isset( $_REQUEST["l"] ) ? $_REQUEST["l"] : null;
+		$this->requestLang = isset( $_REQUEST["l"] ) ? $_REQUEST["l"] : 'en';
+		$this->slashmode = isset( $_REQUEST["psp:slashmode"] ) ? $_REQUEST["psp:slashmode"] : null;
+		$this->slashpath = isset( $_REQUEST["psp:slashpath"] ) ? $_REQUEST["psp:slashpath"] : null;
+		$this->slashpage = isset( $_REQUEST["psp:slashpage"] ) ? $_REQUEST["psp:slashpage"] : null;
 
 		if ( $debug > 0 )
 		{
+			debug( 'request', "slashmode:         $this->slashmode" );
+			debug( 'request', "slashpage:         $this->slashpage" );
+			debug( 'request', "slashpath:         $this->slashpath" );
 			debug( 'request', "requestURI:        $this->requestURI" );
 			debug( 'request', "requestBaseURI:    $this->requestBaseURI" );
 			debug( 'request', "requestPathURI:    $this->requestPathURI");
@@ -98,6 +129,7 @@ class Request
 			debug( 'request', "requestRelPathURI: $this->requestRelPathURI" );
 			debug( 'request', "requestFileURI:    $this->requestFileURI" );
 			debug( 'request', "requestQuery:      $this->requestQuery" );
+			debug( 'request', "referrer:          ".gad( $_SERVER, "HTTP_REFERER", '-') );
 
 			// no closures...
 			$actions = implode( ' ',
