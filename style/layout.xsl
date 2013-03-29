@@ -6,7 +6,7 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
-	xmlns:psp="http://neonics.com/2011/psp" 
+	xmlns:psp="http://neonics.com/2011/psp"
 	exclude-result-prefixes="l"
 >
 
@@ -116,13 +116,13 @@
 	-->
 
 	<xsl:template match="l:messages[not(@module)]">
-		<xsl:comment>Global messages</xsl:comment> 
+		<xsl:comment>Global messages</xsl:comment>
 		<xsl:apply-templates mode="insert"/>
 	</xsl:template>
 
 	<xsl:template match="l:messages[@module]">
 		<xsl:variable name="m" select="@module"/>
-		<xsl:comment>Module '<xsl:value-of select="@module"/>' messages</xsl:comment> 
+		<xsl:comment>Module '<xsl:value-of select="@module"/>' messages</xsl:comment>
 		<xsl:apply-templates select="l:message[@module=$m]" mode="insert"/>
 	</xsl:template>
 
@@ -216,7 +216,10 @@
 		<xsl:variable name="pre">
 			<xsl:choose>
 				<xsl:when test="contains(@page, '?')">
-					<xsl:value-of select="substring-before(@page, '?')"/> 
+					<xsl:value-of select="substring-before(@page, '?')"/>
+				</xsl:when>
+				<xsl:when test="contains(@page, '#')">
+					<xsl:value-of select="substring-before(@page, '#')"/>
 				</xsl:when>
 				<xsl:otherwise>
 					<xsl:value-of select="@page"/>
@@ -225,9 +228,17 @@
 		</xsl:variable>
 
 		<xsl:variable name="post">
-			<xsl:if test="contains(@page, '?')">
-				<xsl:value-of select="concat('?', substring-after(@page, '?'))"/> 
-			</xsl:if>
+			<xsl:choose>
+				<xsl:when test="contains(@page, '?')">
+					<xsl:value-of select="concat('?l=', $lang, '&amp;', substring-after(@page, '?'))"/>
+				</xsl:when>
+				<xsl:when test="contains(@page, '#')">
+					<xsl:value-of select="concat('?l=', $lang, '#', substring-after(@page, '#'))"/>
+				</xsl:when>
+				<xsl:otherwise>
+					?l=<xsl:value-of select="$lang"/>
+				</xsl:otherwise>
+			</xsl:choose>
 		</xsl:variable>
 
 		<xsl:value-of select="concat($psp:requestBaseURI, $pre, '.html', $post)"/>
@@ -238,7 +249,7 @@
 		<xsl:variable name="pre">
 			<xsl:choose>
 				<xsl:when test="contains($v, '?')">
-					<xsl:value-of select="substring-before($v, '?')"/> 
+					<xsl:value-of select="substring-before($v, '?')"/>
 				</xsl:when>
 				<xsl:otherwise>
 					<xsl:value-of select="$v"/>
@@ -248,7 +259,7 @@
 
 		<xsl:variable name="post">
 			<xsl:if test="contains($v, '?')">
-				<xsl:value-of select="concat('?', substring-after($v, '?'))"/> 
+				<xsl:value-of select="concat('?', substring-after($v, '?'))"/>
 			</xsl:if>
 		</xsl:variable>
 
@@ -470,7 +481,7 @@
     <xsl:choose>
       <xsl:when test="contains($content, '&lt;')">
         <xsl:value-of select="substring-before($content, '&lt;')"/><span class="code_special">&lt;</span>
-        
+
         <xsl:choose>
           <xsl:when test="contains(substring-after($content, '&lt;'), '&gt;')">
             <span class="code_tag"><xsl:value-of select="substring-before(substring-after($content, '&lt;'), '&gt;')"/></span><span class="code_special">&gt;</span>
