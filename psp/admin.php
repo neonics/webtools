@@ -30,11 +30,9 @@ class AdminModule extends AbstractModule
 
 		debug('admin', "slashpath: $request->slashpath");
 		foreach ( $_REQUEST as $k => $v )
-		debug('admin', "REQUEST: $k=$v");
-		debug('admin', "save?: " . isset( $_REQUEST['action:admin:save'] )?'Y':'N' );
+			debug('admin', "REQUEST: $k=$v");
 
 		$pspm = ModuleManager::$modules['psp']['instance'];
-
 
 		if ( $pspm->slashpath( 'site/page' ) )
 		{
@@ -42,9 +40,14 @@ class AdminModule extends AbstractModule
 
 			debug('admin', "slasharg: $path");
 
+			if ( !auth_permission( 'editor' ) )
+			{
+				debug('admin', "No editor permission");
+				return $this->message( 'No edit permissions', 'error' );
+			}
+
 			if ( isset( $_REQUEST['action:admin:save'] ) )
 			{
-
 				psp_module('db');
 				$dbcontentdir = "$db->base/content";
 				debug('admin', "saving page $path to "

@@ -22,7 +22,7 @@ class TemplateModule extends AbstractModule
 
 
 	/***** Public Interface *****/
-	
+
 
 	/**
 	 *
@@ -45,11 +45,17 @@ class TemplateModule extends AbstractModule
 
 		if ( isset( $cmd ) )
 		{
+			if ( !auth_permission( 'editor' ) )
+			{
+				debug('template', "No editor permission");
+				return $this->message( 'No edit permissions', 'error' );
+			}
+
 			$content = psp_arg( "template:content" );
 			$file = psp_arg( "template:file" );
 			$aid = psp_arg( "template:id" );
 
-			$status = $cmd == "publish" ? "published" : 
+			$status = $cmd == "publish" ? "published" :
 				( $cmd=="save-draft"?"draft":"unknown" );
 
 			debug( "Storing template, command=$cmd" );
@@ -103,7 +109,7 @@ class TemplateModule extends AbstractModule
 		}
 
 		$this->message('got edit perms', 'debug');
-		
+
 		#if ( $this->isAction( "edit" ) )
 		{
 			return loadXML( $request->in )->documentElement;//->documentElement;
