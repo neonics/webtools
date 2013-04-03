@@ -91,6 +91,21 @@
 				</auth:success>
 			</auth:permission>
 
+
+			<l:item class="menutitle">
+				<xsl:choose>
+					<!-- TODO FIXME -->
+					<!--
+					<xsl:when test="//l:translation[@name='article:articles']">
+						<xsl:value-of select="//l:translations/l:translation[@name='article:articles' and @xml:lang=$lang]"/>
+					</xsl:when>
+					-->
+					<xsl:when test="@menutitle">
+						<xsl:value-of select="@menutitle"/>
+					</xsl:when>
+					<xsl:otherwise>Articles</xsl:otherwise>
+				</xsl:choose>
+			</l:item>
 			<xsl:apply-templates select="php:function('article_index')" mode="index"/>
 
 		</l:menu>
@@ -221,7 +236,6 @@
 	<!-- index/menu mode -->
 
 	<xsl:template match="article:articles" mode="index">
-		<l:item class="menutitle">Articles</l:item>
 		<xsl:apply-templates select="article:article[not(article:content/@xml:lang) or article:content/@xml:lang=$lang]" mode="index"/>
 	</xsl:template>
 
