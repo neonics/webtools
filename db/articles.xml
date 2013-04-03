@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<a:articles
+	xmlns:a="http://neonics.com/2011/article"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:db="http://neonics.com/2011/db/xml"
+	xmlns="http://www.w3.org/1999/xhtml"
+>
+
+	<db:meta row="article">
+		<db:column name="status" xml="attribute" type="string"/>
+		<db:column name="title" xml="attribute" type="string"/>
+		<db:column name="content" xml="element" type="blob">
+			<db:attribute name="xml:lang"/>
+		</db:column>
+	</db:meta>
+
+  <a:article status="draft" title="PHP Server Pages Introduction" db:id="1">
+		<a:content db:blob="articles/1_content.xml" xml:lang="en"/>
+	</a:article>
+</a:articles>
