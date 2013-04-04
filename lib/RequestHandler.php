@@ -7,6 +7,7 @@ require_once( "Resource.php" );
 
 class Request
 {
+	public $requestBaseURL;		# http://..../WEBROOT/
 	public $requestURI;				# /WEBROOT/bar/baz.html?foo
 	public $requestBaseURI;		# /WEBROOT/
 	public $requestRelURI;		# bar/baz.html
@@ -33,6 +34,7 @@ class Request
 	public function __construct( $requestURIRoots )
 	{
 		global $debug;
+
 
 		if ( !preg_match( "@^(.*?)(\?.*)?$@", $_SERVER["REQUEST_URI"], $matches ) )
 			die ("Regexp error");
@@ -94,7 +96,21 @@ class Request
 			}
 		}
 		if (! isset( $this->requestBaseURI ) )
-			$requestBaseURI = '/';
+			$this->requestBaseURI = '/';
+
+		# reconstruct the Request URL:
+		{
+			$p = (int)$_SERVER['SERVER_PORT'];
+			$port = '';
+			if ( $p == 80 )				$prot = 'http';
+			elseif ( $p == 443 )	$prot = 'https';
+			else { $prot = 'UNKNOWN'; $port = ':'.$p; }
+
+			$url = $prot."://".$_SERVER['SERVER_NAME'].$port;
+
+			$this->requestBaseURL = $url . $this->requestBaseURI;
+			$this->requestURL = $url . $this->requestURI;
+		}
 
 		$this->requestRelURI =
 			#substr( $this->requestURI, strlen( $this->requestBaseURI ) );

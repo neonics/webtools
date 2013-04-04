@@ -22,6 +22,8 @@ class PSPModule extends AbstractModule
 		$xslt->setParameter( $pspNS, "slashmode", $request->slashmode );
 		$xslt->setParameter( $pspNS, "slashpage", $request->slashpage );
 		$xslt->setParameter( $pspNS, "slashpath", $request->slashpath );
+		$xslt->setParameter( $pspNS, "requestURL", $request->requestURL );
+		$xslt->setParameter( $pspNS, "requestBaseURL", $request->requestBaseURL );
 		$xslt->setParameter( $pspNS, "requestURI", $request->requestURI );
 		$xslt->setParameter( $pspNS, "requestPathURI", $request->requestPathURI );
 		$xslt->setParameter( $pspNS, "requestBaseURI", $request->requestBaseURI );
@@ -81,12 +83,37 @@ EOF;
 
 	public function expr( $data )
 	{
+		debug('psp', "EVAL: $data");
+		$ret = eval( "return $data;");
+		debug('psp', "EVAL result: $ret");
+
 		return eval( "return $data;" );
 	}
 
 	public function isaction( $data )
 	{
 		return isset( $_REQUEST["action:$data"] );
+	}
+
+	public function lastmodfile( $name, $type )
+	{
+		debug('psp', "lastmodfile( $name, $type )" );
+		return filemtime( DirectoryResource::findFile( $name, $type ) );
+	}
+
+	public function lastmodfilestr( $name, $type )
+	{
+		debug('psp', "lastmodfilestr( $name, $type )" );
+		$mt = filemtime( DirectoryResource::findFile( $name, $type ) );
+
+		# http://www.w3.org/TR/NOTE-datetime
+		$str = strftime( "%Y-%m-%dT%H:%M:%S", $mt);
+
+		$dtz = new DateTimeZone( date_default_timezone_get() );
+		$tzo = $dtz->getOffset( new DateTime( $str ) );	# lame!
+
+		return $str . ( $tzo==0 ? 'Z' :
+			sprintf("%s%02s:%02s", $tzo>=0?'+':'-', $tzo / 3600, $tzo % 3600 ) );
 	}
 
 	public function slashpath( $data )
