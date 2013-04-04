@@ -3,34 +3,37 @@ ErrorDocument 404 /404.html
 RewriteEngine On
 RewriteBase /
 
-RewriteRule ^$		index.html [R,L]
+RewriteRule ^$			index.html [R,L]
+RewriteRule ^favicon.ico$	favicon.ico
+RewriteRule ^sitemap.xml$	handle.php [L]
 
-RewriteRule ^admin$	admin/	   [R]
-RewriteRule ^admin/(.*?)$ admin.html?psp:slashmode=1&psp:slashpath=$1&psp:slashpage=admin&%{QUERY_STRING} [L]
+RewriteRule ^admin$		admin/	   [R]
+RewriteRule ^admin/(.*?)$	admin.html?psp:slashmode=1&psp:slashpath=$1&psp:slashpage=admin&%{QUERY_STRING} [L]
 
-RewriteRule ^articles/$ articles.html [R]
-RewriteRule ^articles/([^/]+)/?([^/]+)?$  articles.html?article:id=$1&action:article:$2= [L]
+RewriteRule ^articles/$		article.html	[L]
+RewriteRule ^articles/([^/]+)/?([^/]+)?$	article.html?article:id=$1&action:article:$2=&%{QUERY_STRING} [L]
 #RewriteRule ^(articles/[^/]+?)$ $1/ [R]
 #RewriteRule ^articles/([^/]+?)$ articles.html?article:id=$1 [NC,L]
 #RewriteRule ^articles/(([0123456789]*?)/)?([^/]*)/?$ articles.html?article:id=$2&action:article:$3= [NC,L]
 
+RewriteRule ^products/$		products.html?psp:slashmode=1 [L]
+RewriteRule ^products/(.+)$	products.html?psp:slashmode=1&psp:slashpath=$1&products:id=$1&%{QUERY_STRING} [L]
 
 #RewriteCond %{REQUEST_URI} !\.html$
 #RewriteRule ^([^/]+)$    $1/index.html
 
+RewriteRule ^wiki/(.*)$		wiki.html?wiki:title=$1&%{QUERY_STRING} [R]
 
-RewriteRule ^wiki/(.*)$	wiki.html?wiki:title=$1&%{QUERY_STRING} [R]
-
-RewriteRule ^(.*?)\.html handle.php [L]
+RewriteRule ^(.*?)\.html	handle.php [L]
 
 # This is handled internally
-RewriteRule ^lib/	404.html [R=404,L]
-RewriteRule ^psp/	404.html [R=404,L]
-RewriteRule ^style/	404.html [R=404,L]
-RewriteRule ^db/	404.html [R=404,L]
+RewriteRule ^lib/		404.html [R=404,L]
+RewriteRule ^psp/		404.html [R=404,L]
+RewriteRule ^style/		404.html [R=404,L]
+RewriteRule ^db/		404.html [R=404,L]
 
-RewriteRule ^img/	handle.php [L]
-RewriteRule ^js/	handle.php [L]
-RewriteRule ^css/	handle.php [L]
-RewriteRule ^content/	handle.php [L]
-RewriteRule ^ckeditor/	handle.php [L]
+RewriteRule ^img/		handle.php [L]
+RewriteRule ^js/		handle.php [L]
+RewriteRule ^css/		handle.php [L]
+RewriteRule ^content/		handle.php [L]
+RewriteRule ^ckeditor/		handle.php [L]
