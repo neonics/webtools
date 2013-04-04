@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?psp style="sitemap.xsl"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
+	
+>
+	<xi:include href="menu.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+	<!--
+	<url>
+		<loc>http://....</loc>	required, rest optional
+		<lastmod>2013-04-04T00:00:00+00:00</lastmod> w3c
+		<changefreq>always hourly daily weekly monthly yearly never</changefreq>
+		<priority>0.5</priority>-->
+	</url>
+
+</urlset>
