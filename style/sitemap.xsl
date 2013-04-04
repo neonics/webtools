@@ -20,7 +20,10 @@
 
 	<xsl:template match="l:item">
 		<url>
-			<loc><xsl:value-of select="$psp:requestBaseURL"/><xsl:value-of select="@page"/>.html</loc>
+			<loc><xsl:value-of select="$psp:requestBaseURL"/><xsl:choose>
+				<xsl:when test="@page"><xsl:value-of select="@page"/>.html</xsl:when>
+				<xsl:when test="@slashpage"><xsl:value-of select="@slashpage"/></xsl:when>
+			</xsl:choose></loc>
 			<lastmod>
 				<xsl:value-of select="php:function('psp_lastmodfilestr', concat(@page,'.xml'), 'content' )"/>
 			</lastmod>
