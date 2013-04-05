@@ -69,6 +69,7 @@ debug('feed', "INSTANTIATING FEED!\n\n");
 
 		if ( file_exists( $cacheFile )
 			&& time() - filemtime( $cacheFile ) < 24*3600
+			&& !psp_arg( "psp:nocache" )
 		)
 		{
 			if ( $debug ) debug( 'feed', "cache hit for $url" );
