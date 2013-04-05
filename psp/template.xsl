@@ -94,6 +94,59 @@
 		</l:page>
 	</xsl:template>
 
+	<xsl:template match="pst:template[@name='neonics']">
+		<l:page css="neonics">
+			<l:body>
+				<l:header>
+					<l:banner>
+							<img class='logo' src="{$psp:requestBaseURI}img/neonics.png"/><br/>
+							<div>Conscious Computing</div>
+					</l:banner>
+					<!--
+					<l:menu class="mainmenu">
+						<l:item page="index">Home</l:item>
+						<l:item page="install">Install</l:item>
+						<l:item page="db">Database</l:item>
+						<l:item page="auth">Authentication</l:item>
+						<l:item page="issues">Issues</l:item>
+						<l:item page="template">Templates</l:item>
+						<l:item page="wiki">Wiki</l:item>
+						<l:item page="article">Articles</l:item>
+					</l:menu>
+					-->
+				</l:header>
+				<!--
+				<l:box align="left">
+					<xsl:call-template name="auth:menu"/>
+				</l:box>
+				<l:messagebox/>
+
+				<xsl:apply-templates select="pst:menu"/>
+
+				<l:messagebox/>
+
+				<l:box align="left">
+					<l:messagebox type="debug"/>
+				</l:box>
+				-->
+
+				<xsl:choose>
+					<xsl:when test="pst:content">
+					<xsl:apply-templates select="pst:content"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<l:content>
+						</l:content>
+					</xsl:otherwise>
+				</xsl:choose>
+
+				<xsl:apply-templates select="pst:edit"/>
+			</l:body>
+
+			<xsl:apply-templates select="php:function('psp_messages')"/>
+		</l:page>
+	</xsl:template>
+
 	<xsl:template name="auth:menu">
 		<xi:include href="authmenu.xml"/>
 	</xsl:template>
