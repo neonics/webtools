@@ -1,0 +1,42 @@
+html	{ font-family: Arial, sans-serif; }
+.main	{ width: 735px; margin: 2em auto; }
+
+.header {border-bottom: 1px solid #6600ff;}
+.banner {}
+
+.banner div {
+	font-size: 18pt;
+	font-style: italic;
+	text-align: right;
+	margin-top: -3px;
+	position: relative;
+	color: #897;
+}
+
+.copyright {
+	position: fixed;
+	width: 100%;
+	text-align: right;
+	z-index: 1;
+	bottom: 0px;
+	left: 0px;
+	font-size: 8pt;
+	color: #333;
+	font-style: italic;
+}
+
+.copyright span {
+	margin-left: 220px;
+}
+
+p { text-align: justify; }
+
+dt { color: #44a; }
+dd { margin-left: 4em; }
+
+.comm-em {
+	width: 16px; height: 16px;
+	background-image: url(../../img/comm-icons16.png);
+	display: block;
+}
+

@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<?psp style="neonics.xsl"?>
+<?psp module="template"?>
+
+<pst:template name="neonics"
+	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:psp="http://neonics.com/2011/psp"
+	xmlns:pst="http://neonics.com/2011/psp/template"
+	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+>
+	<pst:content>
+		<h2>PSP Summary</h2>
+		<p>
+		This website is built on PSP: PHP Server Pages, an XML Publishing Framework
+		leveraging PHP, XML, XSLT, XHTML, CSS, and SQL. It is specifically designed to
+		be able to be hosted on standard php hosting environments.
+		</p>
+		<p>
+		It's predecessor, XSP (XML Server Pages), which has an implementation in Java
+		aswell as C++, is based on server-side code generation, compilation
+		and execution. This PHP version differs in that no code is generated, thereby
+		separating code from XML transformations. Instead, PHP module functionality is exposed
+		to XSL.
+		</p>
+		<h2>Modules</h2>
+		<dl>
+			<dt>admin</dt>
+			<dd>Website Administration and content management</dd>
+
+			<dt>article</dt>
+			<dd>Write, edit, and publish articles</dd>
+
+			<dt>auth</dt>
+			<dd>Login and authentication module</dd>
+
+			<dt>db</dt>
+			<dd>XML and SQL Database support for seamless dynamic content integration</dd>
+
+			<dt>email</dt>
+			<dd>E-Mail functionality</dd>
+
+			<dt>feed</dt>
+			<dd>Incorporate RSS/Atom feeds</dd>
+
+			<dt>project</dt>
+			<dd>Project documentation and download manager</dd>
+
+			<dt>template</dt>
+			<dd>Custom dynamic templating</dd>
+
+			<dt>wiki</dt>
+			<dd>A What-I-Know-Is module</dd>
+
+			<dt>psp</dt>
+			<dd>Core PSP module for expression evaluation and conditional processing</dd>
+
+			<dt>product</dt>
+			<dd>Webshop with integrated PayPal</dd>
+		</dl>
+
+		<h2>Contact</h2>
+		<p>
+			<a href="mailto:psp@neonics.com"><span class="comm-em"/></a>
+		</p>
+	</pst:content>
+</pst:template>
