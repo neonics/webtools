@@ -49,7 +49,7 @@
 				<table width="100%" border="0" padding="0" cellspacing="0">
 					<tr>
 						<td colspan="3">
-			<xsl:apply-templates select="l:header"/>
+							<xsl:apply-templates select="l:header"/>
 						</td>
 					</tr>
 					<tr>
