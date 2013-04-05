@@ -8,7 +8,8 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
 	xmlns="http://www.w3.org/1999/xhtml"
-	exclude-result-prefixes="l"
+	xmlns:x="http://www.w3.org/1999/xhtml"
+	exclude-result-prefixes="l x"
 >
 
 	<xsl:template match="l:p">

@@ -4,7 +4,7 @@
 <?psp module="template"?>
 
 <pst:template name="neonics"
-	xmlns="http://www.neonics.com/xslt/layout/1.0"
+	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:psp="http://neonics.com/2011/psp"
 	xmlns:pst="http://neonics.com/2011/psp/template"
 	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
@@ -14,7 +14,7 @@
 		<h2>PSP Summary</h2>
 		<p>
 		This website is built on PSP: PHP Server Pages, an XML Publishing Framework
-		leveraging PHP, XML, XSLT, XHTML, CSS, and SQL. It is specifically designed to
+		leveraging PHP, XML, XSLT, Javascript, XHTML, and CSS. It is specifically designed to
 		be able to be hosted on standard php hosting environments.
 		</p>
 		<p>
@@ -24,6 +24,7 @@
 		separating code from XML transformations. Instead, PHP module functionality is exposed
 		to XSL.
 		</p>
+
 		<h2>Modules</h2>
 		<dl>
 			<dt>admin</dt>
@@ -64,5 +65,6 @@
 		<p>
 			<a href="mailto:psp@neonics.com"><span class="comm-em"/></a>
 		</p>
+		<p><l:link page="index">Return to website</l:link></p>
 	</pst:content>
 </pst:template>

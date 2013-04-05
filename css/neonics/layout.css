@@ -31,8 +31,10 @@ html	{ font-family: Arial, sans-serif; }
 
 p { text-align: justify; }
 
-dt { color: #44a; }
-dd { margin-left: 4em; }
+dt { float: left; width: 10%; color: #44a;}
+dd { display: block-inline; width: 80%; margin: .01em 0 .01em 10%; }
+
+h2 { display: block; }
 
 .comm-em {
 	width: 16px; height: 16px;
