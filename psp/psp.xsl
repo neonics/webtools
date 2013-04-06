@@ -13,6 +13,7 @@
 	xmlns:xsp="http://neonics.com/2001/xsp"
 	xmlns:php="http://php.net/xsl" 
 	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
 >
 <!-- exclude-result-prefixes="psp" -->
 
@@ -194,6 +195,15 @@
 				<xsl:value-of select="php:function('psp_xsl_uri', string(@href))"/>
 			</xsl:attribute>
 		</xsl:element>
+	</xsl:template>
+
+	<xsl:template match="xi:include">
+		<xsl:copy>
+			<xsl:attribute name="href">
+				<xsl:value-of select="php:function('psp_xml_uri', string(@href), 'content')"/>
+			</xsl:attribute>
+			<xsl:apply-templates select="@*[not(name(.)='href')]"/>
+		</xsl:copy>
 	</xsl:template>
 
 	<xsl:template match="psp:messages">

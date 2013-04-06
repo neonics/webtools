@@ -205,6 +205,11 @@ EOF;
 		return file_to_uri( $pspBaseDir ) . '/' . $href;
 	}
 
+	public function xml_uri( $href, $type )
+	{
+		return DirectoryResource::findFile( $href, $type );
+	}
+
 	public function accessLogs()
 	{
 		$al = DirectoryResource::findFile( "access.xml" );

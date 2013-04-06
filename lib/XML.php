@@ -11,6 +11,7 @@ require_once( "Debug.php");
 		$debug and debug( 'xml', "load $debugType $in" );
 		$doc = new DOMDocument();
 		$doc->load( $in );
+		$doc = ModuleManager::processDoc( $doc );	# ADDED
 		$doc->xinclude();
 
 		return $doc;
