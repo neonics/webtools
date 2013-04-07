@@ -33,6 +33,7 @@
      		<title><xsl:value-of select="title"/></title>
      		<link rel="stylesheet" type="text/css" href="{$psp:requestBaseURI}css/{$themecss}layout.css"/>
      		<link rel="stylesheet" type="text/css" href="{$psp:requestBaseURI}css/{$themecss}style.css"/>
+				<link rel="icon" href="{$psp:requestBaseURI}img/favicon.ico" type="image/x-icon"/>
 				<script type="text/javascript" src="{$psp:requestBaseURI}js/script.js"/>
 				<script type="text/javascript" src="{$psp:requestBaseURI}js/dragdrop.js"/>
 			</head>
@@ -180,12 +181,12 @@
 					</xsl:for-each>
 				</form>
 				<a href="javascript:document.getElementById( '{$id}' ).submit();">
-					<xsl:apply-templates/>
+					<xsl:apply-templates select="@class|@style|@title|node()"/>
 				</a>
 			</xsl:when>
 
 			<!-- for now equal treatment - it's an XOR -->
-			<xsl:when test="@slashpage|@slashpath">
+			<xsl:when test="@slashpage">
 				<xsl:variable name="page">
 					<xsl:call-template name="link-slashpage"/>
 				</xsl:variable>
@@ -193,6 +194,17 @@
 					<xsl:apply-templates/>
 				</a>
 			</xsl:when>
+
+			<!-- relative to current slashpage -->
+			<xsl:when test="@slashpath">
+				<xsl:variable name="page">
+					<xsl:call-template name="link-slashpath"/>
+				</xsl:variable>
+				<a href="{$page}">
+					<xsl:apply-templates/>
+				</a>
+			</xsl:when>
+
 
 			<xsl:when test="@page">
 				<xsl:variable name="page">
@@ -245,7 +257,34 @@
 	</xsl:template>
 
 	<xsl:template name="link-slashpage">
-		<xsl:variable name="v"><xsl:value-of select="@slashpage"/><xsl:value-of select="@slashpath"/></xsl:variable>
+		<xsl:variable name="v"><xsl:value-of select="@slashpage"/></xsl:variable>
+		<xsl:variable name="pre">
+			<xsl:choose>
+				<xsl:when test="contains($v, '?')">
+					<xsl:value-of select="substring-before($v, '?')"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="$v"/>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+
+		<xsl:variable name="post">
+			<xsl:if test="contains($v, '?')">
+				<xsl:value-of select="concat('?', substring-after($v, '?'))"/>
+			</xsl:if>
+		</xsl:variable>
+
+		<!-- unsure what psp:slaspage is here...
+		xsl:value-of select="concat($psp:requestBaseURI, $psp:slashpage, '/', $pre, $post)"/>
+		-->
+		<xsl:value-of select="concat($psp:requestBaseURI, $pre, '/', $post)"/>
+	</xsl:template>
+
+
+
+	<xsl:template name="link-slashpath">
+		<xsl:variable name="v"><xsl:value-of select="@slashpath"/></xsl:variable>
 		<xsl:variable name="pre">
 			<xsl:choose>
 				<xsl:when test="contains($v, '?')">
@@ -265,7 +304,6 @@
 
 		<xsl:value-of select="concat($psp:requestBaseURI, $psp:slashpage, '/', $pre, $post)"/>
 	</xsl:template>
-
 
 
 	<xsl:template match="l:edit">

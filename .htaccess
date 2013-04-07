@@ -4,7 +4,7 @@ RewriteEngine On
 RewriteBase /
 
 RewriteRule ^$			index.html [R,L]
-RewriteRule ^favicon.ico$	favicon.ico
+RewriteRule ^favicon.ico$	img/favicon.ico [L]
 RewriteRule ^sitemap.xml$	handle.php [L]
 
 RewriteRule ^admin$		admin/	   [R]
