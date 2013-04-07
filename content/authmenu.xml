@@ -14,10 +14,10 @@
 
 			<auth:permission role="editor">
 				<item action="template:edit">Edit Page</item>
+				<item slashpage="admin/site">Edit Site</item>
 			</auth:permission>
 
-			<item action="auth:logout"><label xml:lang="en">Logout</label>
-			</item>
+			<item action="auth:logout"><label xml:lang="en">Logout</label></item>
 		</menu>
 	</auth:success>
 	<auth:fail>

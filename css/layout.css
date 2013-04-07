@@ -200,3 +200,36 @@ li.menuitem {
 	color: inherit;
 }
 
+
+
+/* admin */
+.admin a { color: blue;}
+.admin a:hover { text-decoration: underline; }
+.admin div.admin-menu {}
+.admin div.admin-content { clear: both; padding-top: 1em;}
+
+.admin ul.menu {
+	list-style-type: none;
+	list-style-position: inside;
+	margin: 0 2em 0 0;
+	padding: .2em;
+}
+.admin ul.authmenu { float: left; }
+.admin ul.vmenu {
+	background-color: #eee;
+}
+.admin li.menuitem {
+	padding-left: 0;
+}
+
+.admin ul.admin-site { float: left; background-color: #eee;}
+.admin ul.admin-site li { display: inline; border: 1px solid blue; padding: .1em; }
+
+.admin li.menutitle { padding-left: 1em; font-weight: bold;}
+
+.admin ul.toolbar { list-style-type: none; padding:0;}
+.admin ul.toolbar li { display: inline; border: 1px solid black;padding: .1em; background-color: #eee;}
+
+table.dir tr.path { font-family: monospace; font-size: 8pt;}
+table.dir tr.base-core { background-color: #eef;}
+table.dir tr.base-request { background-color:#efe;}

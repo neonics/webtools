@@ -1,6 +1,7 @@
+function $(id) { return document.getElementById( id ); }
+
 function xmlRequest( url )
 {
-
 	if ( window.ActiveXObject )
 	{
 		//xhttp=new ActiveXObject("Microsoft.XMLHTTP");
@@ -14,7 +15,7 @@ function xmlRequest( url )
 		var xdoc = new ActiveXObject("MSXML2.DOMDocument");
 		xdoc.async=false;
 		xdoc.load( url );
-		return xdoc;
+		return validate( xdoc, url );
 	}
 	else if ( window.XMLHttpRequest )
 	{
@@ -23,10 +24,20 @@ function xmlRequest( url )
 		xhttp=new XMLHttpRequest();
 		xhttp.open("GET", url, false);
 		xhttp.send("");
-		return xhttp.responseXML;
+		return validateXML( xhttp.responseXML, url );
 	}
 	else alert("Incompatible browser");
+}
 
+function validateXML(xml, src = null)
+{
+//	<parsererror xmlns="http://www.mozilla.org/newlayout/xml/parsererror.xml"
+	if ( xml.documentElement.localName == 'parsererror' )
+		alert("xml: " + (src==null?"":"(source: " + src + ")\n") + 
+			serialize( xml.documentElement )
+		);
+
+	return xml;
 }
 
 
@@ -63,6 +74,8 @@ function transform( xml, xsl )
 {
 	try
 	{
+		if ( typeof(xml) == 'undefined') throw new Exception("transform: xml null");
+		if ( typeof(xsl) == 'undefined') throw new Exception("transform: xsl null");
 
 		// code for Mozilla, Firefox, Opera, etc.
 		//if ( document.implementation && document.implementation.createDocument )

@@ -275,9 +275,6 @@
 			</xsl:if>
 		</xsl:variable>
 
-		<!-- unsure what psp:slaspage is here...
-		xsl:value-of select="concat($psp:requestBaseURI, $psp:slashpage, '/', $pre, $post)"/>
-		-->
 		<xsl:value-of select="concat($psp:requestBaseURI, $pre, '/', $post)"/>
 	</xsl:template>
 

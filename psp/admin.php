@@ -34,10 +34,15 @@ class AdminModule extends AbstractModule
 
 		$pspm = ModuleManager::$modules['psp']['instance'];
 
-		if ( $pspm->slashpath( 'site/page' ) )
-		{
-			$path = $pspm->slasharg( 'site/page', 0 );
+		$path = null;
 
+		if ( $pspm->slashpath( 'site/page' ) )
+			$path = $pspm->slasharg( 'site/page', 0 );
+		elseif ( $pspm->slashpath( 'site/menu' ) )
+			$path = 'menu';
+
+		if ( $path )
+		{
 			debug('admin', "slasharg: $path");
 
 			if ( !auth_permission( 'editor' ) )
@@ -59,6 +64,39 @@ class AdminModule extends AbstractModule
 				file_put_contents( "$dbcontentdir/".safeFile( "$path.xml" ),
 					$_REQUEST['admin:content'] );
 
+			}
+		}
+		else
+		{
+			if ( isset( $_REQUEST['action:admin:delete'] ) )
+			{
+				if ( !auth_permission( 'editor' ) )
+				{
+					debug('admin', "No editor permission");
+					return $this->message( 'No edit permissions', 'error' );
+				}
+
+				if ( isset( $_REQUEST['admin:dbfile'] ) )
+				{
+					$dbf = $_REQUEST['admin:dbfile'];
+					$dbf2= "$db->base/".stripDoubleSlash(preg_replace("@\.\.@","",$dbf));
+					if ( file_exists ( $dbf2 ) )
+					{
+						if ( file_exists( $dbf2.".deleted" ) )
+							unlink ($dbf2.".deleted" );
+						rename( $dbf2, $dbf2.".deleted" );
+					}
+					else
+					{
+						debug('admin', "admin:delete: file not found: " . $dbf2 . " (arg: $dbf)");
+						return $this->message( 'File not found', 'error' );
+					}
+				}
+				else
+				{
+					debug('admin', "admin:delete: no valid argument");
+					return $this->message( 'Invalid argument', 'error' );
+				}
 			}
 		}
 
@@ -123,7 +161,7 @@ class AdminModule extends AbstractModule
 
 	// public functions are exported to XSLT, and are expected to return
 	// a DOM Node Set.
-	public function site_overview()
+	public function site_menu()
 	{
 		$f = DirectoryResource::findFile( "menu.xml", "content" );
 		$d = loadXML( $f );
@@ -131,13 +169,22 @@ class AdminModule extends AbstractModule
 		return $d->documentElement;
 	}
 
-	public function site_pages()
+	public function site_pages( $bd = null )
 	{
 		#$layoutNS = "http://www.neonics.com/xslt/layout/1.0";
 		$d = new DOMDocument();
 		$l = $d->createElement( "list" );
 
-		$this->_dirtree( $l, "content" );
+		if ( $bd != null )
+		{debug('psp', "site_pages got arg: [$bd]");
+			$bd = stripDoubleSlash( "/". preg_replace( "@\.\.@", "", $bd ) );
+			}
+		else
+			$bd = "";
+
+			debug('psp', "dirring tree: content/[$bd]");
+
+		$this->_dirtree( $l, "content".$bd );
 
 		$d->appendChild( $l );
 
@@ -145,8 +192,15 @@ class AdminModule extends AbstractModule
 		return $l;
 	}
 
+	// for now this function assumes that the path root is content
 	private function _dirtree( $d, $path )
 	{
+		global $requestBaseDir, $pspBaseDir;
+
+		$relpath = substr( $path, strlen("content"));
+		if ( strpos( $relpath, '/' ) === 0 )
+			$relpath = substr( $relpath, 1 );
+
 		$list = scandir( $path );
 
 		foreach ( $list as $f )
@@ -165,6 +219,50 @@ class AdminModule extends AbstractModule
 			{
 				$i = $d->ownerDocument->createElement( 'file' );
 				$i->setAttribute( "name", preg_replace( "@\.xml$@", "", $f ) );
+				$i->setAttribute( "path", $relpath.'/'.preg_replace( "@\.xml$@", "", $f ) );
+				$i->setAttribute( "name-ext", $f );
+
+				foreach ( DirectoryResource::findFiles( $path . '/' . $f ) as $f )
+				{
+					$l = $i->appendChild( $d->ownerDocument->createElement( 'alt' ) );
+					$l->setAttribute('fullpath', $f );
+
+					// strip. +1 to cut starting /
+					$b;
+					// sometimes psp is installed under requestbasedir, so check that first.
+					if ( strpos( $f, $pspBaseDir ) === 0 )
+					{
+						$f = substr( $f, strlen( $pspBaseDir ) + 1 );
+						$b = 'core';
+						$l->setAttribute('baserelpath', $f );
+					}
+					elseif ( strpos( $f, $requestBaseDir ) === 0 )
+					{
+						$f = substr( $f, strlen( $requestBaseDir ) + 1 );
+						$b = 'request';
+						$l->setAttribute('baserelpath', $f );
+					}
+
+					else
+					{
+						debug('psp', "warn: file not in psp or request root: $f");
+						$b = 'outside';
+					}
+					$w = null;
+					if ( strpos( $f, "db/" ) === 0 )
+					{
+						$f = substr( $f, 3 );
+						$w = 'db';
+					}
+					$t = substr( $f, 0, strpos( $f, '/' ) );
+
+					$l->setAttribute( 'name', $f );
+					$l->setAttribute( 'base', $b );
+					$l->setAttribute( 'type', $t );
+					$w != null and
+					$l->setAttribute( 'where', $w );
+
+				}
 			}
 			else
 			{

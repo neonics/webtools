@@ -130,10 +130,13 @@ EOF;
 		global $request;
 		$idx = strlen( $data ) < strlen( $request->slashpath )
 				? strpos( $request->slashpath, $data.'/' )
+				: strlen( $data ) == strlen( $request->slashpath)
+				? false
 				: strpos( $request->slashpath, $data );
 		if ( $idx === 0 )
 		{
-			$idx2 = strpos( $request->slashpath, '/', strlen( $data ) + 1 );
+			$idx2 =
+				strpos( $request->slashpath, '/', strlen( $data ) + 1 );
 			if ( $idx2 === false || $one == 0 )
 			{
 				return substr( $request->slashpath, strlen( $data )+1 );
@@ -145,6 +148,15 @@ EOF;
 		}
 		else
 			return null;
+	}
+
+
+	public function variable( $name, $val = null )
+	{
+		static $varhash = array();
+		debug('psp', "variable( $name, $val )" );
+		if ( defined( $val ) ) $varhash[ $name ] = $val;
+		return isset( $varhash[ $name ] ) ? $varhash[ $name ] : false;
 	}
 
 

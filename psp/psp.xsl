@@ -121,24 +121,7 @@
 	-->
 	<xsl:template match="psp:if">
 		<xsl:variable name="cond">
-			<xsl:choose>
-				<xsl:when test="psp:expr">
-					<xsl:apply-templates select="psp:expr"/>
-				</xsl:when>
-				<xsl:when test="@action">
-					<xsl:value-of select="php:function('psp_isaction', string(@action))"/>
-				</xsl:when>
-				<xsl:when test="@expr">
-					<xsl:value-of select="php:function('psp_expr', string(@expr))"/>
-				</xsl:when>
-				<xsl:when test="@arg">
-					<xsl:value-of select="php:function('psp_arg', string(@arg)) != ''"/>
-				</xsl:when>
-				<xsl:when test="@slashpath">
-					<xsl:value-of select="php:function('psp_slashpath', string(@slashpath)) != ''"/>
-				</xsl:when>
-				<xsl:otherwise>false</xsl:otherwise>
-			</xsl:choose>
+			<xsl:call-template name="eval-expr"/>
 		</xsl:variable>
 
 		<!-- check psp:if format: -->
@@ -167,6 +150,64 @@
 	<xsl:template match="psp:then | psp:else">
 		<xsl:apply-templates/>
 	</xsl:template>
+
+	<xsl:template match="psp:switch">
+		<xsl:comment>
+			<xsl:value-of select="php:function('psp_variable', concat('switch-',generate-id()), 'false')"/>
+		</xsl:comment>
+		<xsl:apply-templates/>
+	</xsl:template>
+
+	<xsl:template match="psp:switch/psp:case">
+		<xsl:variable name="cond">
+			<xsl:call-template name="eval-expr"/>
+		</xsl:variable>
+		<xsl:if test="$cond = 'true' and php:function('psp_variable', concat('switch-',generate-id(..)))= 'false'">
+			<xsl:comment>
+				<xsl:value-of select="php:function('psp_variable', concat('switch-',generate-id(..)), 'true')"/>
+			</xsl:comment>
+			<xsl:apply-templates/>
+		</xsl:if>
+	</xsl:template>
+
+	<xsl:template match="psp:switch/psp:default">
+		<xsl:if test="php:function('psp_variable', concat('switch-',generate-id(..)))='false'">
+			<xsl:comment>
+				<xsl:value-of select="php:function('psp_variable', concat('switch-',generate-id(..)), 'true')"/>
+			</xsl:comment>
+			<xsl:apply-templates/>
+		</xsl:if>
+	</xsl:template>
+
+<!--
+	<xsl:template match="psp:variable">
+		<xsl:comment>
+		<xsl:value-of select="php:function('psp_variable', concat('-',string(@name)), string(@value))"/>
+		</xsl:comment>
+	</xsl:template>
+	-->
+
+	<xsl:template name="eval-expr">
+		<xsl:choose>
+			<xsl:when test="psp:expr">
+				<xsl:apply-templates select="psp:expr"/>
+			</xsl:when>
+			<xsl:when test="@action">
+				<xsl:value-of select="php:function('psp_isaction', string(@action))"/>
+			</xsl:when>
+			<xsl:when test="@expr">
+				<xsl:value-of select="php:function('psp_expr', string(@expr))"/>
+			</xsl:when>
+			<xsl:when test="@arg">
+				<xsl:value-of select="php:function('psp_arg', string(@arg)) != ''"/>
+			</xsl:when>
+			<xsl:when test="@slashpath">
+				<xsl:value-of select="php:function('psp_slashpath', string(@slashpath)) != ''"/>
+			</xsl:when>
+			<xsl:otherwise>false</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
 
 <!--
 	<xsl:template match="processing-instruction('xml-stylesheet')">

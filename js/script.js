@@ -66,6 +66,13 @@ function show3(name, ap)
 	s.display='block';
 }
 
+function toggle3( name )
+{
+	var s = document.getElementById(name).style;
+	if ( s.display == 'none' ) s.display = 'block';
+	else if ( s.display == 'block' || s.display == '' ) s.display = 'none';
+}
+
 
 function gup( name )
 {

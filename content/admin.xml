@@ -12,39 +12,49 @@
 	xmlns:admin="http://neonics.com/2013/psp/admin"
 	xmlns:xi="http://www.w3.org/2001/XInclude"
 >
-	<psp:content>
-		<xi:include href="authmenu.xml"/>
+	<psp:content class="admin">
 
+		<div class="admin-menu">
 
-		<auth:permission role="editor">
-			<auth:success>
-				<menu>
-					<item slashpath="site">Edit Site</item>
+			<xi:include href="authmenu.xml"/>
+			<psp:if slashpath="site">
+				<menu class="admin-site">
+					<item slashpath="site/pages">Edit Pages</item>
+					<item slashpath="site/menu">Edit Menu</item>
 				</menu>
+			</psp:if>
+		</div>
 
+		<div class="admin-content">
+
+			<auth:permission role="editor">
 				<psp:if slashpath="site">
-					<div class="admin-site">
-						<p>Site overview</p>
-						<menu>
-							<item slashpath="site/menu">Edit Menu</item>
-							<admin:site-pages/>
-						</menu>
 
-						<psp:if slashpath="site/menu">
-							<admin:site-overview/>
-						</psp:if>
+					<admin:site>	<!-- makes sure JS/CSS is inited -->
 
-						<psp:if slashpath="site/page">
-							<p> PAGE: <psp:expr slasharg="site/page"/></p>
-							<admin:site-page-edit><psp:attribute name="page"><psp:expr slasharg="site/page" one="0"/></psp:attribute>
-							</admin:site-page-edit>
-						</psp:if>
+						<psp:switch>
+							<psp:case slashpath="site/menu">
+								<admin:site-menu/>
+							</psp:case>
+							<psp:case slashpath="site/pages">
+								<admin:site-pages advanced="1"><psp:attribute name="dir"><psp:expr slasharg="site/pages" one="0"/></psp:attribute>
+								</admin:site-pages>
+							</psp:case>
+							<psp:case slashpath="site/page">
+								<p> PAGE: <psp:expr slasharg="site/page"/></p>
+								<admin:site-page-edit><psp:attribute name="page"><psp:expr slasharg="site/page" one="0"/></psp:attribute>
+								</admin:site-page-edit>
+							</psp:case>
 
-					</div>
+							<psp:default>
+								SWITCH: default
+							</psp:default>
+						</psp:switch>
+
+					</admin:site>
 				</psp:if>
+			</auth:permission>
 
-			</auth:success>
-		</auth:permission>
-
+		</div>
 	</psp:content>
 </psp:page>
