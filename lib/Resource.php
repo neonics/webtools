@@ -144,6 +144,9 @@
 			$pspContentDir, $pspLogicDir, $pspStyleDir,
 			$contentDir, $logicDir, $styleDir;
 
+		$requestBaseDir = str_replace( '\\', '/', $requestBaseDir );
+		$baseDir = str_replace( '\\', '/', $baseDir );
+
 		$pspContentDir = gd( $pspContentDir, 'content' );
 		$pspLogicDir = gd( $pspLogicDir, 'logic' );
 		$pspStyleDir = gd( $pspStyleDir, 'style' );
