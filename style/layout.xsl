@@ -411,11 +411,51 @@
 				</xsl:if>
 			</xsl:if>
 
-			<form method="POST" action="{@action}">
+			<script type="text/javascript" src="{$psp:requestBaseURI}js/crypto/sha1.js"/>
+			<script type="text/javascript">
+				<xsl:text disable-output-escaping="yes">
+				function login_submit(form)
+				{
+					try
+					{
+						var s = "";
+						for ( v in CryptoJS) s += typeof(v) + " " + v + ", ";
+
+						var l = form.getElementsByTagName( "input" );
+						var challenge, password;
+
+						for ( var i = 0; i &lt; l.length; i ++)
+						{
+							if ( l.item(i).name == 'auth:challenge' )
+								challenge = l.item(i);
+							else if ( l.item(i).name == 'password' )
+								password = l.item(i);
+
+						}
+
+						if ( challenge &amp;&amp; password )
+						{
+								password.value = CryptoJS.SHA1( challenge.value + CryptoJS.SHA1( password.value ) );
+								return true;
+						}
+						else
+						{
+							alert("No password.");
+						}
+
+					} catch ( e ) {alert("bug: " + e );}
+
+					return false;
+				}
+				</xsl:text>
+			</script>
+			<form method="POST" action="{@action}" onsubmit="return login_submit(this);" name="login">
 				<xsl:apply-templates select="l:field"/>
 				<table class="login">
 					<tr>
-						<th colspan="2">Login</th>
+						<th colspan="2">
+							<span title="Secure challenge-response mechanism using SHA1: the password will not be transmitted over the network"> Secure Login </span>
+						</th>
 					</tr>
 					<tr>
 						<td><label for="user{$id}">Username</label></td>

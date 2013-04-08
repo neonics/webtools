@@ -2,6 +2,10 @@
 /**
  * author: Kenney Westerhof <kenney@neonics.com>
  */
+class SecurityException extends Exception
+{
+	public function __construct( $msg ) { parent::__construct( $msg ); }
+}
 
 class AuthModule extends AbstractModule
 {
@@ -81,6 +85,11 @@ class AuthModule extends AbstractModule
 		return "$m:" . ($m != 'plain' ? hash( $m, $s ) : $s );
 	}
 
+	public function challenge()
+	{
+		return $this->setSessionChallenge( hash( 'sha1', mt_rand() ) );
+	}
+
 	public function numusers()
 	{
 		global $db;
@@ -107,35 +116,121 @@ class AuthModule extends AbstractModule
 	{
 		global $db;
 
-		foreach ( Array( 'md5', 'plain' ) as $m )
+		$user;
+
+		try
 		{
-			$user = $db->query( 'auth', 
-			// XXX Sanitize	
-				sprintf( '/auth:auth/auth:user[@username="%s" and @password="%s"]',
-					$_REQUEST["username"],
-					$this->hash( $_REQUEST["password"], $m )
-				)
+			$username = gad( $_REQUEST, 'username', null );
+
+			if ( !isset( $username ) )
+				throw new SecurityException( "missing username" );
+
+			if ( strpbrk( $username, "&[]'\"<>/\\" ) )
+				throw new SecurityException( "username contains invalid characters: " . $username );
+
+			$user = $db->query( 'auth',
+				'/auth:auth/auth:user[@username="' . $username . '"]'
 			);
+			$user = isset( $user ) && $user->length > 0 ? $user->item(0) : null;
 
-			if ( isset( $user ) && $user->length > 0 )
-				break;
+			if ( !isset( $user ) )
+				throw new SecurityException( 'login attempt for unknown username: '.$username );
+
+
+			# sanity check complete: the authentication is for an existing user.
+
+			# determine authentication method:
+			if ( isset( $_REQUEST["auth:challenge"] ) )
+			{
+				if ( $this->getSessionChallenge() != $_REQUEST["auth:challenge"] )
+					throw new SecurityException( 'challenge mismatch' );
+
+				# split the password field into hash-id and value
+				$passhash;
+				{
+					$p = $user->getAttribute('password');
+
+					if ( ( $sep = strpos( $p, ':' ) ) === false )
+						throw new SecurityException( "password field corruption for user " . $username . ": no hash separator" );
+
+					$hashtype = substr( $p, 0, $sep );
+					$p = substr( $p, $sep +1 );
+
+					if ( $hashtype != 'sha1' )
+						if ( $hashtype == 'plain' )
+							$p = hash( 'sha1', $p );
+						else
+						{
+							throw new SecurityException( "password not sha1 for user " . $username .
+								"; login prohibited." );
+						}
+
+					$passhash = $p;
+				}
+
+				$h = hash( 'sha1', $_REQUEST['auth:challenge'] . $passhash );
+
+				debug('auth', "calculated: $h");
+				if ( $h == $_REQUEST["password"] )
+				{
+					debug('auth', "security info: authenticated user ". $user->getAttribute("username")
+						. " from " . $_SERVER["REMOTE_ADDR"] );
+				}
+				else
+				{
+					debug('auth', "security info: invalid credentials for user ". $user->getAttribute("username")
+						. " from " . $_SERVER["REMOTE_ADDR"] );
+					$user = null;
+				}
+			}
+			else
+			{
+				# legacy
+				$myuser = $user;
+				$user = null;
+
+				foreach ( Array( 'sha1', 'md5', 'plain' ) as $m )
+				{
+					if ( $user->getAttribute('password') == $this->hash( $_REQUEST["password"], $m ) )
+					{
+						$user = $myuser;
+						break;
+					}
+				}
+			}
+
+
+			if ( isset( $user ) )
+			{
+				$this->setSessionUser( $user );
+			}
+			else
+			{
+				// XXX persistent logging (security log)
+				debug( 'auth', 'invalid credentials' );
+				$this->errorMessage( "Invalid credentials" );
+				$_REQUEST['action:auth:show-login']='';
+			}
+
 		}
-				// XXX : return single value if query is of that type...
-				// XXX that requires metadata, unique values etc....
-
-				$user = isset( $user ) ? $user->item( 0 ) : null;
-
-		if ( isset( $user ) ) 
+		catch ( SecurityException $e )
 		{
-			$this->setSessionUser( $user );
-		}
-		else
-		{
-			// XXX persistent logging (security log)
-			debug( 'auth', 'invalid credentials' );
+			debug( 'auth', "security warning: " . $e->getMessage()
+				. ' from ' . $_SERVER['REMOTE_ADDR'] );
 			$this->errorMessage( "Invalid credentials" );
-			$_REQUEST['action:auth:show-login']='';
 		}
+	}
+
+	private function setSessionChallenge( $v )
+	{
+		global $request;
+		return $_SESSION["realm[$request->requestBaseURI]:auth.challenge"] = $v;
+	}
+
+	private function getSessionChallenge()
+	{
+		global $request;
+		return gad( $_SESSION, "realm[$request->requestBaseURI]:auth.challenge", null );
 	}
 
 	private function setSessionUser( $user )
@@ -160,7 +255,7 @@ class AuthModule extends AbstractModule
 		global $db;
 		// TODO: Sanitize, roles as list
 
-		return $this->permission( 'admin' ) ? $this->authTable : 
+		return $this->permission( 'admin' ) ? $this->authTable :
 			$this->errorMessage( 'No permission to list users' )
 		;
 	//		$db->xpath( 'auth', "''" );

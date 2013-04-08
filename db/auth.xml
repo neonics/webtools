@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <auth xmlns="http://neonics.com/2000/xsp/auth"
  xmlns:db="http://neonics.com/2011/db/xml">
-  <user username="admin" password="plain:adminpass" roles="admin,editor,author" db:id="1"/>
+  <user username="admin" password="sha1:74913f5cd5f61ec0bcfdb775414c2fb3d161b620" roles="admin,editor,author" db:id="1"/>
 </auth>

@@ -144,6 +144,8 @@ Produces:
 		<l:login userfield="username" passfield="password">
 			<xsl:apply-templates select="@*"/>
 			<l:field type="hidden" name="action:auth:login"/>
+			<l:field type="hidden" name="auth:challenge"
+				value="{php:function('auth_challenge')}"/>
 		</l:login>
 	</xsl:template>
 
