@@ -1,3 +1,5 @@
+/** @author Kenney Westerhof <kenney@neonics.com> */
+
 function $(id) { return document.getElementById( id ); }
 
 function xmlRequest( url )
@@ -15,7 +17,7 @@ function xmlRequest( url )
 		var xdoc = new ActiveXObject("MSXML2.DOMDocument");
 		xdoc.async=false;
 		xdoc.load( url );
-		return validate( xdoc, url );
+		return validateXML( xdoc, url );
 	}
 	else if ( window.XMLHttpRequest )
 	{
@@ -29,7 +31,7 @@ function xmlRequest( url )
 	else alert("Incompatible browser");
 }
 
-function validateXML(xml, src = null)
+function validateXML(xml, src)
 {
 //	<parsererror xmlns="http://www.mozilla.org/newlayout/xml/parsererror.xml"
 	if ( xml != null && xml.documentElement.localName == 'parsererror' )
@@ -70,7 +72,7 @@ function parse( xml )
 }
 
 
-function transform( xml, xsl )
+function transform( xml, xsl, params )
 {
 	try
 	{
@@ -84,14 +86,26 @@ function transform( xml, xsl )
 			// if there's some weird error uncomment this, mozilla may 
 			// enter some xml error code
 			xsltProcessor = new XSLTProcessor();
+
+			// Code for chrome: xsl:import/xsl:include don't work
+			// see https://code.google.com/p/chromium/issues/detail?id=8441
+			// (no solution there though)
+			if (window.chrome)
+				xsl = xslResolveIncludes( xsl );
+
 			xsltProcessor.importStylesheet( xsl );
-			//return xsltProcessor.transformToFragment( xml, document );
+
+			if ( params != null )
+				for ( var p in params )
+					xsltProcessor.setParameter( null, p, params[p] );
+
 			return xsltProcessor.transformToDocument( xml, document );
 		}
 
 		// code for IE
 		if ( typeof(xml.transformNode) != "undefined" )
 		{
+			// no params..
 			var ret = xml.transformNode( xsl );
 			// result is a string, so return doc
 			return parse( ret );
@@ -110,6 +124,9 @@ function transform( xml, xsl )
 
 			var xslproc = xslt.createProcessor();
 			xslproc.input = xmldoc;
+			if ( params != null )
+				for ( var p in params )
+					xsltProcessor.setParameter( null, p, params[p] );
 			xslproc.transform();
 			return parse( xslproc.output );
 		}
@@ -118,8 +135,77 @@ function transform( xml, xsl )
 	}
 	catch ( e )
 	{
-		alert("transform(): Error: " + e + "\n" + e.stack );
+		alert("transform(): Error: " + e
+			+ "\nXML: " + xml+"\nXSL: " + xsl+"\n" + e.stack
+			+ "\n\n" + serialize( xml ) 
+			+ "\n\n" + serialize( xsl ) );
 	}
+}
+
+
+// Chrome hack
+// remove xsl:import/xsl:include tags, fetch them, and
+// insert them into the original xsl.
+function xslResolveImportsORIG( xsl )
+{
+	var toinclude = [];
+	// find any imports
+	var xslns = "http://www.w3.org/1999/XSL/Transform";
+	var imports = xsl.getElementsByTagNameNS( xslns, "import" ); // NodeList
+	var includes = xsl.getElementsByTagNameNS( xslns, "include" ); // NodeList
+
+	if ( imports.length > 0 || includes.length > 0 )
+	{
+		// remove the nodes in reverse, otherwise the nodelist will become invalid
+		for ( var i = imports.length -1; i >= 0; i-- )
+		{
+			toinclude.push(
+				xslResolveImports( 
+					imports.item(i).parentNode.removeChild( imports.item(i) )
+				)
+			);
+			// 
+		}
+
+		for ( var i = includes.length -1; i >= 0; i-- )
+		{
+			//alert("remove include node " + includes.item(i));
+
+			var d = xmlRequest( xsl.documentURI + "/../"
+						+ includes.item(i).parentNode.removeChild( includes.item(i) )
+						.getAttribute('href')
+					);
+
+			var rec = xslResolveImports( d );
+			for ( var r in rec )
+				xslResolveImports( r );
+			toinclude.push( d );
+		}
+
+		alert("ok: " + toinclude);//serialize( xsl ));
+	}
+	return toinclude;
+}
+
+// Chrome hack
+// remove xsl:import/xsl:include tags, fetch them, and
+// insert them into the original xsl.
+function xslResolveIncludes( xsl )
+{
+	var xslns = "http://www.w3.org/1999/XSL/Transform";
+	var includes = xsl.getElementsByTagNameNS( xslns, "include" ); // NodeList
+
+	for ( var i = includes.length -1; i >= 0; i-- )
+	{
+		var n = includes.item(i);
+
+		var d = xmlRequest(
+			xsl.documentURI + "/../" + n.getAttribute('href')
+		);
+
+		replaceNode( n, d.documentElement.childNodes );
+	}
+	return xsl;
 }
 
 function getElementById( xml, id )
@@ -135,3 +221,29 @@ function getElementById( xml, id )
 		.iterateNext();
 }
 
+function replaceNode( orig, replacement )
+{
+	var tmp;
+	//if (typeof replacement == "
+	if ( replacement instanceof NodeList)
+	{
+		var frag = document.createDocumentFragment();
+		for ( var i = 0; i < replacement.length; i ++ )
+			frag.appendChild( document.importNode( replacement.item(i), true ) );
+		replacement = frag;
+	}
+	orig.parentNode.replaceChild( tmp=document.importNode( replacement, true ), orig );
+	return tmp;
+}
+
+function appendNode( par, child )
+{
+	var tmp;
+	par.appendChild( tmp=document.importNode( par, true ), par );
+	return tmp;
+
+}
+
+function insertAfter(referenceNode, newNode) {
+    return referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
