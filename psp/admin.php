@@ -27,6 +27,7 @@ class AdminModule extends AbstractModule
 	function init()
 	{
 		global $db, $request, $_REQUEST; // XXX ref
+		global $requestBaseDir, $contentDir, $pspContentDir;
 
 		debug('admin', "slashpath: $request->slashpath");
 		foreach ( $_REQUEST as $k => $v )
@@ -41,9 +42,24 @@ class AdminModule extends AbstractModule
 		elseif ( $pspm->slashpath( 'site/menu' ) )
 			$path = 'menu';
 
+		debug('admin', "slasharg: $path");
+
 		if ( $path )
 		{
-			debug('admin', "slasharg: $path");
+			$path = safePath( $path );
+			if ( ( $idx = strrpos( $path, '/' ) ) !== false )
+			{
+				$file = safeFile( substr( $path, $idx + 1 ) );
+				$path = substr( $path, 0, $idx + 1 );
+			}
+			else
+			{
+				$file = $path;
+				$path = "";
+			}
+
+			debug('admin', "path[ $path ] file[ $file ]");
+
 
 			if ( !auth_permission( 'editor' ) )
 			{
@@ -55,13 +71,32 @@ class AdminModule extends AbstractModule
 			{
 				psp_module('db');
 				$dbcontentdir = "$db->base/content";
-				debug('admin', "saving page $path to "
-					. "dbcontentdir=$dbcontentdir, file=".safeFile( "$path.xml" )
+				debug('admin', "saving page '$path' / '$file' to "
+					. "dbcontentdir=$dbcontentdir, file=$file.xml"
 					. " complete path: "
-					. "$dbcontentdir/".safeFile( "$path.xml" )
+					. "$dbcontentdir/$path$file.xml"
 				);
 
-				file_put_contents( "$dbcontentdir/".safeFile( "$path.xml" ),
+				if ( !is_dir( $dbcontentdir.'/'.$path ) )
+				{
+					$p = $requestBaseDir . '/'.gd( $contentDir, $pspContentDir ).'/'.$path;
+					debug ('admin', "check path: ". $p );
+
+					// check if the path exists in the normal content dir
+					if ( is_dir( $p ) )
+					{
+						debug('admin', "notice: creating directory: $dbcontentdir/$path" );
+						mkdir( $dbcontentdir.'/'.$path, 0755, true );
+					}
+					else
+					{
+						debug('admin', "denied attempt to create db path: $dbcontentdir/$path");
+						return $this->message('Cannot create non-original db path: '.$path);
+
+					}
+				}
+
+				file_put_contents( $dbcontentdir.'/'.$path.$file.'.xml',
 					$_REQUEST['admin:content'] );
 
 			}

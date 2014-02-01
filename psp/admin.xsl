@@ -61,15 +61,20 @@
 
 				menuel.appendChild( transform( menudoc, xsl_editmenu ).documentElement );
 
-				function savemenu()
+				function updateInputElements( el )
 				{
 					// update dom value attribute with js value property
-					var inputs = menuel.getElementsByTagName( 'input' );
+					var inputs = el.getElementsByTagName( 'input' );
 					for ( var i = 0; i &lt; inputs.length; i ++ )
 					{
 						var v = inputs.item( i );
 						v.setAttribute( 'value', v.value );
 					}
+				}
+
+				function savemenu()
+				{
+					updateInputElements( menuel );
 
 					var doc = transform( menuel.childNodes[0], xsl_editmenu );
 
@@ -268,6 +273,17 @@
 -->
 
 	<xsl:template match="admin:site-page-edit">
+		<xsl:call-template name="inject-editor">
+			<xsl:with-param name="file">content/<xsl:value-of select="@page"/>.xml</xsl:with-param>
+			<xsl:with-param name="xsl">js/edit/page.xsl</xsl:with-param>
+		</xsl:call-template>
+	</xsl:template>
+
+	<xsl:template name="inject-editor">
+		<xsl:param name="file"/>
+		<xsl:param name="xsl"/>
+
+
 		<style type="text/css">
 			#preview { border: 1px dashed red; }
 
@@ -322,16 +338,88 @@
 
 
 		<script type="text/javascript">
-			var pageurl = requestBaseURI + "content/<xsl:value-of select="@page"/>.xml";
-			<xsl:text disable-output-escaping="yes">
+			var pageurl = requestBaseURI + "<xsl:value-of select="$file"/>";
+			//"content/<xsl:value-of select="@page"/>.xml";
 
 			var doc;
 			var editel;	// element in doc that is edited
+
+			<xsl:text disable-output-escaping="yes">
+			// determine which element of doc to edit
+			function geteditel( l )
+			{
+				var ce = doc.getElementsByTagName(//NS("http://neonics.com/2011/psp/template",
+							'pst:content'
+						).item(0);
+
+				if ( ce != null )
+				{
+					if ( ce.getElementsByTagName( 'slides' ) )
+					{
+						var slides = ce.getElementsByTagName( 'slide' ) 
+						var si="";
+						for ( var i = 0; i &lt; slides.length; i++)
+						{
+							if ( slides.item(i).getAttribute('xml:lang' ) == l )
+							{
+								ce=slides.item(i);
+								show2('edit_langsel');
+								break;
+							}
+						}
+					}
+				}
+				else
+				{
+					// try product
+					var contents = doc.getElementsByTagName( 'p:content' );
+					if ( contents != null )
+					{
+						for ( var i = 0; i &lt; contents.length; i++ )
+						{
+							if ( contents.item(i).getAttribute('xml:lang') == l )
+							{
+								ce = contents.item(i);
+								show2('edit_langsel');
+								break;
+							}
+						}
+					}
+				}
+
+				if ( ce == null ) ce = doc.documentElement;
+				// no effect:
+				//else {
+				//	ce.namespaceURI = "http://www.w3.org/1999/xhtml";
+				//	ce.setAttribute( "xmlns", "http://www.w3.org/1999/xhtml" );
+				//}
+				
+
+				return ce;
+			}
+			</xsl:text>
+
+			<xsl:if test="$xsl">
+			var edit_xsl;
+			</xsl:if>
 			
-			function geteditdoc(l) {
+			function geteditdoc( l )
+			{
 				if ( l == null ) l = 'en';
 
 				doc = xmlRequest( pageurl  + "?cachebreaker=" + Math.random() );
+
+				<xsl:if test="$xsl">
+				edit_xsl =  xmlRequest( requestBaseURI + "<xsl:value-of select="$xsl"/>" );
+
+				//menuel.appendChild( transform( menudoc, xsl_editmenu ).documentElement );
+				if ( edit_xsl == null ) alert('warning: failed to load xsl');
+				else
+				doc = transform( doc, edit_xsl );
+				</xsl:if>
+
+			<xsl:text disable-output-escaping="yes">
+
 				if ( doc == null ) alert( "Failed to load document '" + pageurl + "'" );
 				else
 				{
@@ -348,55 +436,13 @@
 					//if ( document.all ) e.innerHTML = serialize(doc);//doc.innerText;
 					//else { oc = document.createRange(); oc.selectNodeContents( doc.firstChild ); e.innerHTML = oc.toString(); }
 
-
-					// determine which element of doc to edit
-
-					var ce = doc.getElementsByTagName(//NS("http://neonics.com/2011/psp/template",
-								'pst:content'
-							).item(0);
-
-					if ( ce != null )
-					{
-						if ( ce.getElementsByTagName( 'slides' ) )
-						{
-							var slides = ce.getElementsByTagName( 'slide' ) 
-							var si="";
-							for ( var i = 0; i &lt; slides.length; i++)
-							{
-								if ( slides.item(i).getAttribute('xml:lang' ) == l )
-								{
-									ce=slides.item(i);
-									show2('edit_langsel');
-									break;
-								}
-							}
-						}
-					}
-					else
-					{
-						// try product
-						var contents = doc.getElementsByTagName( 'p:content' );
-						if ( contents != null )
-							for ( var i = 0; i &lt; contents.length; i++ )
-							{
-								if ( contents.item(i).getAttribute('xml:lang') == l )
-								{
-									ce = contents.item(i);
-									show2('edit_langsel');
-									break;
-								}
-						}
-					}
-
-					// ce may be null
-
-					editel=ce;
+					editel = geteditel( l );
 
 					//e.innerHTML = serialize( ce );
 					//no innerhtml as it screws with script tags getting nested
 
 					e.innerHTML = null; 
-					e.appendChild( ce.cloneNode(true) );
+					e.appendChild( editel.cloneNode(true) );
 
 					// enable editor
 					e.contentEditable = true;
@@ -404,6 +450,7 @@
 				}
 			}
 
+			</xsl:text>
 
 			function savepage()
 			{
@@ -414,6 +461,10 @@
 
 //				alert("Submitting: \n"+serialize(doc));
 
+				<xsl:if test="$xsl">
+				doc = transform( doc, edit_xsl );
+				</xsl:if>
+
 				document.getElementById( 'data' ).value = serialize( doc );
 
 				document.getElementById( 'uploadForm' ).submit();
@@ -422,9 +473,20 @@
 
 			geteditdoc('en');
 
-			</xsl:text>
 		</script>
 		<!--a href="javascript:geteditdoc()">Start Editing</a-->
+	</xsl:template>
+
+
+	<xsl:template match="admin:site-template-edit">
+		<div>
+			Template editor
+		</div>
+
+		<xsl:call-template name="inject-editor">
+			<xsl:with-param name="file">psp/template.xsl</xsl:with-param>
+			<xsl:with-param name="xsl">js/edit/template.xsl</xsl:with-param>
+		</xsl:call-template>
 	</xsl:template>
 
 

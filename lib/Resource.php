@@ -132,7 +132,7 @@
 			}
 			else
 				$debug > 2 and
-				debug( 'resource', "[$this->label] x not found: $fn" );
+				debug( 'resource', "[$this->label] x not found: $fn [relfile:$relFile]" );
 			return null;
 		}
 	}
@@ -175,8 +175,17 @@
 		$dbdir = DirectoryResource::findFile( "db" );
 		if ( isset( $dbdir ) )
 		{
+		debug('!!!', "add db dir $dbdir - $contentDir - $pspContentDir");
 			$dr = new DirectoryResource( $dbdir, 'db' );
 			$dr->addResourceRelPath( 'content', gd( $contentDir, $pspContentDir ) );
+		}
+
+		$adir = $requestBaseDir;# . "/psp";#DirectoryResource::findFile( "psp" );
+		if ( isset( $adir ) )
+		{
+		debug('!!!', "add psp dir $adir - $logicDir - $pspLogicDir");
+			$dr = new DirectoryResource( $adir, 'psp' );
+			$dr->addResourceRelPath( 'psp', 'psp' );#gd( $logicDir, $pspLogicDir ) );
 		}
 	}
 

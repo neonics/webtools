@@ -50,6 +50,11 @@
 		return $f==null?null:str_replace( "\\", '_', str_replace( "/", '_', $f ) );
 	}
 
+	function safePath( $f )
+	{
+		return $f==null?null:str_replace("..","", str_replace("\\","_", $f ));
+	}
+
 	function endsWith( $haystack, $needle )
 	{
 		return substr( $haystack, strlen( $haystack ) - strlen( $needle ) )

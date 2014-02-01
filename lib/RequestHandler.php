@@ -485,6 +485,35 @@ class DynamicRequestHandler extends RequestHandler
 						exit;
 					}
 				}
+				else
+				{
+					# HACK FIXME special handler for psp/*.xsl
+					# see Resource.php setupPaths - adds a 'psp' resource handler.
+					# (only allows from $requestBaseDir)
+
+					# take the requestDir as the type
+					$idx = strpos( $requestDir, '/' );
+					if ( $idx !== false )
+					{
+						$t = substr( $requestDir, 0, $idx );
+						$requestDir = substr( $requestDir, $idx + 1);
+
+						if ( $t == 'psp' )
+						{
+
+							$requestFile = pathinfo( $request->requestRelURI, PATHINFO_FILENAME ).'.xsl';
+
+							$in = DirectoryResource::findFile( $requestDir.$requestFile, $t );
+							debug ('request', "\n\nFALLBACK TYPE: find($requestDir $requestFile, $t) FILE: $in\n\n");
+							if ( is_file( $in ) )
+							{
+								RequestHandler::sendFile( $in );
+								exit;
+							}
+						}
+
+					}
+				}
 
 				RequestHandler::notFound( $request );
 				exit;

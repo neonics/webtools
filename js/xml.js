@@ -32,7 +32,7 @@ function xmlRequest( url )
 function validateXML(xml, src = null)
 {
 //	<parsererror xmlns="http://www.mozilla.org/newlayout/xml/parsererror.xml"
-	if ( xml.documentElement.localName == 'parsererror' )
+	if ( xml != null && xml.documentElement.localName == 'parsererror' )
 		alert("xml: " + (src==null?"":"(source: " + src + ")\n") + 
 			serialize( xml.documentElement )
 		);

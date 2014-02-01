@@ -19,8 +19,9 @@
 			<xi:include href="authmenu.xml"/>
 			<psp:if slashpath="site">
 				<menu class="admin-site">
-					<item slashpath="site/pages">Edit Pages</item>
 					<item slashpath="site/menu">Edit Menu</item>
+					<item slashpath="site/pages">Edit Pages</item>
+					<item slashpath="site/template">Edit Template</item>
 				</menu>
 			</psp:if>
 		</div>
@@ -46,8 +47,14 @@
 								</admin:site-page-edit>
 							</psp:case>
 
+							<psp:case slashpath="site/template">
+								<p>TEMPLATE: <psp:expr slasharg="site/template"/></p>
+								<admin:site-template-edit/>
+							</psp:case>
+
 							<psp:default>
-								SWITCH: default
+								Site Content Management. Choose the aspect to edit
+								in the horizontal menu above.
 							</psp:default>
 						</psp:switch>
 

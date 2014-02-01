@@ -3,7 +3,7 @@
 use lib '.';
 use DB;
 
-tie %db, 'DB', 'db/webauth.db';
+tie %db, 'DB', $ARGV[0] || 'db/webauth.db';
 
 $db{test}{foo}={bar=>{baz=>'lala'}};
 
