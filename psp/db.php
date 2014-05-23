@@ -160,11 +160,15 @@ class XMLDB {
 
 
 		# loop and make sure every row has an ID
-		$rowname = $this->xpath[ $table ]->query( "//db:meta/@row" )->item(0)->nodeValue;
-		foreach ( $this->xpath[ $table ]->query("//$table:$rowname") as $c )
+		$tmp = $this->xpath[ $table ]->query( "//db:meta/@row" );
+		if ( isset( $tmp ) && $tmp->item(0) )
 		{
-			if ( ! $c->hasAttributeNS( $this->ns, 'id' ) )
-				$c->setAttributeNS( $this->ns, 'db:id', $this->newId( $table ) );
+			$rowname = $tmp->item(0)->nodeValue;
+			foreach ( $this->xpath[ $table ]->query("//$table:$rowname") as $c )
+			{
+				if ( ! $c->hasAttributeNS( $this->ns, 'id' ) )
+					$c->setAttributeNS( $this->ns, 'db:id', $this->newId( $table ) );
+			}
 		}
 
 		$this->store_blobs( $table );
