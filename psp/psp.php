@@ -39,7 +39,8 @@ class PSPModule extends AbstractModule
 
 	public function init()
 	{
-		session_start();
+		if ( session_status() === PHP_SESSION_NONE )
+			session_start();
 
 		$fn = "errorHandler";
 
@@ -220,6 +221,13 @@ EOF;
 	public function xml_uri( $href, $type )
 	{
 		return DirectoryResource::findFile( $href, $type );
+	}
+
+	public function xml_include( $href, $type )
+	{
+		$doc = new DOMDocument();
+		$doc->load( DirectoryResource::findFile( $href, $type ) );
+		return $doc->documentElement;
 	}
 
 	public function accessLogs()
