@@ -80,7 +80,7 @@ class AuthModule extends AbstractModule
 		return $user;
 	}
 
-	private function hash( $s, $m = 'md5' )
+	private function hash( $s, $m = 'sha1' )
 	{
 		return "$m:" . ($m != 'plain' ? hash( $m, $s ) : $s );
 	}
@@ -264,7 +264,7 @@ class AuthModule extends AbstractModule
 	public function user()
 	{
 		global $request;
-		return isset( $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] );
+		return !empty( $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] );
 	}
 
 	public function username()
@@ -281,7 +281,7 @@ class AuthModule extends AbstractModule
 
 		return $user
 			? $user->getAttribute( 'roles' )
-			: "";
+			: "(no user)";
 	}
 
 	public function permission( $role )
