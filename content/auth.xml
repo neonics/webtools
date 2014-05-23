@@ -11,11 +11,14 @@
 	xmlns:xi="http://www.w3.org/2001/XInclude"
 >
 	<psp:content>
-		<xi:include href="authmenu.xml"/>
 		Number of users: <auth:numusers/>
 		<auth:firstrun>
 			<auth:success>
-				This is the first run - initializing administrator user
+				<l:section>
+					<l:message type="danger">
+						This is the first run - initializing administrator user
+					</l:message>
+				</l:section>
 				<l:form method="post">
 					<l:label>Username</l:label>
 					<l:input type="text" name="username" value="admin"/><l:br/>
@@ -26,6 +29,7 @@
 
 			</auth:success>
 			<auth:fail>
+				<xi:include href="authmenu.xml"/>
 				<auth:listUsers/>
 
 				<auth:user>

@@ -21,8 +21,8 @@
 		</menu>
 	</auth:success>
 	<auth:fail>
-		<auth:login/>
 		<!--
+		<auth:login/> // no double login form! content usually also protected with login form.
 			<item action="auth:show-login">Login..</item>
 			-->
 	</auth:fail>
