@@ -173,6 +173,12 @@ abstract class RequestHandler
 	{
 		ob_start();
 
+		global $psp_custom_handlers;
+		foreach ( $psp_custom_handlers as $name => $class )
+		{
+			# be sure to set up an __autoload function!
+			self::add( $name, new $class() );
+		}
 		self::add( 'log', new LogRequestHandler() );
 		self::add( 'redirect', new RedirectRequestHandler( $redir ) );
 		self::add( 'static', new StaticRequestHandler( $staticContent ) );
