@@ -24,24 +24,30 @@ class AuthModule extends AbstractModule
 
 	public function init()
 	{
-		global $db, $request; // XXX ref
+		global $xmldb, $request; // XXX ref
 
 		psp_module( 'db' );
-		$this->authTable = $db->table( "auth", $this->ns );
+		$this->authTable = $xmldb->table( "auth", $this->ns );
 
 		if ( $this->isAction( 'logout' ) )
 		{
 			unset( $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] );
+			foreach ( $_SESSION as $k=>$v )
+				unset( $_SESSION[$k] );
+
+			header( 'HTTP/1.1 302 Logout Redirect' );
+			header( 'Location: ' . $request->requestBaseURI );
+			exit();
 		}
 
 
 		if ( $this->isAction( 'firstuser' ) )
 		{
-			$db->begin( 'auth' );
+			$xmldb->begin( 'auth' );
 
 			if ( ! $this->firstrun() )
 			{
-				$db->rollback( 'auth' );
+				$xmldb->rollback( 'auth' );
 				return $this->errorMessage( 'Administrator account already created' );
 			}
 			else
@@ -50,7 +56,7 @@ class AuthModule extends AbstractModule
 				$user = $this->newUser(
 					$_REQUEST['username'], $_REQUEST['password'], 'admin' );
 
-				$db->put( $this->name, $user );
+				$xmldb->put( $this->name, $user );
 
 				#echo str_replace( '<', '&lt;', $this->authTable->saveXML() );
 				#echo "Numusers: ". $this->numusers();
@@ -58,7 +64,7 @@ class AuthModule extends AbstractModule
 				$this->setSessionUser( $user );
 			}
 
-			$db->commit( 'auth' );
+			$xmldb->commit( 'auth' );
 		}
 
 		if ( $this->isAction( 'login' ) )
@@ -92,8 +98,8 @@ class AuthModule extends AbstractModule
 
 	public function numusers()
 	{
-		global $db;
-		return $db->query( 'auth', "count(/auth:auth/auth:user)" );
+		global $xmldb;
+		return $xmldb->query( 'auth', "count(/auth:auth/auth:user)" );
 	}
 
 	public function firstrun()
@@ -114,7 +120,7 @@ class AuthModule extends AbstractModule
 
 	private function handleLogin()
 	{
-		global $db;
+		global $xmldb;
 
 		$user;
 
@@ -128,7 +134,7 @@ class AuthModule extends AbstractModule
 			if ( strpbrk( $username, "&[]'\"<>/\\" ) )
 				throw new SecurityException( "username contains invalid characters: " . $username );
 
-			$user = $db->query( 'auth',
+			$user = $xmldb->query( 'auth',
 				'/auth:auth/auth:user[@username="' . $username . '"]'
 			);
 			$user = isset( $user ) && $user->length > 0 ? $user->item(0) : null;
@@ -235,30 +241,30 @@ class AuthModule extends AbstractModule
 
 	private function setSessionUser( $user )
 	{
-		global $db, $request;
+		global $xmldb, $request;
 
-#echo "Setting session user id: " . $user->getAttributeNS( $db->ns, 'id' );
-		$_SESSION["realm[$request->requestBaseURI]:auth.user.id"] = $user->getAttributeNS( $db->ns, 'id' );
+#echo "Setting session user id: " . $user->getAttributeNS( $xmldb->ns, 'id' );
+		$_SESSION["realm[$request->requestBaseURI]:auth.user.id"] = $user->getAttributeNS( $xmldb->ns, 'id' );
 	}
 
 	private function getSessionUser()
 	{
-		global $db, $request;
+		global $xmldb, $request;
 
-		$u= $this->user() ? $db->get( 'auth', $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] ) : null;
+		$u= $this->user() ? $xmldb->get( 'auth', $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] ) : null;
 
 		return $u;
 	}
 
 	public function listUsers()
 	{
-		global $db;
+		global $xmldb;
 		// TODO: Sanitize, roles as list
 
 		return $this->permission( 'admin' ) ? $this->authTable :
 			$this->errorMessage( 'No permission to list users' )
 		;
-	//		$db->xpath( 'auth', "''" );
+	//		$xmldb->xpath( 'auth', "''" );
 	}
 
 	public function user()

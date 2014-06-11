@@ -29,7 +29,7 @@ class TemplateModule extends AbstractModule
 	 */
 	function init()
 	{
-		global $db, $request; // XXX ref
+		global $xmldb, $request; // XXX ref
 
 		if ( isset( $_REQUEST["template:id"] ) && $_REQUEST["template:id"] != "" )
 			$this->templateId = $_REQUEST["template:id"];
@@ -69,31 +69,31 @@ class TemplateModule extends AbstractModule
 			// TODO: separate to specific content module - provides DBResource
 
 			psp_module( "db" );
-			$db->table( "templates", $this->ns );
+			$xmldb->table( "templates", $this->ns );
 
-			$templateDir = "$db->base/content";
+			$templateDir = "$xmldb->base/content";
 			if ( ! is_dir( $templateDir ) )
 				mkdir( $templateDir ) or die("Cannot create template dir $templateDir");
 
 			file_put_contents( "$templateDir/".safeFile( $file ), $content );
 /*
-			$old = $db->get( "templates", $aid );
+			$old = $xmldb->get( "templates", $aid );
 			if ( isset( $old ) )
 			{
 				debug( "Replacing" );
 
-				$db->set( $old, "@file", $file );
-				$db->set( $old, "@status", $status );
-				$db->set( $old, "content", $content );
+				$xmldb->set( $old, "@file", $file );
+				$xmldb->set( $old, "@status", $status );
+				$xmldb->set( $old, "content", $content );
 			}
 			else
 			{
 				debug( "Appending" );
-				$db->put( "templates", $this->newTemplate( $file, $content ) );
+				$xmldb->put( "templates", $this->newTemplate( $file, $content ) );
 			}
 
 			debug( "STORING" );
-			$db->store( "templates" );
+			$xmldb->store( "templates" );
 */
 		}
 	}
@@ -121,8 +121,6 @@ class TemplateModule extends AbstractModule
 
 	private function newTemplate( $file = "", $content = "" )
 	{
-		global $db;
-
 		$title = htmlspecialchars( $file );
 
 		$template = <<<EOF
@@ -155,8 +153,8 @@ EOF;
 	 */
 	public function index()
 	{
-		global $db;
-		return $db->table( "templates" )->documentElement;
+		global $xmldb;
+		return $xmldb->table( "templates" )->documentElement;
 	}
 
 	/**
@@ -164,9 +162,9 @@ EOF;
 	 */
 	public function get( $aid, $newIfNotFound = true )
 	{
-		global $db;
+		global $xmldb;
 
-		$ret= $db->get( "templates", $aid );
+		$ret= $xmldb->get( "templates", $aid );
 
 		return isset( $ret ) ? $ret : ( $newIfNotFound ? $this->newTemplate() : null );
 	}

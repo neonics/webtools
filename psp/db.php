@@ -515,11 +515,11 @@ FOO
 	}
 }
 
-$db;
+$xmldb;
 
 function db_init()
 {
-	global $db, $dbNS, $pspBaseDir;
+	global $xmldb, $dbNS, $pspBaseDir;
 
 	$dbDir = DirectoryResource::findFile( "db" );
 
@@ -528,7 +528,7 @@ function db_init()
 		die("XML Database not found.");
 	}
 	debug( 'db',  "Initializing DB $dbDir" ); #fancy: ../localname()
-	$db = new XMLDB( $dbDir, $dbNS );
+	$xmldb = new XMLDB( $dbDir, $dbNS );
 }
 
 ?>

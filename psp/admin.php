@@ -26,7 +26,7 @@ class AdminModule extends AbstractModule
 	 */
 	function init()
 	{
-		global $db, $request, $_REQUEST; // XXX ref
+		global $xmldb, $request, $_REQUEST; // XXX ref
 		global $requestBaseDir, $contentDir, $pspContentDir;
 
 		debug('admin', "slashpath: $request->slashpath");
@@ -70,7 +70,7 @@ class AdminModule extends AbstractModule
 			if ( isset( $_REQUEST['action:admin:save'] ) )
 			{
 				psp_module('db');
-				$dbcontentdir = "$db->base/content";
+				$dbcontentdir = "$xmldb->base/content";
 				debug('admin', "saving page '$path' / '$file' to "
 					. "dbcontentdir=$dbcontentdir, file=$file.xml"
 					. " complete path: "
@@ -114,7 +114,7 @@ class AdminModule extends AbstractModule
 				if ( isset( $_REQUEST['admin:dbfile'] ) )
 				{
 					$dbf = $_REQUEST['admin:dbfile'];
-					$dbf2= "$db->base/".stripDoubleSlash(preg_replace("@\.\.@","",$dbf));
+					$dbf2= "$xmldb->base/".stripDoubleSlash(preg_replace("@\.\.@","",$dbf));
 					if ( file_exists ( $dbf2 ) )
 					{
 						if ( file_exists( $dbf2.".deleted" ) )
@@ -163,32 +163,32 @@ class AdminModule extends AbstractModule
 			// TODO: separate to specific content module - provides DBResource
 
 			psp_module( "db" );
-			$db->table( "templates", $this->ns );
+			$xmldb->table( "templates", $this->ns );
 
-			$templateDir = "$db->base/content";
+			$templateDir = "$xmldb->base/content";
 			if ( ! is_dir( $templateDir ) )
 				mkdir( $templateDir ) or die("Cannot create template dir $templateDir");
 
 			file_put_contents( "$templateDir/".safeFile( $file ), $content );
 */
 /*
-			$old = $db->get( "templates", $aid );
+			$old = $xmldb->get( "templates", $aid );
 			if ( isset( $old ) )
 			{
 				debug( "Replacing" );
 
-				$db->set( $old, "@file", $file );
-				$db->set( $old, "@status", $status );
-				$db->set( $old, "content", $content );
+				$xmldb->set( $old, "@file", $file );
+				$xmldb->set( $old, "@status", $status );
+				$xmldb->set( $old, "content", $content );
 			}
 			else
 			{
 				debug( "Appending" );
-				$db->put( "templates", $this->newTemplate( $file, $content ) );
+				$xmldb->put( "templates", $this->newTemplate( $file, $content ) );
 			}
 
 			debug( "STORING" );
-			$db->store( "templates" );
+			$xmldb->store( "templates" );
 */
 //		}
 	}
@@ -338,7 +338,7 @@ class AdminModule extends AbstractModule
 /*
 	private function newTemplate( $file = "", $content = "" )
 	{
-		global $db;
+		global $xmldb;
 
 		$title = htmlspecialchars( $file );
 
@@ -362,8 +362,8 @@ EOF;
 /*
 	public function index()
 	{
-		global $db;
-		return $db->table( "templates" )->documentElement;
+		global $xmldb;
+		return $xmldb->table( "templates" )->documentElement;
 	}
 */
 
@@ -373,9 +373,9 @@ EOF;
 /*
 	public function get( $aid, $newIfNotFound = true )
 	{
-		global $db;
+		global $xmldb;
 
-		$ret= $db->get( "templates", $aid );
+		$ret= $xmldb->get( "templates", $aid );
 
 		return isset( $ret ) ? $ret : ( $newIfNotFound ? $this->newTemplate() : null );
 	}

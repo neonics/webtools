@@ -30,7 +30,7 @@ class EMailModule extends AbstractModule
 	 */
 	function init()
 	{
-		global $db, $request, $debug; // XXX ref
+		global $request, $debug; // XXX ref
 
 		$this->status = 'form';
 

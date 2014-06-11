@@ -30,10 +30,10 @@ class ArticleModule extends AbstractModule
 	function init()
 	{
 		global $debug, $request;
-		global $db; // XXX ref
+		global $xmldb; // XXX ref
 
 		psp_module( "db" );
-		$db->table( "articles", $this->ns );
+		$xmldb->table( "articles", $this->ns );
 
 #		foreach ($_REQUEST as $k=>$v) { echo "REQUEST $k => $v<br>"; }
 
@@ -67,18 +67,18 @@ class ArticleModule extends AbstractModule
 				debug('article', "Content: $content" );
 			}
 
-			$old = $db->get( "articles", $aid );
+			$old = $xmldb->get( "articles", $aid );
 
 			if ( !isset( $old ) )
 			{
-				$old = $db->newrow( 'articles' );
+				$old = $xmldb->newrow( 'articles' );
 			}
 
 
 			{
-				$db->set( $old, "@title", $title );
-				$db->set( $old, "@status", $status );
-				$db->set( $old, "content/@xml:lang", $request->requestLang );
+				$xmldb->set( $old, "@title", $title );
+				$xmldb->set( $old, "@status", $status );
+				$xmldb->set( $old, "content/@xml:lang", $request->requestLang );
 
 				$str = str_replace( "\r","", trim( $content ) );
 
@@ -98,14 +98,14 @@ class ArticleModule extends AbstractModule
 				$dd = new DOMDocument();
 				$dd->loadXML( $str );
 
-				$db->set( $old, "content", $dd->documentElement->childNodes );
+				$xmldb->set( $old, "content", $dd->documentElement->childNodes );
 			}
 			#else
 			#{
-		#		$db->put( "articles", $this->newArticle( $title, $content ) );
+		#		$xmldb->put( "articles", $this->newArticle( $title, $content ) );
 	#		}
 
-			$db->store( "articles" );
+			$xmldb->store( "articles" );
 		}
 	}
 
@@ -114,7 +114,7 @@ class ArticleModule extends AbstractModule
 	private function newArticle( $title = "", $content = "" )
 	{
 		/*
-		global $db, $request;
+		global $xmldb, $request;
 
 		$title = htmlspecialchars( $title );
 		$ns = $this->ns;
@@ -153,8 +153,8 @@ EOF;
 	 */
 	public function index()
 	{
-		global $db;
-		return $db->table( "articles" )->documentElement;
+		global $xmldb;
+		return $xmldb->table( "articles" )->documentElement;
 	}
 
 	/**
@@ -162,12 +162,12 @@ EOF;
 	 */
 	public function get( $aid = null, $newIfNotFound = true )
 	{
-		global $db;
+		global $xmldb;
 
-		$ret= $db->get( "articles", gd( $aid, $this->articleId ) );
+		$ret= $xmldb->get( "articles", gd( $aid, $this->articleId ) );
 
 		return isset( $ret ) ? $ret : ( $newIfNotFound
-			? $db->table( 'articles' )->createElementNS( $this->ns, 'article' )
+			? $xmldb->table( 'articles' )->createElementNS( $this->ns, 'article' )
 			: null );
 	}
 
