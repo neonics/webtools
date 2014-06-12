@@ -37,10 +37,10 @@ if (get_magic_quotes_gpc()) {
 
 	ini_set('date.timezone', date_default_timezone_get());
 
-	require_once( "lib/Debug.php" );
-	require_once( "lib/RequestHandler.php" );
-	require_once( "lib/Resource.php" );
-	require_once( "lib/Util.php" );
+	require_once( dirname(__FILE__)."/lib/Debug.php" );
+	require_once( dirname(__FILE__)."/lib/RequestHandler.php" );
+	require_once( dirname(__FILE__)."/lib/Resource.php" );
+	require_once( dirname(__FILE__)."/lib/Util.php" );
 
 	$requestURIRoots;
 	$theme;
