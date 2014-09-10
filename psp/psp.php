@@ -230,6 +230,24 @@ EOF;
 		return $doc->documentElement;
 	}
 
+	/**
+	 * same as xml_include, except this one will evaluate {$VAR} by substituting
+	 * the request variable $request->VAR.
+	 */
+	public function xml_include_eval( $href, $type )
+	{
+		$content = file_get_contents( DirectoryResource::findFile( $href, $type ) );
+		$content = preg_replace_callback(
+			'/{\$([^}]+)}/',
+			function( $m ){ global $request; return $request->$m[1]; },
+			preg_replace( '/<\?php[^?]+\?>/', "", $content )	// strip php code which may use {$..}
+		);
+		$doc = new DOMDocument();
+		$doc->loadXML( $content );
+		return $doc->documentElement;
+	}
+
+
 	public function accessLogs()
 	{
 		$al = DirectoryResource::findFile( "access.xml" );
