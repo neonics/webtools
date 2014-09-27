@@ -13,6 +13,16 @@
 		return isset( $var ) ? $var : $default;
 	}
 
+	/**
+	 * use this version when the first argument is a function call
+	 * or other non-referential type.
+	 */
+	function gd_( $var, $default )
+	{
+		return isset( $var ) ? $var : $default;
+	}
+
+
 	function gad( $array, $key, $default )
 	{
 		return array_key_exists( $key, $array ) && isset( $array[ $key ] )
