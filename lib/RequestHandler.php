@@ -174,6 +174,7 @@ abstract class RequestHandler
 		ob_start();
 
 		global $psp_custom_handlers;
+		if ( isset( $psp_custom_handlers ) )
 		foreach ( $psp_custom_handlers as $name => $class )
 		{
 			# be sure to set up an __autoload function!
