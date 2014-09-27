@@ -8,7 +8,7 @@
 	/**
 	 * get default: return var if set, else return default.
 	 */
-	function gd( $var, $default )
+	function gd( &$var, $default )
 	{
 		return isset( $var ) ? $var : $default;
 	}
