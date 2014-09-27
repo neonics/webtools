@@ -9,8 +9,8 @@
   xmlns:auth="http://neonics.com/2000/xsp/auth"
 	xmlns:l="http://www.neonics.com/xslt/layout/1.0"
 >
-		<psp:content>
-			DaPage
+	<psp:content>
+		<section>
 			<auth:permission role="editor">
 				<auth:fail>
 					permission denied
@@ -26,5 +26,6 @@
 					</psp:if>
 				</auth:success>
 			</auth:permission>
-		</psp:content>
+		</section>
+	</psp:content>
 </psp:page>

@@ -15,5 +15,7 @@
 	<pst:content>
 		<h1>Issue Tracker</h1>
 		<p>Issues: bugs, features, rfc</p>
+
+		<p>TODO. For now, See <a href="https://github.com/neonics/webtools/issues">the issues for webtools/psp at github</a></p>.
 	</pst:content>
 </psp:page>

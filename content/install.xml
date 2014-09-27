@@ -15,6 +15,12 @@
 	<pst:content>
 		<section title="Installation">
 
+		<auth:user>
+			<auth:fail>
+				You are not logged in as administrator.
+			</auth:fail>
+			<auth:success>
+
 		<section title="Installed Webroot">
 
 			<section title="Resource Paths">
@@ -75,6 +81,11 @@
 		widgets instead - which then may be removed from the layout.xsl.
 		</p>
 
+
+				</auth:success>
+			</auth:user>
+
 		</section>
+
 	</pst:content>
 </psp:page>
