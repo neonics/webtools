@@ -171,16 +171,23 @@
 		$br->addResourceRelPath( 'logic', $pspLogicDir );
 		$br->addResourceRelPath( 'style', $pspStyleDir );
 
-		if ( isset( $requestBaseDir ) && $requestBaseDir != $pspBaseDir )
+		if ( isset( $requestBaseDir ) )
 		{
-			$rr = new DirectoryResource( $requestBaseDir, $request->requestBaseURI );
-			$rr->addResourceRelPath( 'content', gd( $contentDir, $pspContentDir ) );
-			$rr->addResourceRelPath( 'logic', gd( $logicDir, $pspLogicDir ) );
-			$rr->addResourceRelPath( 'style', gd( $styleDir, $pspStyleDir ) );
+			if ( $requestBaseDir != $pspBaseDir )
+			{
+				$rr = new DirectoryResource( $requestBaseDir, $request->requestBaseURI );
+				$rr->addResourceRelPath( 'content', gd( $contentDir, $pspContentDir ) );
+				$rr->addResourceRelPath( 'logic', gd( $logicDir, $pspLogicDir ) );
+				$rr->addResourceRelPath( 'style', gd( $styleDir, $pspStyleDir ) );
+				# XXX FIXME - not sure what this is for. See RequestHandler.php in same commit)
+				debug('!!!', "add psp dir $requestBaseDir - $logicDir - $pspLogicDir");
+				# . "/psp";#DirectoryResource::findFile( "psp" );
+				$dr = new DirectoryResource( $requestBaseDir, 'psp' );
+				$dr->addResourceRelPath( 'psp', 'psp' );#gd( $logicDir, $pspLogicDir ) );
+			}
 		}
 		else
-			if ( !isset( $requestBaseDir ) )
-				$requestBaseDir = $pspBaseDir;
+			$requestBaseDir = $pspBaseDir;
 
 		$request->basedir = $requestBaseDir;
 
@@ -191,14 +198,6 @@
 		debug('!!!', "add db dir $dbdir - $contentDir - $pspContentDir");
 			$dr = new DirectoryResource( $dbdir, 'db' );
 			$dr->addResourceRelPath( 'content', gd( $contentDir, $pspContentDir ) );
-		}
-
-		$adir = $requestBaseDir;# . "/psp";#DirectoryResource::findFile( "psp" );
-		if ( isset( $adir ) )
-		{
-		debug('!!!', "add psp dir $adir - $logicDir - $pspLogicDir");
-			$dr = new DirectoryResource( $adir, 'psp' );
-			$dr->addResourceRelPath( 'psp', 'psp' );#gd( $logicDir, $pspLogicDir ) );
 		}
 	}
 
