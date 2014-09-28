@@ -27,7 +27,7 @@
  *
  * @author Kenney Westerhof <kenney@neonics.com>
  */
-require_once( __DIR__."/Template.php" );
+#require_once( __DIR__."/Template.php" );
 class TemplateRequestHandler extends RequestHandler
 {
 	public function __construct()
