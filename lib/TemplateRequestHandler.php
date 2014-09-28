@@ -15,8 +15,19 @@
  *
  * See Template.php.
  *
+ * Override mechanism:
+ *
+ * 1) class OverrideTemplateRequestHandler extends TemplateRequestHandler
+			{
+				protected function resolve( $file ) { return "$file.php"; }
+			}
+ *
+ * 2) handle.php:
+ *    $psp_custom_handlers = array( 'template' => 'OverideTemplateRequestHandler' );
+ *
  * @author Kenney Westerhof <kenney@neonics.com>
  */
+require_once( __DIR__."/Template.php" );
 class TemplateRequestHandler extends RequestHandler
 {
 	public function __construct()
@@ -24,6 +35,9 @@ class TemplateRequestHandler extends RequestHandler
 		$this->regexp = '@^/(.*?)\.(html|php)@';
 	}
 
+	protected function resolve( $file ) {
+		return DirectoryResource::findFile( "$file.php", 'php' );
+	}
 
 	public function _handle( $request )
 	{
@@ -35,7 +49,7 @@ class TemplateRequestHandler extends RequestHandler
 		if ( preg_match( $this->regexp, $request->requestURI/*RelPathURI*/, $matches ) )
 		{
 			if ( $debug )
-			debug( 'request', "[template] match $this->regexp: ".$matches[0] );
+			debug( $this, "match $this->regexp: ".$matches[0] );
 #			$request->requestRelPathURI = "";
 #			$request->requestFileURI = $this->redir[ $matches[1] ];
 #			$request->requestRelURI = $request->requestFileURI;
@@ -48,11 +62,15 @@ class TemplateRequestHandler extends RequestHandler
 			}
 			else
 			{
-				$file = dirname(__FILE__).'/../pages/'.$matches[1].'.php';
+				$file = $this->resolve( $matches[1] );
+
+				#dirname(__FILE__).'/../pages/'.$matches[1].'.php';
+
+				debug( $this, "resolved $file" );
 
 				if ( file_exists( $file ) )
 				{
-					require_once( 'template.php' );	// MUST define class Template
+					#require_once( 'template.php' );
 					#if ( session_status() === PHP_SESSION_NONE )
 					#	session_start();
 					#if ( ! isset( $_SESSION['user'] ) )
@@ -67,14 +85,13 @@ class TemplateRequestHandler extends RequestHandler
 
 						$request->requestRelURI = "auth.html";#"login.html";#"auth.html";
 						#RequestHandler::handle( $request );
-						return false;
+						return false;	// we're early in the request chain
 					}
 					else
 					{
 						ob_start();
 						require_once( $file );
-						Template::$legacyContent = ob_get_clean();
-						template_do( $request );
+						template_do( $request, ob_get_clean() );
 					}
 					return true;
 				}
@@ -85,7 +102,7 @@ class TemplateRequestHandler extends RequestHandler
 				}
 			}
 			return false;
-			#true; # never try other handlers for html files
+			#true; // never try other handlers for html files
 		}
 
 		if ( $debug )

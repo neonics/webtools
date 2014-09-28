@@ -34,8 +34,8 @@ try
 
 
 #phpinfo();
-#	if ( !isset( $debug ) )
-		$debug = 2;
+	if ( !isset( $debug ) )
+		$debug = 4;
 
 	set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/lib' );
 
@@ -50,16 +50,17 @@ try
 	$requestURIRoots;
 	$theme;
 
-	$staticContent = array_merge( isset( $staticContent )
-		? $staticContent
-		: Array(),
+	$staticContent = array_merge(
+		gd( $staticContent, array() ),
 		Array( 'css/', 'img/', 'js/', 'ckeditor/')
 	);
 
-	$psp_custom_handlers = array_merge(
-		gd( $psp_custom_handlers, array() ),
+	$psp_custom_handlers = //array_merge(
+		gd( $psp_custom_handlers, array() )
+		+
 		array( 'template' => 'TemplateRequestHandler' )
-	);
+	//)
+	;
 
 	$redir = array( 'wiki/' => 'wiki.html' );
 
