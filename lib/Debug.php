@@ -4,6 +4,13 @@
 			return strlen($a) > strlen($b) ? $a : $b;
 	}
 
+	function fatal( $catOrMsg, $themsg = null, $exception = null )
+	{
+		debug( $catOrMsg, isset( $exception ) ? $themsg  . $exception : $themsg );
+		debug( "fatal error, exiting." );
+		exit;
+	}
+
 	function debug( $catOrMsg, $themsg = null )
 	{
 		global $logging, $debug;//, $debugFixes;
@@ -24,11 +31,15 @@
 		$msg = isset( $themsg ) ? $themsg : $catOrMsg;
 		$cat = isset( $themsg ) ? $catOrMsg: "default";
 
+		$cat = is_object( $cat )
+			? ( isset( $cat->_logname ) ? $cat->_logname : get_class( $cat ) )
+			: $cat;
+
 		#$msg = str_replace( '<', '&lt;', $msg );
 
 		$level = "".min( $debug, 2 );
 		$pad = array_reduce( array_keys($templates ), "sortLength" );
-		$pad = str_repeat( ' ', strlen($pad)-strlen($cat) );
+		$pad = str_repeat( ' ', max( 0, strlen($pad)-strlen($cat) ) );
 
 		if ( $logging & 1 )
 		error_log( sprintf( "[%s%s] %s", $cat, $pad, $msg ) );
