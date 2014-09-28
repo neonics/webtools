@@ -1,10 +1,40 @@
 <?php
+/**
+ * Extensible Request Handling.
+ *
+ *
+ * RequestHandler::$requesthandlers is initialized with these sequenced handlers:
+ *
+ * - $psp_custom_handlers* - see below
+ * - 'template' (via custom handlers); see TemplateRequestHandler.php.
+ * - 'log' 			updates access log; use this name for early-always access
+ * - 'redirect' internal redirect: rewrite Request and continue
+ * - 'static' 	(css/, img/, js/)
+ * - 'content' 	('db/content/',  '.', 'content/')
+ * - 'dynamic' 	the PSP Core handler, executing a content XML using the psp module.
+ *
+ * See serve.php for default configuration and override mechanism.
+ *
+ * Custom handlers*)
+ *   $psp_custom_handlers is an array( name => classname ). All handlers are
+ *   at current executed in sequence of class RequestHandler instantiation.
+ *   It is foreseen that the sequence might be modeled by a RequestLifecycle
+ *   using different processing phases (and possibly complex decision trees),
+ *   so, treat any of the above listed 'phase' names as reserved.
+ *
+ * NOTE: any ob_end_flush() below is debug related, prior to the actual content output.
+ *
+ * @author Kenney Westerhof <kenney@neonics.com>
+ */
 
 require_once( "Util.php" );
 require_once( "ModuleManager.php" );
 require_once( "XML.php" );
 require_once( "Resource.php" );
 
+/**
+ * Data object that constructs path information from server environment variables.
+ */
 class Request
 {
 	public $requestBaseURL;		# http://..../WEBROOT/
@@ -283,8 +313,8 @@ class RedirectRequestHandler extends RequestHandler
 			if ( $debug )
 			debug( 'request', "[redir] match $this->regexp: ".$matches[0] );
 			$request->requestRelPathURI = "";
+			$request->requestRelURI =
 			$request->requestFileURI = $this->redir[ $matches[1] ];
-			$request->requestRelURI = $request->requestFileURI;
 			return false;
 		}
 
@@ -399,7 +429,7 @@ class ContentRequestHandler extends RequestHandler
 {
 	public function __construct( $dirs )
 	{
-		$this->regexp = '@^(' . implode( '|^', $dirs ) . ')@';
+		$this->regexp = '@^(' . implode( '|', $dirs ) . ')@';
 	}
 
 	public function _handle( $request )
@@ -486,7 +516,7 @@ class DynamicRequestHandler extends RequestHandler
 					if ( is_file( $in ) )
 					{
 						debug( 'request', "Fallback to $in" );
-						ob_end_clean();
+						ob_end_clean(); // explicit clean
 						RequestHandler::sendFile( $in );
 						exit;
 					}
@@ -506,6 +536,7 @@ class DynamicRequestHandler extends RequestHandler
 
 						if ( $t == 'psp' )
 						{
+							debug( $this, "psp xsl handler triggered" ); # have yet to see output
 
 							$requestFile = pathinfo( $request->requestRelURI, PATHINFO_FILENAME ).'.xsl';
 

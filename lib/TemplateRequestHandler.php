@@ -1,5 +1,22 @@
 <?php
-
+/**
+ * Backwards compatible template system
+ *
+ * The idea is to allow legacy .php files to be executed as-is,
+ * expecting them however to merely wrap their code between
+ *
+ * 'function template_content( $request ) {'
+ *
+ * and '}'
+ *
+ * (where $request is optional), although, if no such function
+ * is found, all captured output the php file produced is
+ * substituted where the template content is expected.
+ *
+ * See Template.php.
+ *
+ * @author Kenney Westerhof <kenney@neonics.com>
+ */
 class TemplateRequestHandler extends RequestHandler
 {
 	public function __construct()

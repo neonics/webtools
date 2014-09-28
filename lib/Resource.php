@@ -1,5 +1,18 @@
 <?php
-
+/**
+ * Directory Resource: overridable path hierarchy.
+ *
+ * Used to allow several kinds of resources to have sensible defaults
+ * and be overridable by a client installation.
+ *
+ * Built-in, yet overridable, search paths are first initialized:
+ *
+ * - core content, logic, style ('content/', 'psp/' and 'style/' respectively)
+ * - client content logic, style
+ * - db/ client, db/ core
+ * 
+ * @author Kenney Westerhof
+ */
 	class DirectoryResource
 	{
 		// either a fallback-chain and one global resource,
