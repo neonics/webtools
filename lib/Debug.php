@@ -7,7 +7,8 @@
 	function fatal( $catOrMsg, $themsg = null, $exception = null )
 	{
 		debug( $catOrMsg, isset( $exception ) ? $themsg  . $exception : $themsg );
-		debug( "fatal error, exiting." );
+		error( $catOrMsg.(isset( $exception ) ? $themsg  . $exception : $themsg ) );
+		error( "fatal error, exiting." );
 		exit;
 	}
 
