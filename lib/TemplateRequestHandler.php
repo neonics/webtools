@@ -98,11 +98,8 @@ class TemplateRequestHandler extends RequestHandler
 				else
 				{
 					# 404
-					echo "404 - not found: $file";
 				}
 			}
-			return false;
-			#true; // never try other handlers for html files
 		}
 
 		if ( $debug )
