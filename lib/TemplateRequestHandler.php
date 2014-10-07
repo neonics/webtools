@@ -90,8 +90,9 @@ class TemplateRequestHandler extends RequestHandler
 					else
 					{
 						ob_start();
+						$request->template_data =
 						require_once( $file );
-						template_do( $request, ob_get_clean() );
+						template_do( $request, ob_get_clean(), null );
 					}
 					return true;
 				}
@@ -108,5 +109,6 @@ class TemplateRequestHandler extends RequestHandler
 	}
 }
 
+// template_do( request, content, templateclassname ); see Template.php
 
 ?>
