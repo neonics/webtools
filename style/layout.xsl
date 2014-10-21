@@ -16,8 +16,11 @@
 
 	<xsl:output method="xml" version="1.0" encoding="utf-8" indent="yes"
 		doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"
-		doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
-	/>
+		doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" />
+	<!-- having them both for the time being - no warnings (yet xmlns xhtml is added!) -->
+	<xsl:output method="html" version="5"
+		encoding="utf-8" indent="yes" omit-xml-declaration="yes"
+		doctype-system="about:legacy-compat" />
 
 	<xsl:param name="psp:requestBaseURI" select="$requestBaseURI"/>
 	<xsl:param name="psp:slashpage" select="$slashpage"/>
