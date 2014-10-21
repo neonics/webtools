@@ -79,7 +79,7 @@ class XMLDB {
 	 */
 	public function table( $table, $tableNS = null )
 	{
-		global $dbNS;
+		global $dbNS, $debug;
 
 		if ( ! isset( $this->tables[ $table ] ) )
 		{
@@ -95,6 +95,7 @@ class XMLDB {
 				$doc->load( $tableFile );
 				$doc->xinclude();
 
+				$debug > 9 and // XXX security risk password leak
 				debug('db', "DUMP $table\n".$doc->saveXML());
 			}
 			else
@@ -152,6 +153,7 @@ class XMLDB {
 	{
 		debug( 'db',  "Storing table $table" );
 
+		$debug > 9 and // XXX security risk: password leak
 		debug( 'db', "table DUMP: " . $this->tables[$table]->saveXML());
 
 #no worky		$this->tables[ $table]->formatOutput=true;
@@ -454,6 +456,7 @@ EOF;
 
 			# filter the doc
 			{
+				$debug > 9 and // XXX security risk: password leak
 				debug('db', "DUMP table:\n".$this->tables[$table]->saveXML());
 
 				$xsl = new DOMDocument();
@@ -472,6 +475,7 @@ FOO
 				$xslt->importStylesheet( $xsl );
 				$dd = $xslt->transformToDoc( $this->tables[$table] );
 
+				$debug > 9 and // XXX security risk: password leak
 				debug('db', "DUMP table after transform:\n".$dd->saveXML());
 			}
 
