@@ -87,4 +87,12 @@ Description:
 Feature: SQL DB / DAL for PHP
 
 
-  
+Feature: auto-generate PSP module files
+Description:
+  Given a PSP PHP file, generate the XSL file for the tags;
+  for instance, a public function test() would get an
+  <xsl:template match="MODULENAMESPACE:test">
+    <xsl:apply-templates select="php:function('MODULENAMESPACE_test')" mode='output'/>
+  </xsl:template>
+  <xsl:template match="MODULENAMESPACE:test" mode='output'/>
+
