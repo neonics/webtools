@@ -1,0 +1,4 @@
+USAGE:
+    
+    <script src="{$request->requestBaseURI}resources/widgets/shadow.min.js"></script>
+    <script type='text/javascript'> jQuery(function($){ widgets.shade( $('.action, table.sql') ); }); </script>
