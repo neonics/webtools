@@ -26,6 +26,7 @@ class AuthModule extends AbstractModule
 	{
 		global $xmldb, $request; // XXX ref
 
+		ModuleManager::loadModule( "psp" );
 		psp_module( 'db' );
 		$this->authTable = $xmldb->table( "auth", $this->ns );
 
