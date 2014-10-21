@@ -109,7 +109,7 @@ li.menuitem {
 .vmenu {
 	font-size: 12pt;
 	background-color: #6b1958;
-	background-image: url('../img/vmenu.png');
+	background-image: url('../../img/vmenu.png'); /* FIXME: requestbase! assumes /somehting/ as base! */
 
 	padding: 10px;
 	margin: 0;
@@ -176,7 +176,7 @@ li.menuitem {
 	margin-top: 20pt;
 	margin-bottom: 10pt;
 
-	background-image: url('../img/menu-bg.png');
+	background-image: url('../../img/menu-bg.png'); /* FIXME */
 
 	color: #dcc;
 
