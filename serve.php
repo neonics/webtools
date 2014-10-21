@@ -18,9 +18,10 @@
 	// 2 - pre-HTML text
 	// 3 - verbose (resources)
 	// 4 - 
+$PSP_TIMING_BEGIN = microtime(true);
+
 try
 {
-
 	if (get_magic_quotes_gpc()) {
 			function stripslashes_gpc(&$value)
 			{
@@ -78,4 +79,9 @@ try
 } catch ( Exception $e ) {
 	fatal( 'serve', "Fatal error: ". $e );
 }
+
+$PSP_TIMING_END = microtime(true);
+$debug and 	// apparently debug needs to be 2+
+debug('serve', sprintf( "done in %f ms", 1000* ( $PSP_TIMING_END - $PSP_TIMING_BEGIN ) ) );
+
 ?>
