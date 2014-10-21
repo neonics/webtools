@@ -237,7 +237,9 @@ abstract class RequestHandler
 			debug( 'request', "delegate handler $k" );
 			if ( $h->_handle( $request ) )
 			{
-				exit;
+				#ob_flush();flush();return;
+				#exit;
+				return;
 			}
 		}
 	}

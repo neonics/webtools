@@ -218,6 +218,9 @@ class ModuleManager
 	{
 		global $debug;
 
+		$debug > 1 and
+		debug( 'module', "generating proxies for module $m" );
+
 		$mi = self::$modules[ $m ][ "instance" ];
 
 		$rc = new ReflectionClass( $mi );
@@ -289,28 +292,39 @@ EOF;
 		ModuleManager::registerFunction( $fname );
 	}
 
-
 	public static function setParameters( $xslt, $sheet )
 	{
 		global $debug;
 
-# commented out because of warning that $sheet is an array
-#		$debug > 2 and
-#		debug( 'module', "  setParameters $sheet");
+		$debug > 2 and
+		// sheet isn't supposed to be an array as it applies to the sheet in $xslt
+		debug( 'module', "  setParameters "./*print_r($xslt,1).": ".*/(is_array($sheet)?implode(',', $sheet):$sheet));
 
 		foreach ( array_keys( self::$modules ) as $m )
+			self::callModuleFunction( $m, 'setParameters', $xslt, $sheet );
+	}
+
+	private static function callModuleFunction( $m, $f )
+	{
+		global $debug;
+
+		$f = $m.'_'.$f;
+		$debug > 3 and
+			debug( 'module', "[$m] Calling $f" );
+
+		$args = func_get_args()[2];#array_slice( func_get_args(), 2 );
+		# XXX TODO (don't want to use call_user_func_array if I can help it)
+		# It is however compatible with non-OO code, this way.
+
+		if ( function_exists( $f ) )
 		{
-			$f = $m . "_setParameters";
-			if ( function_exists( $f ) )
-			{
-				if ( $debug > 2 )
-				debug( 'module', "    module $m" );
-				$f( $xslt );
-			}
-			else
-			if ( $debug > 2 )
-			debug ("    module $m: no function");
+			if ( $debug > 3 )
+			debug( 'module', "    module $m function $f" );
+			$f( $args );
 		}
+		else
+		if ( $debug > 3 )
+		debug ("    module $m: no function");
 	}
 
 	public static function registerFunction( $fname )
