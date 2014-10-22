@@ -239,7 +239,7 @@ EOF;
 		$content = file_get_contents( DirectoryResource::findFile( $href, $type ) );
 		$content = preg_replace_callback(
 			'/{\$([^}]+)}/',
-			function( $m ){ global $request; return $request->$m[1]; },
+			function( $m ){ global $request; return gd( $request->$m[1], null ); },
 			preg_replace( '/<\?php[^?]+\?>/', "", $content )	// strip php code which may use {$..}
 		);
 		$doc = new DOMDocument();
