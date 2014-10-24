@@ -103,6 +103,8 @@
 			case "html": return "text/html";
 			case "png": return "image/png";
 			case "jpg": return "image/jpeg";
+			case "ttf": return "font/truetype";
+			case "woff": return "application/font-woff";
 
 			default: return null;
 		}

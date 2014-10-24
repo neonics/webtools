@@ -35,6 +35,10 @@ class AuthModule extends AbstractModule
 			unset( $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] );
 			foreach ( $_SESSION as $k=>$v )
 				unset( $_SESSION[$k] );
+			session_destroy();
+
+			foreach ( $_COOKIE as $k=>$v )
+				unset( $_COOKIE[$k] );
 
 			header( 'HTTP/1.1 302 Logout Redirect' );
 			header( 'Location: ' . $request->requestBaseURI );
@@ -123,7 +127,7 @@ class AuthModule extends AbstractModule
 	{
 		global $xmldb;
 
-		$user;
+		$user = null;
 
 		try
 		{
@@ -150,7 +154,7 @@ class AuthModule extends AbstractModule
 			if ( isset( $_REQUEST["auth:challenge"] ) )
 			{
 				if ( $this->getSessionChallenge() != $_REQUEST["auth:challenge"] )
-					throw new SecurityException( 'challenge mismatch' );
+					throw new SecurityException( 'challenge mismatch: expect '.$this->getSessionChallenge() . ", got " . $_REQUEST['auth:challenge'] );
 
 				# split the password field into hash-id and value
 				$passhash;
@@ -224,7 +228,7 @@ class AuthModule extends AbstractModule
 		{
 			debug( 'auth', "security warning: " . $e->getMessage()
 				. ' from ' . $_SERVER['REMOTE_ADDR'] );
-			$this->errorMessage( "Invalid credentials" );
+			$this->errorMessage( "Invalid credentials (".$e->getMessage().")" );
 		}
 	}
 
