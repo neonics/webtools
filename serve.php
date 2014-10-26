@@ -38,15 +38,16 @@ try
 	if ( !isset( $debug ) )
 		$debug = 4;
 
+	// XXX maybe prepend instead
 	set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/lib' );
 
 	ini_set('date.timezone', date_default_timezone_get());
 
+	require_once( dirname(__FILE__)."/lib/Util.php" );
 	require_once( dirname(__FILE__)."/lib/Debug.php" );
 	require_once( dirname(__FILE__)."/lib/ClassLoader.php" );	# extensible; initializes __autoload
 	require_once( dirname(__FILE__)."/lib/RequestHandler.php" );
 	require_once( dirname(__FILE__)."/lib/Resource.php" );
-	require_once( dirname(__FILE__)."/lib/Util.php" );
 
 	$requestURIRoots;
 	$theme;
