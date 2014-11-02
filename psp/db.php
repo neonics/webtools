@@ -151,6 +151,8 @@ class XMLDB {
 
 	public function store( $table )
 	{
+		global $debug;
+
 		debug( 'db',  "Storing table $table" );
 
 		$debug > 9 and // XXX security risk: password leak
