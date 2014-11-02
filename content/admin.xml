@@ -27,6 +27,7 @@
 		</div>
 
 		<div class="admin-content">
+			<psp:messages/>
 
 			<auth:permission role="editor">
 				<psp:if slashpath="site">
