@@ -59,6 +59,7 @@ abstract class AbstractModule implements IModule
 	private static $funcToMod = Array(
 		"mail" => "email",
 	);
+
 	public static function smessage( $msg, $type = null, $mod = null )
 	{
 		$lns = "http://www.neonics.com/xslt/layout/1.0";
@@ -68,7 +69,7 @@ abstract class AbstractModule implements IModule
 			$l = self::$messages = new DOMDocument();
 			$l->appendChild( $l->createElementNS( $lns, 'messages' ) );
 			isset( $mod ) and
-			$l->documentElement->setAttribute( 'module', $mod->name );
+			$l->documentElement->setAttribute( 'module', is_object( $mod ) ? $mod->name : ( is_string( $mod ) ? "!$mod" : "(unknown)" ) );
 		}
 		else
 		{
@@ -82,7 +83,7 @@ abstract class AbstractModule implements IModule
 			$msg = Array($msg);
 
 		$modname;
-		if (! isset( $mod ) )
+		if ( ! isset( $mod ) )
 		{
 			$matches;
 			if ( preg_match( "/^(.*?\(.*?<a href=['\"]function\.(.*?)['\"]>.*?<\/a>\s*\]:\s*)/",
@@ -95,8 +96,11 @@ abstract class AbstractModule implements IModule
 				$msg = Array( $msg[0] );
 			}
 		}
-		else
+		elseif ( is_object( $mod ) )
 			$modname = $mod->name;
+		elseif ( is_string( $mod ) )
+			$modname = $mod;
+
 
 		isset( $modname ) and $m->setAttribute( 'module', $modname );
 		isset( $type ) and $m->setAttribute( 'type', $type );
@@ -197,6 +201,9 @@ class ModuleManager
 				debug( 'module', "Initializing module $m" );
 				$f();
 			}
+
+			if ( !isset( $$modClass ) && ! isset( $pspLogic ))
+				self::errorMessage( 'module', "cannot load module $m" );
 		}
 
 		self::addXSL( "$m.xsl", $m  );
