@@ -129,7 +129,7 @@ class ModuleManager
 	private static $stylesheets = Array();
 	private static $xsltFunctions = Array();
 
-	static function loadModule( $m )
+	static function loadModule( $m, $args = null )
 	{
 		global $debug;
 
@@ -161,7 +161,7 @@ class ModuleManager
 		}
 		else
 		{
-			debug( 'module', "[module $m]" );
+			debug( 'module', "[module $m]" . ( $args !== null ? "<pre><b>args:</b>\n".print_r($args,1)."</pre>" : "" ) );
 
 			self::$modules[ $m ] = Array();
 
@@ -176,6 +176,8 @@ class ModuleManager
 				ob_end_clean();
 
 				$GLOBALS += get_defined_vars();
+
+				debug( 'module', "LOGIC $pspLogic INCLUDED");
 			}
 
 			// the code below is not included within the conditional above
@@ -189,7 +191,7 @@ class ModuleManager
 				if ( $debug > 2 )
 					debug( 'module', "Instantiating module $m" );
 
-				self::$modules[$m]["instance"] = new $$modClass();
+				self::$modules[$m]["instance"] = new $$modClass( $args );
 
 				self::createProxies( $m );
 			}
@@ -199,7 +201,7 @@ class ModuleManager
 			{
 				if ( $debug > 2 )
 				debug( 'module', "Initializing module $m" );
-				$f();
+				$f( $args );
 			}
 
 			if ( !isset( $$modClass ) && ! isset( $pspLogic ))
@@ -308,7 +310,13 @@ EOF;
 		debug( 'module', "  setParameters "./*print_r($xslt,1).": ".*/(is_array($sheet)?implode(',', $sheet):$sheet));
 
 		foreach ( array_keys( self::$modules ) as $m )
+		{
+			$debug > 2 and
+			debug( 'module', "  - setting module $m parameters");
 			self::callModuleFunction( $m, 'setParameters', $xslt, $sheet );
+		}
+		$debug > 2 and
+		debug('module', 'setParameters complete.');
 	}
 
 	private static function callModuleFunction( $m, $f )
@@ -424,11 +432,22 @@ ob_flush();
 	{
 		global $debug;
 
+		$debug > 2 and
+		debug('module', "transforming $doc->documentURI with sheets: ".print_r(self::$stylesheets,1));
+
 		while ( count( self::$stylesheets ) > 0 )
 		{
 			$sheets = array_shift( self::$stylesheets );
+
+			$debug > 3 and
+			debug('module', "transform ".$doc->documentURI . " with sheet(s) ".print_r($sheets,1));
+
 			$doc = transform( $doc, $sheets );
-			dumpXMLFile( $doc, $sheets[0] );
+
+			if ( $debug > 3 ) {
+				debug('module', "transform done, cont. (".count(self::$stylesheets)." sheets to go)" );
+				dumpXMLFile( $doc, $sheets[0] );
+			}
 		}
 
 		if ( $debug )

@@ -222,6 +222,10 @@
 		<xsl:value-of select="php:function('psp_pi', name(.), string(.))"/>
 	</xsl:template>
 
+	<xsl:template match="psp:module">
+		<xsl:value-of select="php:function('psp_module', string(@name), .)"/>
+	</xsl:template>
+
 	<xsl:template match="psp:xsl-include">
 		<xsl:element name="xsl:include">
 			<xsl:attribute name="href">

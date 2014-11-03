@@ -160,11 +160,31 @@ EOF;
 		return isset( $varhash[ $name ] ) ? $varhash[ $name ] : false;
 	}
 
-
-	public function module( $modname )
+	/**
+	 * Called using <xsl:value-of select="php:function('psp_module', 'modulename', .)"/>
+	 *
+	 * @param string $a modulename
+	 * @param array $b array of DOMElement (why array? XSLT does this)
+	 * @return string returnvalue required due to <xsl:value-of/>.
+	 */
+	public function module( $modname, $args = null )
 	{
-		return ModuleManager::loadModule( $modname );
+		// verify $args:
+		if ( $args !== null )
+		{
+			if ( is_array( $args ) && count( $args ) == 1 && is_object( $args[0] ) && get_class( $args[0] ) == 'DOMElement' )
+			{
+				// ok
+			}
+			else
+			{
+				$this->errorMessage( "load module '$modname': illegal argument" );
+			}
+		}
+
+		return ModuleManager::loadModule( $modname, $args );
 	}
+
 
 	/**
 	 * processing instruction
