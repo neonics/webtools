@@ -20,7 +20,7 @@
 		// prefix and postfix
 		static $templates = Array(
 			'1' => '<!-- [$cat:$level$pad] $msg -->\n',
-			'2' => '<code style=\'white-space:pre; font-size: 8pt; color:black;\'>[<span style=\'color:".$templates[$cat]["color"]."\'>$cat:$level$pad</span>] $msg</code><br/>\n',
+			'2' => '<code style=\'white-space:pre; font-size: 8pt; color:black;\'>[$time][<span style=\'color:".$templates[$cat]["color"]."\'>$cat:$level$pad</span>] $msg</code><br/>\n',
 			'[]' => Array( 'color' => '#33f' ),
 			'default' => Array( 'color' => 'black' ),
 			'resource' => Array( 'color' => '#aa0' ),
@@ -29,7 +29,12 @@
 			'db' => Array( 'color' => 'blue' ),
 		);
 
-			
+		global $PSP_TIMING_BEGIN; // should be set-up in serve.php
+		if ( ! $PSP_TIMING_BEGIN )
+			$PSP_TIMING_BEGIN = microtime(true);
+
+		$time = sprintf("%8s", sprintf( "%.3f", (microtime(true)-$PSP_TIMING_BEGIN)*1000));
+
 		$msg = isset( $themsg ) ? $themsg : $catOrMsg;
 		$cat = isset( $themsg ) ? $catOrMsg: "default";
 
