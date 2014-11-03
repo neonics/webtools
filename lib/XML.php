@@ -19,18 +19,33 @@ require_once( "Debug.php");
 
 	function transform( $doc, $sheets )
 	{
+		global $debug;
+
 		if ( !is_array( $sheets ) )
 			$sheets = Array( $sheets );
 
+		if ( $debug > 3 )
+		{
+			ob_start();debug_print_backtrace();$t = ob_get_clean();
+			debug('xml', "transform $doc->documentURI with ".implode(', ', $sheets) . " stacktrace:\n". $t);
+		}
+
+		$debug > 1 and
+		debug( 'xml', "transform: loadXSL ".implode(', ', $sheets ) );
+
 		$sheet = loadXSL( $sheets );
 
+		$debug > 1 and
 		debug ( 'xml', "transform ".
 			filename( $doc->documentURI ).
-			" sheet ".$sheets[0] );
+			" sheet(s) ".implode(", ", $sheets) );
 
 		$docURI = $doc->documentURI;
 		$doc = $sheet->transformToDoc( $doc );
 		$doc->documentURI = $docURI;
+
+		$debug > 2 and
+		debug('xml', 'transformation complete');
 
 		return $doc;
 	}
@@ -64,40 +79,62 @@ require_once( "Debug.php");
 	{
 		global $debug;
 
+		static $xsltDocCache = array(); // for merged/parsed XML
 		static $xsltCache = Array();
 
 		if ( !is_array( $sheets ) )
 			$sheets = Array( $sheets );
 
-		$key = "";
-		foreach ( $sheets as $s )
-			$key .= $s.';';
+		$key = implode( ';', $sheets );
+		$xslt = null; // there's a bug that resets the connection under certain conditions...
+			//isset( $xsltCache[$key] ) ? $xsltCache[$key] : null;
 
-		$xslt = isset( $xsltCache[$key] ) ? $xsltCache[$key] : null;
+		$doc = isset( $xsltDocCache[ $key ] ) ? $xsltDocCache[ $key ] : null;
 
-		if ( $xslt == null )
+		if ( $doc === null )
 		{
 			#$debug > 1 and
 			#debug( 'xml', "load sheet $key" );
+
 			$doc = mergeXSLT( $sheets );
-
 			$doc = ModuleManager::processDoc( $doc );
+			$xsltDocCache[ $key ] = $doc;
 
+			#debug( str_replace("<", "&lt;", $doc->saveXML() ) );
+			$debug > 3 and
 			dumpXMLFile( $doc );
+		}
 
-#debug( str_replace("<", "&lt;", $doc->saveXML() ) );
+		if ( $xslt === null )
+		{
+			//debug('xml', "!!! WARNING !!!  caching disabled");
 
 			$xslt = new XSLTProcessor();
 			ModuleManager::registerFunctions( $xslt );
 			ModuleManager::setParameters( $xslt, $sheets );
 			$xslt->importStylesheet( $doc );
 
-			# XXX non-existing field
+			// XXX non-existing field
 			$xslt->doc = $doc;
 
 			$xsltCache[ $key ] = $xslt;
 		}
+		else
+		{
+			$debug > 2 and
+			debug('xml', "updating cached sheet parameters for $key" );
 
+			ModuleManager::registerFunctions( $xslt );
+			ModuleManager::setParameters( $xslt, $sheets );
+
+			if ( $debug > 3 )
+			{
+				ob_start();
+				debug_print_backtrace();
+				$t=ob_get_clean();
+				debug( 'xml', "sheet $key configured, called from \n" . $t );
+			}
+		}
 
 		return $xslt;
 	}
