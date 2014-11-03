@@ -17,7 +17,7 @@
 	// 1 - basic files (content, modules, sheets)
 	// 2 - pre-HTML text
 	// 3 - verbose (resources)
-	// 4 - 
+	// 4 -
 $PSP_TIMING_BEGIN = microtime(true);
 
 try
@@ -82,7 +82,7 @@ try
 }
 
 $PSP_TIMING_END = microtime(true);
-$debug and 	// apparently debug needs to be 2+
-debug('serve', sprintf( "done in %f ms", 1000* ( $PSP_TIMING_END - $PSP_TIMING_BEGIN ) ) );
-
+$timing = sprintf( "done in %f ms", 1000* ( $PSP_TIMING_END - $PSP_TIMING_BEGIN ) );
+if ( $debug ) debug('serve', $timing );
+else echo "<!-- $timing -->";
 ?>
