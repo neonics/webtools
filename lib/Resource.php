@@ -10,7 +10,7 @@
  * - core content, logic, style ('content/', 'psp/' and 'style/' respectively)
  * - client content logic, style
  * - db/ client, db/ core
- * 
+ *
  * @author Kenney Westerhof
  */
 	class DirectoryResource
@@ -198,6 +198,12 @@
 		debug('!!!', "add db dir $dbdir - $contentDir - $pspContentDir");
 			$dr = new DirectoryResource( $dbdir, 'db' );
 			$dr->addResourceRelPath( 'content', gd( $contentDir, $pspContentDir ) );
+		}
+
+		$tmpdir = DirectoryResource::findFile( 'tmp' );
+		if ( isset( $tmpdir ) )
+		{
+			$tr = new DirectoryResource( $tmpdir, 'tmp' );
 		}
 	}
 
