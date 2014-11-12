@@ -23,6 +23,10 @@
 	</xsl:template>
 
 	<xsl:template match="sqldb:listtables">
+		<style type='text/css'>
+			/* fixup for fixed header */
+			a.anchor{display: block; position: relative; top: -70px; visibility: hidden;}
+		</style>
 		<xsl:apply-templates select="php:function('sqldb_listtables')"/>
 	</xsl:template>
 
@@ -35,10 +39,6 @@
 	<!--  -->
 
 	<xsl:template match="sqldb:result">
-		<style type='text/css'>
-			/* fixup for fixed header */
-			a.anchor{display: block; position: relative; top: -70px; visibility: hidden;}
-		</style>
 		<div class='db-result'>
 			<xsl:apply-templates/>
 		</div>

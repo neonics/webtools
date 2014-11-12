@@ -120,26 +120,41 @@ class SQLDBModule extends AbstractModule
 	public function query( $arg )
 	{
 		$doc = new DOMDocument();
-		$doc->appendChild( $root = $doc->createElement( "div" ) );
 
-		//$root->appendChild( $doc->createElement( "pre", print_r( $arg, 1 ) ) );
-		$root->appendChild( $doc->createTextNode( "SQL: " . $arg[ 0 ]->getAttribute( "sql" ) ) );
+		$my_debug = false;
 
-		$sth = $this->db->prepare( $arg[ 0 ]->getAttribute( "sql" ) );
+		if ( $my_debug )
+		{
+			$doc->appendChild( $root = $doc->createElement( "div" ) );
+
+			//$root->appendChild( $doc->createElement( "pre", print_r( $arg, 1 ) ) );
+			$root->appendChild( $doc->createTextNode( "SQL: " . $arg[ 0 ]->getAttribute( "sql" ) ) );
+		}
+		else
+			$root = $doc;
+
+		// html_entity_decode not necessary ( &gt; seems to work in > comparisons ),
+		// however, just to be safe:
+		$sth = $this->db->prepare( html_entity_decode( $arg[ 0 ]->getAttribute( "sql" ) ) );
 		$sth->execute();
 
-		$root->appendChild( $doc->createTextNode("NUM RESULTS: " . $sth->rowCount() ) );
+		if ( $my_debug )
+			$root->appendChild( $doc->createTextNode("NUM RESULTS: " . $sth->rowCount() ) );
 
 		$root->appendChild(  $root = $doc->createElementNS( $this->ns, "db:result" ) );
 
+		$elname = $arg[0]->getAttribute( 'element' );
+		$elname = empty($elname) || $elname=='' ? null : $elname;
+
 		while ( $row = $sth->fetch( PDO::FETCH_ASSOC ) )
-			$root->appendChild( $this->row2xml( $doc, $row, gd_( $arg[0]->getAttribute( "element" ), null ) ) );
+			$root->appendChild( $this->row2xml( $doc, $row, $elname ) );
 
 		return $doc->documentElement;
 	}
 
 	protected function row2xml( $doc, array $row, $entityname = "row" )
 	{
+		empty( $entityname ) and $entityname = 'row';
 		$ret = $doc->createElementNS( $this->ns, "db:$entityname" );
 		foreach ( $row as $k => $v )
 			$ret->setAttribute( $k, $v );
