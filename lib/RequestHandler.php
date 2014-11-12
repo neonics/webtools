@@ -59,7 +59,7 @@ class Request
 	public $requestFile;
 	public $in;
 
-	public $style = "layout.xsl"; # processing instr: <?psp style href=".."
+	public $style = "layout.xsl"; # processing instr: <?psp style=".."
 
 	public function __construct( $requestURIRoots )
 	{
@@ -574,6 +574,10 @@ class DynamicRequestHandler extends RequestHandler
 
 		$debug and
 		debug('handler', "serialize style=" . $request->style );
+
+		if ( substr( $request->requestURI, -4 ) == '.xml' )
+			header( "Content-Type: text/xml" );
+		#sendmime( $fn );
 
 		echo serializeDoc( $doc,
 			array_reverse(
