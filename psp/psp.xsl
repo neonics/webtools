@@ -17,7 +17,10 @@
 >
 <!-- exclude-result-prefixes="psp" -->
 
+	<!--
 	<xsl:strip-space elements="xsl:* psp:* xsp:*"/>
+	<xsl:preserve-space elements="xsl:text"/>
+	-->
 
 	<xsl:template match="psp:page | xsp:page">
 		<xsl:choose>
