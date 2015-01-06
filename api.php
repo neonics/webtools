@@ -2,7 +2,7 @@
 //ob_start(); // so we can clear the buffer and send an error on fail
 
 // see api/ and .htaccess
-if ( !preg_match( "@api/([\w/]+)@", $_SERVER['REQUEST_URI'], $m ) ) {
+if ( !preg_match( "@api/([\w/\-_]+)@", $_SERVER['REQUEST_URI'], $m ) ) {
 	header("HTTP/1.1 400 Illegal call");echo "illegal call";exit;
 }
 //set_error_handler( function(/*integer*/ $errno,/* string*/ $errstr, string $errfile=null, int $errline=null, array $errcontext=null)
@@ -10,7 +10,23 @@ set_error_handler( function( $errno, $errstr, $errfile=null, $errline=null, $err
 {
 	//ob_end_clean();	// drop 
 
-	header("HTTP/1.1 404 Unknown API: " . $errcontext['m'][1]);
+	if ( isset( $errcontext['m'] ) )
+	{
+		header("HTTP/1.1 404 Unknown API: " . $errcontext['m'][1]);
+	}
+	else
+	{
+		switch ( $errno )
+		{
+			case 2:
+			case 8:
+				header("HTTP/1.1 500 API Error: [$errno] " . $errstr );
+				break;
+			default:
+				header("HTTP/1.1 500 API Error (errno=$errno, msg=$errstr)");
+		}
+	}
+
 	echo "<pre>ERROR: ".print_r( func_get_args(), 1 )."</pre>";
 
 	exit;
