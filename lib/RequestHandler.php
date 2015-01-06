@@ -408,13 +408,13 @@ class StaticRequestHandler extends RequestHandler
 
 			if ( is_file( $fn ) )
 			{
-				ob_end_clean();
+				if ( ob_get_level() ) ob_end_clean();
 				#ob_end_flush();
 				RequestHandler::sendFile( $fn );
 			}
 			else
 			{
-				ob_end_clean(); # ob_end_flush();
+				if ( ob_get_level() ) ob_end_clean(); # ob_end_flush();
 				RequestHandler::notFound( $request );
 				exit;
 			}
@@ -452,13 +452,13 @@ class ContentRequestHandler extends RequestHandler
 
 			if ( is_file( $fn ) )
 			{
-				ob_end_clean();
+				if ( ob_get_level() ) ob_end_clean();
 				#ob_end_flush();
 				RequestHandler::sendFile( $fn );
 			}
 			else
 			{
-				ob_end_flush();
+				if ( ob_get_level() ) ob_end_flush();
 				RequestHandler::notFound( $request );
 				exit;
 			}
@@ -518,7 +518,7 @@ class DynamicRequestHandler extends RequestHandler
 					if ( is_file( $in ) )
 					{
 						debug( 'request', "Fallback to $in" );
-						ob_end_clean(); // explicit clean
+						if ( ob_get_level() ) ob_end_clean(); // explicit clean
 						RequestHandler::sendFile( $in );
 						exit;
 					}
@@ -570,7 +570,7 @@ class DynamicRequestHandler extends RequestHandler
 		$doc = ModuleManager::transform( $doc );
 		ModuleManager::deinit();
 
-		ob_end_flush();
+		if ( ob_get_level() ) ob_end_flush();
 
 		$debug and
 		debug('handler', "serialize style=" . $request->style );

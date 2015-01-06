@@ -43,6 +43,9 @@ class TemplateRequestHandler extends RequestHandler
 	{
 		global $debug;
 
+		if ( ob_get_level() ) ob_end_clean(); // close/clear debug
+
+
 #		print_r( $request);
 
 		$matches;

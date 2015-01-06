@@ -396,7 +396,8 @@ EOF;
 				self::$sheetToModule[$sheet] = $m;
 				self::$modules[$m]["sheet"] = $z[0];
 			}
-ob_flush();
+
+			if ( ob_get_level() ) ob_flush();
 			loadXSL( $z );
 		}
 		else
