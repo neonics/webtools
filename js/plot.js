@@ -76,8 +76,8 @@
 				}
 				allplotdata.stats[c] = { min:min, max:max };
 				console.log( "extremes for ", c, ": min=", min, " max=", max );
-				if ( 0 )
-			//	if ( ! allplotdata.global_extremes )
+			//	if ( 0 )
+				if ( ! allplotdata.global_extremes )
 					for ( var i in allplotdata[c] )
 						//allplotdata[c][i][1] = min + ( allplotdata[c][i][1] - min ) / (max-min) * h;
 						allplotdata[c][i][1] = normalize( allplotdata[c][i][1], min, max, h ); // XXX change: min+... => h*min+ ....
