@@ -131,7 +131,8 @@
 				pos = e.target.getBoundingClientRect();
 				mousepos[0] = e.clientX - pos.left;
 				mousepos[1] = e.clientY - pos.top;
-				console.log("mousemove", canvas, arguments );
+				console.log("mousemove", canvas, arguments, mousepos );
+				canvas.ctx.clearRect(0,0,canvas.width,canvas.height);
 				draw( canvas, current_currency );
 			};
 		} );
@@ -173,8 +174,8 @@
 		var plotdata = canvas.allplotdata[currency];
 		var stats = canvas.allplotdata.stats[currency];
 		var ctx = canvas.ctx;
-		var w = canvas.w;
-		var h = canvas.h;
+		var w = canvas.width;
+		var h = canvas.height;
 		var offs = canvas.offs;
 		console.log("draw", arguments, mousepos );
 		if (plotdata === undefined )
