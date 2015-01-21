@@ -8,7 +8,7 @@
 	/**
 	 * get default: return var if set, else return default.
 	 */
-	function gd( &$var, $default )
+	function gd( &$var, $default = null)
 	{
 		return isset( $var ) ? $var : $default;
 	}
@@ -17,13 +17,13 @@
 	 * use this version when the first argument is a function call
 	 * or other non-referential type.
 	 */
-	function gd_( $var, $default )
+	function gd_( $var, $default = null )
 	{
 		return isset( $var ) ? $var : $default;
 	}
 
 
-	function gad( $array, $key, $default )
+	function gad( $array, $key, $default = null )
 	{
 		return array_key_exists( $key, $array ) && isset( $array[ $key ] )
 			? $array[ $key ] : $default;
