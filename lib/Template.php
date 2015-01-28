@@ -36,7 +36,7 @@ class Template
 			{$this->menu($request)}
 		</header>
 		<script src="{$request->requestBaseURI}js/menu.js"></script>
-		
+
 		<div class='alert alert-info dismissable'>
 			note: define template.php in the PHP include path to override
 		</div>
@@ -87,5 +87,20 @@ HTML;
 
 			return ob_get_clean() . $c;
 		}
+	}
+}
+
+/**
+ * The no-template. Use this for plain old php files that produce content that
+ * should not be templated:
+ *
+ *  <?php
+ *  echo "custom content";
+ *  return array( 'template' => new NullTemplate() );
+ *
+ */
+class NullTemplate{
+	public function main($request, $content) {
+		echo $content;
 	}
 }

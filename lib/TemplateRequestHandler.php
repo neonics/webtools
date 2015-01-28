@@ -79,7 +79,9 @@ class TemplateRequestHandler extends RequestHandler
 					#if ( ! isset( $_SESSION['user'] ) )
 					ModuleManager::loadModule( "psp" );
 					ModuleManager::loadModule( "auth" );
-					if ( ! auth_user() )
+
+					global $publicURIs;
+					if ( ! auth_user() && ! array_filter( $publicURIs, function($v)use($request){return $v == $request->requestURI;} ) )
 					{
 					  #header( "Location: $request->requestBaseURI"."login.html" );
 						#echo "login first.";
@@ -95,7 +97,7 @@ class TemplateRequestHandler extends RequestHandler
 						ob_start();
 						$request->template_data =
 						require_once( $file );
-						template_do( $request, ob_get_clean(), null );
+						template_do( $request, ob_get_clean(), is_array( $request->template_data ) ? gd( $request->template_data['template'] ) : null );
 					}
 					return true;
 				}
