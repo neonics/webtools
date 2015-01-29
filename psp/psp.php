@@ -82,13 +82,21 @@ EOF;
 		return isset( $_REQUEST[ $key ] ) ? $_REQUEST[ $key ] : $default;
 	}
 
+	/**
+	 * Evaluate an <xsp:expr>PHP code</xsp:expr>
+	 * Typically a PHP expression is expected, unless the code contains "return",
+	 * in which case a list of statements is accepted. For example:
+	 *
+	 *   <psp:expr>global $var; return $var;</psp:expr>
+	 *
+	 */
 	public function expr( $data )
 	{
 		debug('psp', "EVAL: $data");
-		$ret = eval( "return $data;");
+		$ret = eval( strpos($data, "return")===false? "return $data;" : $data );
 		debug('psp', "EVAL result: $ret");
 
-		return eval( "return $data;" );
+		return $ret;
 	}
 
 	public function isaction( $data )
@@ -169,16 +177,38 @@ EOF;
 	 */
 	public function module( $modname, $args = null )
 	{
+		debug("psp:module - args: <pre>".htmlentities(print_r($args,1))."</pre>");
 		// verify $args:
 		if ( $args !== null )
 		{
 			if ( is_array( $args ) && count( $args ) == 1 && is_object( $args[0] ) && get_class( $args[0] ) == 'DOMElement' )
 			{
-				// ok
+				// ok.
+				// Apply psp.xsl (processDoc).
+				//
+				// (Passing the result of xsl:apply-templates via a xsl:variable to the function as such in psp.xsl:
+				//   <xsl:variable name="arg"><xsl:apply-templates/></xsl:variable>
+				//   <xsl:apply-templates select="psp:function('module',string(@name), $arg)"/>
+				// would be better, but the value received through this mechanism is a string, not
+				// a DOMNodeList).
+				// NOTE: another solution would be to split xsp.xsl and apply only certain templates
+				// in sequence (such as first a global xsp:expr), however an <xsp:if><xsp:else> would not
+				// need to be evaluated. Further, the sequence would be lost, and side effects disordered.
+
+				$doc = new DOMDocument();
+				// The loadModule will ignore the container element and only process child elements,
+				// so we can name the element as we wish:
+				$doc->appendChild( $doc->createElement( "arg" ) );
+				// Only append the children, otherwise there is recursion (as the top node is <psp:module>).
+				for ( $i = 0; $i < $args[0]->childNodes->length; $i++)
+					$doc->documentElement->appendChild( $doc->importNode( $args[0]->childNodes->item($i), 1 ) );
+				$doc = ModuleManager::processDoc( $doc ); // apply psp.xsl, resolving any nested <xsp:expr> etc:
+				$args[0] = $doc->documentElement; // put it back
+
 			}
 			else
 			{
-				$this->errorMessage( "load module '$modname': illegal argument" );
+				$this->errorMessage( "load module '$modname': illegal argument (type ".gettype($args).": ".htmlentities($args).")" );
 			}
 		}
 

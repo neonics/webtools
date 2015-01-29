@@ -71,7 +71,16 @@
 		<xsl:value-of select="php:function('psp_arg', string(.))"/>
 	</xsl:template>
 
+	<xsl:template match="psp:expr" mode="psp"><!-- for recursive copy/apply-->
+		<xsl:call-template name="handle_psp_expr"/>
+	</xsl:template>
+
 	<xsl:template match="psp:expr">
+		<xsl:call-template name="handle_psp_expr"/>
+	</xsl:template>
+
+
+	<xsl:template name="handle_psp_expr">
 		<xsl:choose>
 			<xsl:when test="@slasharg and @one">
 				<xsl:value-of select="php:function('psp_slasharg', string(@slasharg), string(@one))"/>
@@ -226,6 +235,10 @@
 	</xsl:template>
 
 	<xsl:template match="psp:module">
+		<!--
+		<xsl:variable name="arg"><xsl:apply-templates select="." mode="psp"/></xsl:variable>
+		using $arg as last param converts it to string.....
+		-->
 		<xsl:value-of select="php:function('psp_module', string(@name), .)"/>
 	</xsl:template>
 

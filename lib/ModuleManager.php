@@ -161,7 +161,7 @@ class ModuleManager
 		}
 		else
 		{
-			debug( 'module', "[module $m]" . ( $args !== null ? "<pre><b>args:</b>\n".print_r($args,1)."</pre>" : "" ) );
+			debug( 'module', "[module $m]" . ( $args !== null ? "<pre><b>args:</b>\n".htmlentities(print_r($args,1))."</pre>" : "" ) );
 
 			self::$modules[ $m ] = Array();
 
