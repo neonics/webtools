@@ -102,9 +102,6 @@ if ( substr( $_SERVER['REQUEST_URI'], 0, 5 ) == '/api/' )	// also included as li
 {
 	// see accompanying ../../js/bar_chart.js
 
-	if ( ! isset( $_SESSION ) )	// we need to fetch the query string from the session
-		session_start();
-
 	$args = array(); // flat
 	$params = array(); // associative
 	foreach ( array( 'id', 'grouping', 'quantity', 'canvas-id', 'canvas-size' ) as $param )
@@ -129,12 +126,16 @@ if ( substr( $_SERVER['REQUEST_URI'], 0, 5 ) == '/api/' )	// also included as li
  */
 function query_execute( $query_id )
 {
+	Session::start();	// we need to fetch the query string from the session
+
 	$query = gd( $_SESSION[ $query_id ], null );
 	if ( $query == null )
 	{
 		error("no query associated with '$query_id'" );
 		return;
 	}
+
+	Session::close();
 
 	echo "<pre>$query</pre>";
 

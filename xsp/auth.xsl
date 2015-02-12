@@ -42,7 +42,7 @@ Produces:
 
       <xsp:init>
         <xsp:logic>
-					session_start();
+					Session::start();
 
 					foreach ($_POST as $k=>$v )
 					{

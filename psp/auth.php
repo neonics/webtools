@@ -33,9 +33,7 @@ class AuthModule extends AbstractModule
 		if ( $this->isAction( 'logout' ) )
 		{
 			unset( $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] );
-			foreach ( $_SESSION as $k=>$v )
-				unset( $_SESSION[$k] );
-			session_destroy();
+			Session::destroy();
 
 			foreach ( $_COOKIE as $k=>$v )
 				unset( $_COOKIE[$k] );

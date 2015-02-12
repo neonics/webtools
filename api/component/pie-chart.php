@@ -101,8 +101,6 @@ if ( substr( $_SERVER['REQUEST_URI'], 0, 5 ) == '/api/' )	// also included as li
 {
 	// see accompanying ../../js/pie_chart.js
 
-	if ( ! isset( $_SESSION ) )	// we need to fetch the query string from the session
-		session_start();
 
 	$args = array(); // flat
 	$params = array(); // associative
@@ -128,12 +126,14 @@ if ( substr( $_SERVER['REQUEST_URI'], 0, 5 ) == '/api/' )	// also included as li
  */
 function query_execute( $query_id )
 {
+	Session::start(); // we need to fetch the query string from the session
 	$query = gd( $_SESSION[ $query_id ], null );
 	if ( $query == null )
 	{
 		error("no query associated with '$query_id'" );
 		return;
 	}
+	Session::close();
 
 	$db = pie_chart_get_db();	// implemented in override
 
@@ -208,8 +208,16 @@ function renderPieChart( $canvas_id, $canvas_size, $totals, $grand_total = null,
 	$data = json_encode( $data );
 
 	$num = count( array_values( $totals ) );
-	$colors = implode(',', array_map( function($i) use ($num) {
-		return "rgb2hex( hsv2rgb( ".(360*$i/$num).",1,1) )";
+	mt_srand( (1000*1000*microtime(true)) % (1<<31) );
+	$rand = mt_rand(0,100);
+	echo "RANDOM: $rand";
+	$colors = implode(',', array_map( function($i) use ($num,$rand) {
+		return sprintf( "rgb2hex( hsv2rgb( %f, %f, %f ) )",
+			360*$i/$num, 1,1//.8, .7
+		);
+		//return "rgb2hex( hsv2rgb( ".(360*$i/$num).",1,1) )";
+		//return "rgb2hex( hsv2rgb( ".(360*$i/$num).",.5,.5) )";
+		//return sprintf( "rgb2hex( hsv2rgb( %f, %f, %f ) )", $angle, 0, .9 - .8*$i/$num );
 	}, range(0, $num) ) );
 
 

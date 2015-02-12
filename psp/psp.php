@@ -39,8 +39,7 @@ class PSPModule extends AbstractModule
 
 	public function init()
 	{
-		if ( session_status() === PHP_SESSION_NONE )
-			session_start();
+		Session::start();
 
 		$fn = "errorHandler";
 
