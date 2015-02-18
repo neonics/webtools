@@ -91,14 +91,15 @@ HTML;
 
 		// hack for now - keep styles local (.autocomplete-suggestions)
 		box.css({
-			position: 'relative',
+			position: 'absolute',//'relative',
 			boxShadow: '1px 2px 3px 4px rgba(128,190,128,.5)',
 			width: undefined !== here.parent().width() ? here.parent().width() + 5 : '200px',
 			minWidth: '100px',
-			left: 0,//here.parent().position().left,
-			'top': 10,//here.parent().height(),
+			left: here.parent().position().left,// nothing when relative
+			'top': here.parent().position().bottom,//10 when relative
 	//		padding: '1px',
 			boxSizing: 'border-box',
+			background: 'white',
 		});
 
 		console.log("input coords:", here.parent(), here.parent().position() );
@@ -107,6 +108,8 @@ HTML;
 			position: 'absolute',
 			left: here.parent().position().left,
 			top: here.parent().position().top,
+			lineHeight: here.parent().css('line-height'),
+			height: here.parent().height(),
 			color: 'rgba(0,0,0,.5)',
 			padding: '3px', // inclusive border etc..
 		});
