@@ -2,6 +2,9 @@
 if ( ! defined( 'CLASSLOADER' ) )
 	define( 'CLASSLOADER', 'ClassLoader' );
 
+require_once( __DIR__ . "/Util.php" );
+require_once( __DIR__ . "/Debug.php" );
+
 class ClassNotFoundException extends Exception {}
 class ClassLoader
 {

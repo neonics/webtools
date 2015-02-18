@@ -63,10 +63,22 @@
 			debug( 'resource', "[$this->label] register " . $this->relPaths[ $type ] . " type $type" );
 		}
 
+		private static function maybeinit() {
+			if ( ! self::$resources )
+			{
+				global $request, $requestURIRoots, $staticContent, $redir;
+				if ( ! isset( $request ) )
+					$request = RequestHandler::init( $requestURIRoots, $staticContent, $redir );
+
+				setupPaths( $_SERVER['DOCUMENT_ROOT'] );
+			}
+		}
 
 		public static function findFile( $relFile, $type = "default", $label = null )
 		{
 			global $debug;
+
+			self::maybeinit();
 
 			$debug > 3 and debug( 'resource', "find $type file '$relFile'" );
 
@@ -90,6 +102,8 @@
 		public static function findFiles( $relFile, $type = 'default' )
 		{
 			global $debug;
+
+			self::maybeinit();
 
 			$ret = Array();
 

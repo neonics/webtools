@@ -210,7 +210,9 @@ abstract class RequestHandler
 			self::add( $name, new $class() );
 		}
 		self::add( 'log', new LogRequestHandler() );
+		if ( $redir !== null )
 		self::add( 'redirect', new RedirectRequestHandler( $redir ) );
+		if ( $staticContent !== null )
 		self::add( 'static', new StaticRequestHandler( $staticContent ) );
 		self::add( 'content', new ContentRequestHandler( Array('content/') ) );
 		self::add( 'dynamic', new DynamicRequestHandler() );
