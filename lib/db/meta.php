@@ -85,6 +85,9 @@ function db_get_tables_meta( $db )
 			foreach ( $keys as $table => $columns )
 				$tables[ $table ]['keys'] = $columns;
 
+			foreach ( db_get_primary_keys( $db, $table ) as $table => $col )
+				$tables[ $table ]['primary_key'] = $col;
+
 			foreach ( db_get_inheritance( $db ) as $r )
 			{
 				if ( ! isset( $tables[$r->sub]['inherits'] )
@@ -113,6 +116,27 @@ function db_get_rows( $db )
 	return $db
 	->query("SELECT * FROM information_schema.columns WHERE table_schema in( 'public', '$db->name' ) ORDER BY ordinal_position")
 	->fetchAll( PDO::FETCH_OBJ );
+}
+
+function db_get_primary_keys( $db, $table )
+{
+	$sth = $db->prepare( <<<SQL
+SELECT k.column_name, t.table_name
+FROM information_schema.table_constraints t
+JOIN information_schema.key_column_usage k
+USING(constraint_name,table_schema,table_name)
+WHERE t.constraint_type='PRIMARY KEY'
+  AND t.table_schema=?
+SQL
+#  AND t.table_name=?
+	);
+	$sth->execute( array( $db->name ) );
+
+	$ret = array();
+	foreach ( $sth->fetchAll( PDO::FETCH_ASSOC ) as $i => $row )
+		$ret[ $row['table_name'] ] = $row[ 'column_name'];
+
+	return $ret;
 }
 
 /**
