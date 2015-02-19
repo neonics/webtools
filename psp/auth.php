@@ -9,8 +9,6 @@ class SecurityException extends Exception
 
 class AuthModule extends AbstractModule
 {
-	private $roles = array( "Kenney" => array( "author" ) );
-
 	private $authTable;
 
 	public function __construct()
@@ -25,6 +23,8 @@ class AuthModule extends AbstractModule
 	public function init()
 	{
 		global $xmldb, $request; // XXX ref
+
+		Session::start();	// auth requires session
 
 		ModuleManager::loadModule( "psp" );
 		psp_module( 'db' );
