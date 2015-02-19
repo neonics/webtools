@@ -9,7 +9,8 @@
 		debug( $catOrMsg, isset( $exception ) ? $themsg  . $exception : $themsg );
 		//error( $catOrMsg.(isset( $exception ) ? $themsg  . $exception : $themsg ) );
 		//error( "fatal error, exiting." );
-		die( "<pre>".__FILE__."</pre><pre style='color:red'><b>[$catOrMsg]</b> ".(isset( $exception ) ? $themsg  . $exception : $themsg ) );
+		die( #"<pre>".__FILE__."</pre>"
+		"<pre style='color:red'><b>[$catOrMsg]</b> ".(isset( $exception ) ? $themsg  . $exception : $themsg ) );
 		exit;
 	}
 
