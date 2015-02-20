@@ -44,6 +44,24 @@ set_include_path(get_include_path()
 );
 
 
+# authentication
+{
+	// needed to load psp/auth.php in AuthRequestHandler
+	$pspLogicDir = "psp";	# otherwise will use logic/
+	$pspContentDir = "content";
+	$pspStyleDir = "style";
+
+	require_once("RequestHandler.php");
+	$request = new Request( array('/') );
+	require_once('Resource.php');
+  setupPaths( $pspBaseDir );# dirname( __FILE__ ) );
+
+	ModuleManager::loadModule( "auth" );
+	if ( ! auth_user() )
+		fatal('auth', "authentication required");
+	Session::close();
+}
+
 #if( file_exists( __DIR__."/api/".$m[1].".php" ) )
 	require_once( __DIR__."/api/".$m[1].".php" );
 #else
