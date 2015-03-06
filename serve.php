@@ -20,6 +20,9 @@
 	// 4 -
 $PSP_TIMING_BEGIN = microtime(true);
 
+if ( !isset( $psp_timing_show ) )
+$psp_timing_show = true;
+
 try
 {
 	if (get_magic_quotes_gpc()) {
@@ -84,5 +87,5 @@ try
 $PSP_TIMING_END = microtime(true);
 $timing = sprintf( "done in %f ms", 1000* ( $PSP_TIMING_END - $PSP_TIMING_BEGIN ) );
 if ( $debug ) debug('serve', $timing );
-else echo "<!-- $timing -->";
+else if ( $psp_timing_show) echo "<!-- $timing -->";
 ?>
