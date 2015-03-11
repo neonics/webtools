@@ -25,7 +25,7 @@
 
 	function gad( $array, $key, $default = null )
 	{
-		return array_key_exists( $key, $array ) && isset( $array[ $key ] )
+		return $array !== null && array_key_exists( $key, $array ) && isset( $array[ $key ] )
 			? $array[ $key ] : $default;
 	}
 
