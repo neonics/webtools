@@ -60,6 +60,7 @@ class Session
 		{
 			session_unset();
 			session_destroy();
+			session_start();
 		}
 
 		$_SESSION['__ACCESSED__'] = $time;
