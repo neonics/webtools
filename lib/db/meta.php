@@ -85,7 +85,7 @@ function db_get_tables_meta( $db )
 			foreach ( $keys as $table => $columns )
 				$tables[ $table ]['keys'] = $columns;
 
-			foreach ( db_get_primary_keys( $db, $table ) as $table => $col )
+			foreach ( db_get_primary_keys( $db ) as $table => $col )
 				$tables[ $table ]['primary_key'] = $col;
 
 			foreach ( db_get_inheritance( $db ) as $r )
@@ -118,7 +118,7 @@ function db_get_rows( $db )
 	->fetchAll( PDO::FETCH_OBJ );
 }
 
-function db_get_primary_keys( $db, $table )
+function db_get_primary_keys( $db )
 {
 	$sth = $db->prepare( <<<SQL
 SELECT k.column_name, t.table_name
