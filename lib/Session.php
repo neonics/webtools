@@ -42,9 +42,22 @@ class Session
 
 	public static function start()
 	{
+		global $debug;
+		$debug > 1 and debug( 'session', "start" );
+
 		if ( ! isset( $_SESSION ) || session_status() === PHP_SESSION_NONE ) // catch duplicate calls
 			session_start();
-		// else warn
+		else // warn
+			if ( $debug > 1 )
+			{
+				debug( 'session', "already started!" );
+			}
+
+		if ( $debug > 2 ) {
+			ob_start();debug_print_backtrace();$t = ob_get_clean();
+			debug( 'session', "trace: <pre>$t</pre>" );
+		}
+				
 
 		$time = time();
 
@@ -75,12 +88,16 @@ class Session
 	 */
 	public static function close()
 	{
+		global $debug;
+		$debug > 1 and debug( 'session', "close" );
 		//file_put_contents("/tmp/webtools-session.log", "[".date('c')."] [{$_SERVER['REQUEST_URI']}] close session ".session_id(). "\n", FILE_APPEND);
 		session_write_close();
 	}
 
 	public static function destroy()
 	{
+		global $debug;
+		$debug > 1 and debug( 'session', "destroy" );
 		//file_put_contents("/tmp/webtools-session.log", "[".date('c')."] [{$_SERVER['REQUEST_URI']}] end session ".session_id(). "\n", FILE_APPEND);
 		foreach ( $_SESSION as $k=>$v )
 			unset( $_SESSION[$k] );

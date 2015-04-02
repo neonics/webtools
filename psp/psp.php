@@ -39,7 +39,7 @@ class PSPModule extends AbstractModule
 
 	public function init()
 	{
-		Session::start();
+		//	Session::start();
 
 		$fn = "errorHandler";
 
