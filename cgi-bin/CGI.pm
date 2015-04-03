@@ -32,23 +32,32 @@ sub constructor
 {
 	my ($self, @args) = @_;
 
+	$self->{form} = $self->parseRequest();
+
+	if ( 0 ) {
+	map {
+		warn "  $_ = $self->{form}{$_}\n";
+	} keys %{ $self->{form} };
+	}
+}
+
+
+sub _initdb
+{
+	my ($self, @args) = @_;
+
+	defined( $self->{db} ) and return;
+
 	tie my %db, 'DB', $dbfilename;
 	$self->{db} = \%db;
 
 	if ( scalar %{ $self->{db}{users} } <= 0)
 	{
 		warn "Initializing database..\n";
-		$self->{db}{users} = {kenney=>{root=>'override'};
+		$self->{db}{users} = {kenney=>{root=>'override'}};
 	}
-
-	$self->{form} = $self->parseRequest();
-
-#warn "FORM:\n";
-	map {
-		warn "  $_ = $self->{form}{$_}\n";
-
-	} keys %{ $self->{form} };
 }
+
 
 sub referer
 {
@@ -66,8 +75,10 @@ sub scriptURL
 sub DESTROY
 {
 	my ($self) = shift;
-	defined $self->{db} and untie $self->{db}
+	defined $self->{db} and do {
+		untie $self->{db}
 		or warn "Cannot close database: $!";
+	};
 }
 
 sub getCookie
@@ -101,6 +112,7 @@ sub getSession
 	my $cookie = $self->getCookie($cookieName);
 	warn $cookie ? "Cookie: $cookie\n" : "No cookie\n";
 
+	$self->_initdb;
 	my $foo = $cookie ? $self->{db}{sessions}{$cookie} : undef;
 
 	if ( defined $foo )
@@ -120,6 +132,7 @@ sub deleteSession
 
 	my $sid = $sessionId || $self->getCookie();
 
+	$self->_initdb;
 	warn "Deleting session $sid: $self->{db}{sessions}{$sid}\n";
 	delete $self->{db}{sessions}{$sid};
 	print "Set-Cookie: $cookieName=$sid; Max-Age: 0; Path=$cookiePath;\n";
@@ -147,6 +160,7 @@ sub createSession
 	warn "Set-Cookie: $cookieName=$sid; Max-Age: $maxCookieAge; Path= $cookiePath\n";
 	print "Set-Cookie: $cookieName=$sid; Max-Age: $maxCookieAge; Path= $cookiePath\n";
 
+	$self->_initdb;
 	$self->{db}{sessions}{$sid} = { username=>$username };
 	return $self->{db}{sessions}{$sid};
 }
@@ -154,6 +168,7 @@ sub createSession
 sub cryptPass
 {
 	my ($self, $username) = @_;
+	$self->_initdb;
 	if ( defined( $self->{db}{users}{$username} ) )
 	{
 		return crypt $self->{db}{users}{$username}, 303;
@@ -171,6 +186,7 @@ sub authenticate
 	if ( defined($username) && defined ($password ) )
 	{
 warn "Authenticate: user=$username, pass=$password\n";
+		$self->_initdb();
 		return $self->{db}{users}{$username}{password} eq $password ? 1 : 0;
 	}
 	else
