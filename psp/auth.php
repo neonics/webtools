@@ -2,6 +2,8 @@
 /**
  * author: Kenney Westerhof <kenney@neonics.com>
  */
+require_once( 'Session.php' );
+
 class SecurityException extends Exception
 {
 	public function __construct( $msg ) { parent::__construct( $msg ); }

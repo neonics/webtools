@@ -13,6 +13,8 @@
  *
  * @author Kenney Westerhof
  */
+require_once( 'RequestHandler.php' );
+
 	class DirectoryResource
 	{
 		// either a fallback-chain and one global resource,

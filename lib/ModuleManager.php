@@ -2,6 +2,8 @@
 /**
  * author: Kenney Westerhof <kenney@neonics.com>
  */
+require_once( 'Debug.php' );
+require_once( 'DirectoryResource.php' );
 
 interface IModule
 {
@@ -163,6 +165,7 @@ class ModuleManager
 		{
 			debug( 'module', "[module $m]" . ( $args !== null ? "<pre><b>args:</b>\n".htmlentities(print_r($args,1))."</pre>" : "" ) );
 
+
 			self::$modules[ $m ] = Array();
 
 			$pspLogic = DirectoryResource::findFile( "$m.php", 'logic' );
@@ -179,6 +182,8 @@ class ModuleManager
 
 				debug( 'module', "LOGIC $pspLogic INCLUDED");
 			}
+			else
+				echo( "<pre style='background-color:red;color:white'>module not found: $m</pre>" );
 
 			// the code below is not included within the conditional above
 			// as the core may provide pre-loaded modules.
