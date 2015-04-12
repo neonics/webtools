@@ -72,7 +72,7 @@ require_once( 'RequestHandler.php' );
 				if ( ! isset( $request ) )
 					$request = RequestHandler::init( $requestURIRoots, $staticContent, $redir );
 
-				setupPaths( $_SERVER['DOCUMENT_ROOT'] );
+				setupPaths( __DIR__ . "/../" ); // XXX update this when moving the file
 			}
 		}
 
@@ -177,7 +177,7 @@ require_once( 'RequestHandler.php' );
 		$baseDir = str_replace( '\\', '/', $baseDir );
 
 		$pspContentDir = gd( $pspContentDir, 'content' );
-		$pspLogicDir = gd( $pspLogicDir, 'logic' );
+		$pspLogicDir = gd( $pspLogicDir, 'psp' );
 		$pspStyleDir = gd( $pspStyleDir, 'style' );
 
 		$pspBaseDir = $baseDir;
@@ -211,7 +211,7 @@ require_once( 'RequestHandler.php' );
 		$dbdir = DirectoryResource::findFile( "db" );
 		if ( isset( $dbdir ) )
 		{
-		debug('!!!', "add db dir $dbdir - $contentDir - $pspContentDir");
+			debug('!!!', "add db dir $dbdir - $contentDir - $pspContentDir");
 			$dr = new DirectoryResource( $dbdir, 'db' );
 			$dr->addResourceRelPath( 'content', gd( $contentDir, $pspContentDir ) );
 		}
