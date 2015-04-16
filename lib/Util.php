@@ -105,6 +105,8 @@
 			case "jpg": return "image/jpeg";
 			case "ttf": return "font/truetype";
 			case "woff": return "application/font-woff";
+			case "woff2": return "application/font-woff2";
+			# TODO: .eot, .svg
 
 			default: return null;
 		}
