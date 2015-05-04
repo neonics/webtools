@@ -198,10 +198,17 @@ class EMail extends MimeMessage
 				#$body .= "Content-Type: $part->type; charset=utf-8; format=flowed\r\n\r\n";
 	}
 
-	public function sender($r) { $this->sender = $r; return $this; }
-	public function recipient($r) { $this->recipient = $r; return $this; }
-	public function subject($r) { $this->subject = $r; return $this; }
-	public function body($r) { $this->body = $r; return $this; }
+	private function _attr( $k, $v ) {
+		if ( $v === null )
+			return $this->$k;//$k=='body' ? $this->format_body() : $this->$k;
+		$this->$k = $v;
+		return $this;
+	}
+
+	public function sender		($r = null)	{ return $this->_attr( 'sender',		$r ); }
+	public function recipient	($r = null)	{ return $this->_attr( 'recipient', $r ); }
+	public function subject		($r = null)	{ return $this->_attr( 'subject', 	$r ); }
+	public function body			($r = null)	{ return $this->_attr( 'body',			$r ); }
 
 }
 
