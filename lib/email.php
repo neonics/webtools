@@ -25,6 +25,7 @@
 class MimeMessage
 {
 	private static $_idcounter = 0;
+	protected $_id = null;
 	protected $parts= array();
 	protected $boundary = null;
 	private $subtype;
@@ -33,19 +34,25 @@ class MimeMessage
 	 * @param $subtype "mixed" || "alternative" || "related" etc
 	 */
 	public function __construct( $subtype = "mixed" ) {
-		self::$_idcounter++;
+		$this->_id = self::$_idcounter++;
 		$this->subtype = $subtype;
 	}
 
 	protected function init()
 	{
-		if ( ! $this->boundary && count( $this->parts ) )
-			$this->boundary = "part" . crc32( sprintf("%f-%d", microtime(true), self::$_idcounter ) );
+		if ( ! $this->boundary && count( $this->parts ) ) # > 1 ) // adding parts (text()/html()) REQUIRES mime!
+			$this->boundary = "part" . crc32( sprintf("%f-%d", microtime(true), $this->_id ) );
+			//$this->boundary = "part" . $this->_id; // for debugging sequences
 	}
 
 	protected function boundary( $default = null )
 	{
 		return $this->boundary ? "\r\n--$this->boundary\r\n" : $default;
+	}
+
+	protected function boundaryEnd( $default = null )
+	{
+		return $this->boundary ? "\r\n--$this->boundary--\r\n" : $default;
 	}
 
 	protected function mime_headers()
@@ -74,7 +81,7 @@ class MimeMessage
 					: array (
 						"Content-Transfer-Encoding: base64",
 						"",
-						chunk_split( base64_encode( $data ), 68, "\n" )
+						chunk_split( base64_encode( $data ), 68, "\r\n" )
 					)
 			) )
 		;
@@ -86,8 +93,11 @@ class MimeMessage
 	{
 		$this->parts[] =
 			$content instanceof MimeMessage ? $content->format() :
-			"Content-Type: $type; charset=$charset" . ( $format ? "; format=$format" : "" ) . "\r\n"
-		. "\r\n$content"
+			"Content-Type: $type"
+			. "; charset=" . gd_( $charset, 'utf-8' )
+			. ( $format ? "; format=$format" : "" )
+			. "\r\n"
+			. "\r\n$content"
 		;
 	}
 
@@ -97,15 +107,18 @@ class MimeMessage
 	public function format()
 	{
 		$this->init();
-		return implode("\r\n",
-			array(
-				"Content-Type: multipart/$this->subtype; boundary=\"$this->boundary\"", # multipart/alternative
-				# XXX this->mime_headers()
-				$this->boundary().
-				implode( $this->boundary(), $this->parts ).
-				$this->boundary()
-			)
-		);
+		return count( $this->parts ) > 1
+			? implode("\r\n",
+					array(
+						"Content-Type: multipart/$this->subtype; boundary=\"$this->boundary\"", # multipart/alternative
+						# XXX this->mime_headers()
+						$this->boundary().
+						implode( $this->boundary(), $this->parts ).
+						$this->boundaryEnd()
+					)
+				)
+			: $this->parts[0]
+			;
 	}
 }
 
@@ -118,9 +131,9 @@ class EMail extends MimeMessage
 	public $headers = array();
 	public $body;
 
-	public function __construct()
+	public function __construct( $subtype = "mixed" )
 	{
-		parent::__construct( "mixed" );
+		parent::__construct( $subtype );
 	}
 
 	protected function init()
@@ -182,20 +195,22 @@ class EMail extends MimeMessage
 
 	private function format_body()
 	{
-		return implode(
-			$this->boundary("\r\n"),
-			array_merge
+		$this->init();	// for boundary
+
+		return ! count( $this->parts )
+		? $this->body
+		: implode
 			(
-				! count($this->parts) ? array() : array_merge(
-					array( "This is a MIME-multipart encoded message" ),
-					$this->body ? array( $this->body ) : array(),
-					$this->parts,
-					array( "" ) // for closing boundary
+				$this->boundary("\r\n"),
+				array_merge
+				(
+						array( "This is a MIME-multipart encoded message" ),
+						$this->body ? array( $this->body ) : array(),
+						$this->parts
 				)
 			)
-		);
-
-				#$body .= "Content-Type: $part->type; charset=utf-8; format=flowed\r\n\r\n";
+			. $this->boundaryEnd()
+		;
 	}
 
 	private function _attr( $k, $v ) {
@@ -212,5 +227,5 @@ class EMail extends MimeMessage
 
 }
 
-function new_email() { return new EMail(); }
+function new_email( $subtype = 'mixed' ) { return new EMail( $subtype ); }
 function new_message( $subtype = "mixed" ) { return new MimeMessage( $subtype ); }
