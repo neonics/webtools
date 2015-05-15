@@ -49,10 +49,24 @@
   var old = $.fn.component
 
   $.fn.component = function (option) {
+
+
     return this.each(function () {
       var $this = $(this)
         , data = $this.data('component')
         , options = typeof option == 'object' && option
+
+			// xxx for autocomplete, inject = $this
+			// which adds tags under <input>.
+			// this doesn't work for textarea:
+			console.log("EL:", $this);
+
+			var inject = $this;
+			if ( $this[0].nodeName == 'TEXTAREA' )
+			{
+				if ( ! $this[0].id ) $this[0].id = 'component-auto-id-' + $.fn.component._idcounter++;
+				inject = $this.after("<span data-component-target='#"+$this[0].id+"'></span>").next();
+			}
 
       if (!data) $this.data('component', (data = new Component(this, options)))
       if (typeof option == 'string') data[option]();
@@ -100,7 +114,8 @@
 				success:function(data,status,jqXHR){
 					//console.log("success","$this=",$this,"this=",this,"status=",status,"data=",data); 
 					if ( spinner != null ) spinner.remove();
-					var a = $this.append( data )
+
+					var a = inject.append( data )
 
 					a.find( '[data-component]' ).each(function () {
 						var $nested = $(this)
@@ -128,6 +143,7 @@
 
   $.fn.component.Constructor = Component
   $.fn.component.defaults = {}
+	$.fn.component._idcounter = 0;
 
   $.fn.component.noConflict = function () {
     $.fn.component = old;
