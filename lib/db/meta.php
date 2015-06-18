@@ -114,7 +114,7 @@ function db_get_tables_meta( $db )
 function db_get_rows( $db )
 {
 	return $db
-	->query("SELECT * FROM information_schema.columns WHERE table_schema in( 'public', '$db->name' ) ORDER BY ordinal_position")
+	->query("SELECT * FROM information_schema.columns WHERE table_schema NOT IN ( 'information_schema', 'pg_catalog' ) ORDER BY ordinal_position")
 	->fetchAll( PDO::FETCH_OBJ );
 }
 
@@ -227,13 +227,17 @@ function db_get_references( $db )
 	// XXX FIXME - mysql has exra rc.table_name/referenced_table_name which psql does not.
 
 	//NOTE:
-	// mysql stores dbname in schema (and 'def' in catalog);
-	// psql in catalog (and 'public' in schema)
+	// mysql stores dbname in constaint_schema, (and 'def' in constraint_catalog);
+	// psql stores dbname in  constraint_catalog (and 'public' in constraint_schema)
 
 	$query = "";
 	switch ( $db->driver )
 	{
 		//https://bowerstudios.com/node/1052
+
+		// here,
+		// tc.table_catalog is the database name, (postgres specific), and
+		// tc.constraint_schema is the schema name ('public' etc) - we don't filter it.
 		case 'pgsql':$query=<<<SQL
 		SELECT
 				tc.constraint_name AS fk_constraint_name,
@@ -253,6 +257,8 @@ SQL;
 		break;
 
 		case 'mysql':
+			// here, there is no table_catalog,
+			// and constraint_schema is database name.
 			$query=
 			/* simple (too simple?)
 			 <<<SQL
