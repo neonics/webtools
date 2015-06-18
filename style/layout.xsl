@@ -414,6 +414,9 @@
 				</xsl:if>
 			</xsl:if>
 
+			<noscript>
+				<p><b>Warning:</b> Javascript is required to log in, but it is disabled! </p>
+			</noscript>
 			<script type="text/javascript" src="{$psp:requestBaseURI}js/crypto/sha1.js"/>
 			<script type="text/javascript">
 				<xsl:text disable-output-escaping="yes">
