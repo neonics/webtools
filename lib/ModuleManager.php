@@ -237,13 +237,19 @@ class ModuleManager
 
 		$mi = self::$modules[ $m ][ "instance" ];
 
+		$classes = array();
+		$methods = array();
 		$rc = new ReflectionClass( $mi );
 
-		$methods = $rc->getMethods( ReflectionMethod::IS_PUBLIC );
+		do {
+			$classes[] = $rc->name;
+			foreach ( $rc->getMethods( ReflectionMethod::IS_PUBLIC ) as $m )
+				$methods[ $m->name ] = $m;
+		} while ( ( $rc = $rc->getParentClass() ) && $rc->getName() != 'AbstractModule' );
 
-		foreach ( $methods as $method )
+		foreach ( $methods as $mname => $method )
 		{
-			if ( $method->class == get_class( $mi )
+			if ( in_array( $method->class, $classes ) # == get_class( $mi )
 				&& substr( $method->name, 0, 1) != '_' )
 			{
 				self::exportMethod( $mi, $method );
