@@ -11,8 +11,8 @@
 	xmlns:xi="http://www.w3.org/2001/XInclude"
 >
 	<psp:content>
-		Number of users: <auth:numusers/>
 		<auth:firstrun>
+
 			<auth:success>
 				<l:section>
 					<l:message type="danger">
@@ -26,19 +26,19 @@
 					<l:input type="password" name="password" value="admin"/><l:br/>
 					<l:input type="submit" name="action:auth:firstuser" value="Create"/>
 				</l:form>
-
 			</auth:success>
-			<auth:fail>
-				<xi:include href="authmenu.xml"/>
-				<auth:listUsers/>
 
+			<auth:fail>
 				<auth:user>
 					<auth:fail>
-							<auth:login/>
+						<auth:login/>
 					</auth:fail>
 					<auth:success>
 						<auth:permission role="admin">
-							<db:listTable/>
+							<xi:include href="authmenu.xml"/>
+							<l:p> Number of users: <auth:numusers/> </l:p>
+							<auth:listUsers/>
+							<auth:listRoles/>
 							<!--
 							<l:form method="POST">
 								<l:input type="text" name="name"/>
@@ -48,10 +48,9 @@
 						</auth:permission>
 					</auth:success>
 				</auth:user>
-
 			</auth:fail>
-		</auth:firstrun>
 
+		</auth:firstrun>
 
 	</psp:content>
 </psp:page>

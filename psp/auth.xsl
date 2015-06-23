@@ -76,6 +76,15 @@ Produces:
 		<xsl:apply-templates select="php:function('auth_listUsers')" mode="list"/>
 	</xsl:template>
 
+	<xsl:template match="auth:listRoles">
+		<xsl:apply-templates select="php:function('auth_listRoles')" mode="list"/>
+	</xsl:template>
+
+	<!-- render permission denied even in list mode -->
+	<xsl:template match="l:message" mode="list">
+		<xsl:apply-templates select="."/>
+	</xsl:template>
+
 	<xsl:template match="auth:auth" mode="list">
 		<table>
 			<tr><th>Users</th><th>Roles</th></tr>
@@ -154,7 +163,15 @@ Produces:
 	</xsl:template>
 
 	<xsl:template match="auth:roles">
-		<xsl:value-of select="php:function('auth_roles')"/>
+		<xsl:apply-templates select="php:function('auth_xml_roles')" mode="list"/>
+	</xsl:template>
+
+	<xsl:template match="auth:roles" mode="list">
+		<ul>
+			<xsl:for-each select="auth:role">
+				<li><xsl:value-of select="@name"/></li>
+			</xsl:for-each>
+		</ul>
 	</xsl:template>
 
   <xsl:template match="@*|node()" priority="-1">

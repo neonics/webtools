@@ -22,7 +22,7 @@ global $debug; $debug = 2;
 
 ModuleManager::loadModule( 'auth' );
 
-$roles = explode(',', auth_roles() );
+$roles = auth_roles();
 
 $tmp_id = "auth".rand();
 

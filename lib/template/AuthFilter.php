@@ -44,7 +44,7 @@ class AuthFilter
 						</xsl:when>
 XSL;
 				},
-				explode(',', auth_roles() ) 
+				auth_roles()
 			)
 
 		);
