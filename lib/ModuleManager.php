@@ -113,6 +113,12 @@ abstract class AbstractModule implements IModule
 		}
 
 		debug( 'core', 'add message: ' . str_replace( "<", "&lt;", $l->saveXML( $m ) ) );
+
+		global $debug;
+		if ( $debug > 2 ) {
+			ob_start(); debug_print_backtrace();
+			debug( 'core', 'trace: <pre>' . ob_get_clean() . "</pre>" );
+		}
 		return $m;
 	}
 
@@ -130,6 +136,10 @@ class ModuleManager
 	public static $modules = Array();
 	private static $stylesheets = Array();
 	private static $xsltFunctions = Array();
+
+	static function isModuleLoaded( $m ) {
+		return array_key_exists( $m, self::$modules );
+	}
 
 	static function loadModule( $m, $args = null )
 	{
@@ -226,6 +236,9 @@ class ModuleManager
 					debug( 'module', "        ".$s[$i]);
 			}
 		}
+
+		// modules are not always instantiated
+		return gad( self::$modules[$m], 'instance' );
 	}
 
 	private static function createProxies( $m )

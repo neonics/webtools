@@ -15,7 +15,7 @@ CREATE TYPE user_status AS ENUM('new','normal','disabled');
 CREATE TABLE users (
 	id		SERIAL NOT NULL,
 	username	varchar (32) NOT NULL,
-	password	varchar (32) NOT NULL,
+	password	varchar (40) NOT NULL,
 	password_type	varchar (32) NOT NULL,
 	activation_code	varchar (32) NULL,
 	creation_date	timestamptz NOT NULL default current_date,

@@ -100,7 +100,6 @@ Produces:
 	</xsl:template>
 
 
-
 	<xsl:template match="auth:firstrun">
 		<xsl:call-template name="ifelse">
 			<xsl:with-param name="condition" select="php:function('auth_firstrun')"/>
@@ -113,9 +112,15 @@ Produces:
 		</xsl:call-template>
   </xsl:template>
 
+  <xsl:template match="auth:role">
+		<xsl:call-template name="ifelse">
+			<xsl:with-param name="condition" select="php:function('auth_role', string(@role))"/>
+		</xsl:call-template>
+  </xsl:template>
+
   <xsl:template match="auth:permission">
 		<xsl:call-template name="ifelse">
-			<xsl:with-param name="condition" select="php:function('auth_permission', string(@role))"/>
+			<xsl:with-param name="condition" select="php:function('auth_permission', string(@permission))"/>
 		</xsl:call-template>
   </xsl:template>
 

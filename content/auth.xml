@@ -34,7 +34,7 @@
 						<auth:login/>
 					</auth:fail>
 					<auth:success>
-						<auth:permission role="admin">
+						<auth:role role="admin">
 							<xi:include href="authmenu.xml"/>
 							<l:p> Number of users: <auth:numusers/> </l:p>
 							<auth:listUsers/>
@@ -45,7 +45,7 @@
 								<l:input type="submit" name="action:auth:db-create" value="Create"/>
 							</l:form>
 							-->
-						</auth:permission>
+						</auth:role>
 					</auth:success>
 				</auth:user>
 			</auth:fail>

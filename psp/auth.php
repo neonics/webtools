@@ -17,8 +17,8 @@ class SecurityException extends Exception
 
 abstract class AbstractAuthModule extends AbstractModule
 {
-
 	protected $db;
+
 
 	protected function __construct( $db = null )
 	{
@@ -31,6 +31,31 @@ abstract class AbstractAuthModule extends AbstractModule
 	{
 	}
 
+
+	protected $options = array(
+		'auto-create-roles'				=> false,
+		'auto-create-permissions' => false
+	);
+
+	public function setOption( $option_name, $option_value )
+	{
+		if ( in_array( $option_name, array_keys( $this->options ) ) )
+			$this->options[ $option_name ] = $option_value;
+		else
+			throw new SecurityException( "unknown option '$option_name'" );
+	}
+
+	private $realm;
+
+	public function setRealm( $realm ) {
+		$this->realm = $realm;
+		return $this;
+	}
+
+	protected function realm() {
+		return $this->realm;
+	}
+
 	protected abstract function _init();
 	protected abstract function _db_begin();
 	protected abstract function _db_commit();
@@ -40,9 +65,12 @@ abstract class AbstractAuthModule extends AbstractModule
 	protected abstract function _get_user_id( $user );
 	protected abstract function _get_username( $user );
 	protected abstract function _get_roles( $user );
+	protected abstract function _get_permissions( $role );
 	protected abstract function _get_numusers();
 	protected abstract function _listUsers();
 	protected abstract function _list_roles();
+	protected abstract function _get_permission( $permission );
+	protected abstract function _create_permission( $permission );
 
 	public function init()
 	{
@@ -281,14 +309,15 @@ abstract class AbstractAuthModule extends AbstractModule
 	public function listUsers()
 	{
 		// TODO: Sanitize, roles as list
-		return $this->permission( 'admin' ) ? $this->_listUsers() :
-			$this->errorMessage( 'No permission to list users' )
+		return $this->role( 'admin' ) || $this->permission( 'user-list', 'core' )
+			? $this->_listUsers()
+			: $this->errorMessage( 'No permission to list users' )
 		;
 	//		$xmldb->xpath( 'auth', "''" );
 	}
 
 	public function listRoles() {
-		return $this->role( 'admin' ) || $this->permission( 'list-roles' )
+		return $this->role( 'admin' ) || $this->permission( 'role-list', 'core' )
 		? $this->_list_roles()
 		: $this->errorMessage( 'No permission to list roles' );
 	}
@@ -313,6 +342,19 @@ abstract class AbstractAuthModule extends AbstractModule
 		return $user ? $this->_get_roles( $user ) : null;
 	}
 
+	public function permissions()
+	{
+		$user = $this->getSessionUser();
+		if ( ! $user )
+			return null;
+
+		$perms = array();
+		foreach ( $this->_get_roles( $user ) as $role )
+			$perms = array_merge( $perms, gd_( $this->_get_permissions( $role ), array() ) );
+		return array_unique( $perms );
+	}
+
+
 	public function xml_roles()
 	{
 		$user = $this->getSessionUser();
@@ -333,6 +375,7 @@ abstract class AbstractAuthModule extends AbstractModule
 		return $x_roles;//$doc->documentElement();
 	}
 
+
 	public function role( $role )
 	{
 		global $debug;
@@ -340,8 +383,7 @@ abstract class AbstractAuthModule extends AbstractModule
 		$user = $this->getSessionUser();
 		if ( !isset ($user) )
 		{
-			if ( $debug > 2 )
-			debug( "No user - can't check role '$role'" );
+			if ( $debug > 2 ) debug( "No user - can't check role '$role'" );
 			return false;
 		}
 #		echo "Session User: id=" . $_SESSION['auth.user.id'].': '. str_replace( '<', '&lt;', $this->authTable->saveXML( $user) ); var_dump( $user);
@@ -353,9 +395,35 @@ abstract class AbstractAuthModule extends AbstractModule
 			: false;
 	}
 
-	public function permission( $role )
+	public function permission( $permission, $realm = null )
 	{
-		return $this->role( $role );
+		global $debug;
+		$user = $this->getSessionUser();
+		if ( !isset ($user) )
+		{
+			if ( $debug > 2 ) debug( "No user - can't check role '$role'" );
+			return false;
+		}
+
+		$this->_assert_permission_exists( $permission, $realm );
+
+		foreach ( $this->_get_roles( $user ) as $role )
+			if ( in_array( $permission, gd_( $this->_get_permissions( $role ), array() ) ) )
+				return true;
+
+		return false;
+	}
+
+	private function _assert_permission_exists( $permission, $realm = null )
+	{
+		$p = $this->_get_permission( $permission, $realm );
+		if ( $p )
+			return;
+
+		if ( $this->options['auto-create-permissions'] )
+			$this->_create_permission( $permission, $realm );
+		else
+			throw new SecurityException( "undefined permission '$permission' in realm '$this->realm'" );
 	}
 
 	function test( $var )
@@ -407,13 +475,20 @@ class XMLDBAuthModule extends AbstractAuthModule
 		return explode( ",", $user->getAttribute( 'roles' ) );
 	}
 
+	protected function _get_permissions( $role ) {
+		$p = $this->db->query( 'auth', "/auth:auth/auth:role[@name='$role']/@permissions" );
+		debug( "GET PERMISSIONS FOR $role: <pre>".print_r($p,1)."</pre>" );
+		return isset( $r ) ? explode( ',', $r ) : null;
+		// XXX if null, check $this->options['auto-create-permissions']
+	}
+
 	protected function _get_numusers()
 	{
 		return $this->db->query( 'auth', "count(/auth:auth/auth:user)" );
 	}
 
 	protected function _listUsers() {
-		return $this->authTable;
+		return $this->authTable;	// XXX TODO: filter auth:user
 	}
 
 	protected function _list_roles() {
@@ -437,6 +512,19 @@ class XMLDBAuthModule extends AbstractAuthModule
 	protected function _get_password( $user ) {
 		return $user->getAttribute('password');
 	}
+
+	protected function _get_permission( $permission, $realm = null ) {
+		$p = $this->db->query( 'auth', "/auth:auth/auth:permission[@name='$permission']" );
+	}
+
+	protected function _create_permission( $permission, $realm = null ) {
+		file_put_contents("/tmp/webtools.log", __CLASS__." create permission $permission" );
+		$doc = new DOMDocument();
+		$perm = $doc->createElementNS( $this->ns, 'permission' );
+		$perm->setAttribute( 'name', $permission );
+		$this->db->put( $this->name, $perm );
+		$this->db->store( $this->name );
+	}
 }
 
 
@@ -444,13 +532,39 @@ class SQLDBAuthModule extends AbstractAuthModule
 {
 	static $db_conninfo;
 
+	#protected $realm;
+
 	public function __construct()
 	{
 		parent::__construct( PDODB::init( self::$db_conninfo ) );
+	#	global $pspAuthRealm;
+	#	if ( isset( $pspAuthRealm ) )
+	#		$this->realm = $pspAuthRealm;
+	#	else
+	#		throw new SecurityException( __CLASS__ ." requires \$pspAuthRealm to be set" );
 	}
 
 	protected function _init()
 	{
+	}
+
+	/** @Override */
+	public function setRealm( $realm ) {
+		$sth = $this->db->prepare( "SELECT * FROM realms WHERE name=?" );
+		$sth->execute( array( $realm ) );
+		if ( $sth->rowCount() )
+			return parent::setRealm( $realm );
+		else
+			throw new SecurityException( "No such realm '$realm'" );
+	}
+
+	/** @Override */
+	protected function realm() {
+		$r = parent::realm();
+		if ( $r === null )
+			throw new SecurityException( __CLASS__ . " requires a realm to be set" );
+		else
+			return $r;
 	}
 
 	protected function _db_begin() {
@@ -490,6 +604,20 @@ class SQLDBAuthModule extends AbstractAuthModule
 		$sth->execute( array( $user['id'] ) );
 		return $sth->fetchAll( \PDO::FETCH_COLUMN, 0 );
 	}
+
+	protected function _get_permissions( $role ) {
+		$sth = $this->db->prepare( "
+			SELECT permissions.name
+			FROM permissions
+			LEFT JOIN role_permissions ON role_permissions.permission_id = permissions.id
+			LEFT JOIN roles ON role_permissions.role_id = roles.id
+			WHERE roles.name = ?
+		" );
+		$sth->execute( array( $role ) );
+		return $sth->fetchAll( \PDO::FETCH_COLUMN );
+		// XXX if null, check $this->options['auto-create-permissions']
+	}
+
 
 	protected function _get_numusers()
 	{
@@ -575,6 +703,25 @@ class SQLDBAuthModule extends AbstractAuthModule
 
 	protected function _get_password( $user ) {
 		return $user['password_type'] . ':' . $user['password'];
+	}
+
+	protected function _get_permission( $permission, $realm = null ) {
+		$sth = $this->db->prepare( "
+			SELECT permissions.*
+			FROM permissions
+			LEFT JOIN realms ON permissions.realm_id = realms.id
+			WHERE realms.name = ? AND permissions.name=?
+		" );
+		$sth->execute( array( gd_( $realm, $this->realm() ), $permission ) );
+		return $sth->rowCount() ? $sth->fetch( \PDO::FETCH_ASSOC ) : null;
+	}
+
+	protected function _create_permission( $permission, $realm = null ) {
+		$sth = $this->db->prepare( "
+			INSERT INTO permissions (realm_id,name,description)
+			VALUES ( (SELECT id FROM realms WHERE name=?), ?, ? )
+		" );
+		$sth->execute( array( gd_( $realm, $this->realm() ), $permission, "(auto-created)" ) );
 	}
 }
 

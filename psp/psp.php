@@ -211,7 +211,7 @@ EOF;
 			}
 		}
 
-		return ModuleManager::loadModule( $modname, $args );
+		ModuleManager::loadModule( $modname, $args );
 	}
 
 
