@@ -4,6 +4,8 @@
  *
  * @author Kenney Westerhof <kenney@neonics.com>
  */
+require_once( 'db/meta.php' );
+
 class PDODB extends PDO
 {
 	public $dsn;
@@ -32,6 +34,7 @@ class PDODB extends PDO
 	 * @return string
 	 */
 	public function returning() {
+		return ""; // temp disable
 		return $this->driver == 'pgsql' ? ' RETURNING id' : "";
 	}
 
@@ -43,7 +46,45 @@ class PDODB extends PDO
 	 * @return string
 	 */
 	public function last_insert_id( $sth ) {
+		if ( 0 )
 		return $this->driver == 'pgsql' ? $sth->fetchColumn(0) : $this->lastInsertId();
+		else
+		{
+			switch ( $this->driver )
+			{
+				case 'pgsql':
+					if ( $t = $this->_is_insert( $sth->queryString ) )
+					{
+						$tm = db_get_tables_meta( $this )[ $t ];
+						if ( isset( $tm['columns']['id'] ) ) { // TODO better check for serial columns
+							$val = $this->query( "SELECT currval(pg_get_serial_sequence('$t','id'))" )->fetchColumn(0);
+							#notice("query <code>".$sth->queryString."</code> insert id <code>$val</code><br/>" );
+							return $val;
+						}
+					}
+					#warn( "no <code>id</code> column for <code>$t</code><pre>".print_r($sth,1)."</pre>" );
+					return null;
+
+				default:
+					return $this->lastInsertId();
+			}
+
+		}
+	}
+
+	/*
+	private $_is_insert = null;
+
+	public function prepare( $sql, $driver_options = array() ) {
+		$this->_is_insert = self::_is_insert( $sql );
+		return parent::prepare( $sql, $driver_options );
+	}
+	*/
+
+	private static function _is_insert( $sql ) {
+		return preg_match( "/^\s*insert\s+into\s+(\S+)/i", $sql, $m )
+			? $m[1]
+			: null;
 	}
 
 	/**
@@ -65,6 +106,9 @@ class PDODB extends PDO
 
 		return $db;
 	}
+
+
+	public function rollback() { return $this->rollBack(); }
 }
 
 /**
