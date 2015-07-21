@@ -186,6 +186,7 @@ require_once( 'RequestHandler.php' );
 		$br->addResourceRelPath( 'content', $pspContentDir );
 		$br->addResourceRelPath( 'logic', $pspLogicDir );
 		$br->addResourceRelPath( 'style', $pspStyleDir );
+		$br->addResourceRelPath( 'pages', "pages" );
 
 		if ( isset( $requestBaseDir ) )
 		{

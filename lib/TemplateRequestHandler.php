@@ -36,7 +36,7 @@ class TemplateRequestHandler extends RequestHandler
 	}
 
 	protected function resolve( $file ) {
-		return DirectoryResource::findFile( "$file.php", 'php' );
+		return DirectoryResource::findFile( "$file.php", 'pages' );
 	}
 
 	public function _handle( $request )
