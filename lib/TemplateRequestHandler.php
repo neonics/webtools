@@ -94,10 +94,17 @@ class TemplateRequestHandler extends RequestHandler
 					}
 					else
 					{
+						// this could be (and was) written simpler, but we want any errors in 
+						// tempalte_data_filter to show up.
 						ob_start();
-						$request->template_data =
-						require_once( $file );
-						template_do( $request, ob_get_clean(), is_array( $request->template_data ) ? gd( $request->template_data['template'] ) : null );
+						$request->template_data =	require_once( $file );
+						$legacy_content = ob_get_clean();
+
+						$request->template_data = $this->template_data_filter( $request, $request->template_data );
+
+						#echo "<pre>".print_r($request,1)."</pre>";
+
+						template_do( $request, $legacy_content, is_array( $request->template_data ) ? gd( $request->template_data['template'] ) : null );
 					}
 					return true;
 				}
@@ -111,6 +118,16 @@ class TemplateRequestHandler extends RequestHandler
 		if ( $debug )
 		debug( 'request', "[template] no match for $this->regexp  ($request->requestRelPathURI)" );
 		return false;
+	}
+
+
+	/**
+	 * Last moment to update template_data before template_do is called.
+	 * This can be used to initialize $template_data->template. By default,
+	 * it is not set, and template_do will initialize it with \template\BootstrapTemplate.
+	 */
+	protected function template_data_filter( $request, $template_data ) {
+		return $template_data;
 	}
 }
 
