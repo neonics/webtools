@@ -9,12 +9,13 @@ require_once( 'db/meta.php' );
 class PDODB extends PDO
 {
 	public $dsn;
+	public $user;
 	public $name;
 	public $driver;
 
 	public function __construct( $dsn, $user, $pass, array $attributes = null )
 	{
-		parent::__construct( $this->dsn = $dsn, $user, $pass, $attributes );
+		parent::__construct( $this->dsn = $dsn, $this->user = $user, $pass, $attributes );
 
 		$this->driver = $this->getAttribute( PDO::ATTR_DRIVER_NAME ); // unfortunately dbname is lost
 
@@ -109,6 +110,21 @@ class PDODB extends PDO
 
 
 	public function rollback() { return $this->rollBack(); }
+
+	/** array_map function */
+	public function fix_sql_value( $v ) {
+		switch ( $this->driver )
+		{
+			case 'pgsql':
+				switch ( gettype( $v ) )
+				{
+					case 'boolean': return $v ? "TRUE":"FALSE";// unfortunately php prints false as ''
+					default: return $v;
+				}
+
+			default:	return $v;
+		}
+	}
 }
 
 /**
