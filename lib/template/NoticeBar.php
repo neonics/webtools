@@ -6,9 +6,15 @@ class NoticeBar
 	var $template;
 	var $rendered = false;
 
+	var $manage_theme_form, $manage_theme_class;
+
 	public function __construct( $template )
 	{
 		$this->template = $template;
+
+		list( $manage_theme_form, $manage_theme_class ) = $this->template->manage_theme();
+		$this->manage_theme_form = $manage_theme_form;
+		$this->manage_theme_class = $manage_theme_class;
 	}
 
 	public $notifications = array();
@@ -91,6 +97,7 @@ class NoticeBar
 				<sup> <a href='{$request->requestBaseURI}git.html'>r$gitRevision</a> </sup>
 HTML;
 
+
 		return \template\AuthFilter::filter(
 
 		<<<HTML
@@ -111,6 +118,7 @@ HTML
 		.$this->getExtraMenus()
 		."<ul class='nav navbar-nav noticebar navbar-right'>"
 		.		$this->getRightNavContent()
+		."  <li class='{$this->manage_theme_class}'>{$this->manage_theme_form}</li>"
 		."	<li><a href='{$request->requestBaseURI}auth.html?action:auth:logout' title='Logout'><i class='fa fa-sign-out'></i></a></li>
       </ul>
 		"
