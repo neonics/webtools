@@ -52,7 +52,7 @@ class BootstrapTemplate
 	protected $theme = 'basic';
 	protected $anim  = "anim";
 
-	protected $noticebar = null;
+	public $noticebar = null;
 
 	public function __construct() {
 	}

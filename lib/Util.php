@@ -30,6 +30,17 @@
 	}
 
 
+	function esc_js_str( $str )
+	{
+		return
+		str_replace( '"', "\\\"",
+		str_replace( "'", "\\'",
+		str_replace( "\n", "\\n", $str )
+		)
+		);
+	}
+
+
 	function localFile( $uri, $base = null )
 	{
 		global $requestBaseDir;

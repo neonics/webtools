@@ -21,43 +21,59 @@ class NoticeBar
 	public $messages = array();
 	public $alerts = array();
 
-	public function alert( $msg ) {
-		//static $__DEBUG_noticebar = 0; echo "<pre>NOTICEBAR ALERT ".($__DEBUG_noticebar++)."</pre>";
-		//ob_start();
-		//debug_print_backtrace();$msg.="<pre>".htmlentities(ob_get_clean())."</pre>";
-		//foreach ( debug_backtrace() as $v )
-		//	echo $v['file'].":".$v['line'].': '.$v['function']."\n";
-		//$msg.="<pre>".htmlentities(ob_get_clean())."</pre>";
-
-
+	public function alert( $title, $body )
+	{
 		if ( $this->rendered )
-		{
-			warn( $msg ); // TODO: javascript update noticebar
-		}
+			$this->js_msg( 'alert', $title, "(JS) ".$body );
 		else 
-			$this->alerts[] = array_merge( array(
-					'title' => 'WARNING',
-					'body'  => $msg,
-					'link' => '',
-					'hash' => hash('md5', $msg )
-			),
-			is_array( $msg ) ? $msg : array()
-		);
+			$this->alerts[] = [
+				'title' => $title,
+				'body'  => "(Static) ".$body,
+				'hash' => hash('md5', $title.$body )
+			];
 	}
 
-	public function message( $title, $body ) {
-		$this->messages[] = array(
-					'link' => '#',
-					'img'=>'http://www.gravatar.com/avatar/4748717147651ff692262a57db31c5ec?s=36',
-					'title'=> $title,
-					'body' => $body,
-					'time'=>'vanochtend',
-					'hash' => hash('md5', $msg )
-				);
+	public function message( $title, $body, $when = null, $img = null ) {
+		if ( $this->rendered )
+			$this->js_msg( 'message', $title, $body, $when, $img );
+		else
+			$this->messages[] = [
+			#	'link' => '#',
+				'img'  => $img,
+				'title'=> $title,
+				'body' => $body,
+				'time' => $when,
+				'hash' => hash('md5', $title.$body.$when.$img )
+			];
 	}
 
 	public function notify( $title, $body ) {
+		if ( $this->rendered )
+			$this->js_msg( 'notification', $title, $body );
+		else
+			$this->notifications[] = [
+				'title' => $title,
+				'body' => $body,
+				'hash' => hash('md5', $title.$body)
+			];
 	}
+
+	private function js_msg( $type, $title, $body, $when = null, $img = null )
+	{
+		$title = esc_js_str( $title );
+		$body = esc_js_str( $body );
+		$rest = $when === null && $img === null ? null :
+			( $when === null ? ', undefined' : ', "' . esc_js_str( $when ) . '"' )
+			.
+			( $img === null ? ', undefined' : ', "' . esc_js_str( $img ) . '"' )
+			;
+		echo <<<HTML
+		<script type='text/javascript'>
+			$(function($){ $().noticebar( '{$type}', '{$title}', '{$body}' {$rest} ); })
+		</script>
+HTML;
+	}
+
 
 	/** AJAX  see api/noticebar and javascript below */
 	function filter_notifications() { return $this->_filter( $this->notifications, 'notifications' ); }

@@ -11,7 +11,7 @@
 
 		var _t = this;
 
-		this.notice = function( kind, title, message, badge_count ) {
+		this.notice = function( kind, title, message, badge_count, when, img ) {
 
 			var a = $('.noticebar-component-' + kind );
 			a.find( '.noticebar-empty' ).remove();
@@ -20,9 +20,15 @@
 
 			a.find( '.noticebar-menu' ).append(
 			"<li class='noticebar-item'>"
+			+ ( !img ? "" :
+			  "<span class='noticebar-item-image'><img src='" + img + "'></span>"
+			  )
 			+ "<span class='noticebar-item-body'>"
 			+ "  <strong class='noticebar-item-title'>"+ title +"</strong>"
 			+ "  <span class='noticebar-item-text'>"+ message+"</span>"
+			+ ( !when ? "" :
+			  "  <span class='noticebar-item-time'><i class='fa fa-clock-o'></i> " + when + "</span>"
+			  )
 			+ "</span>"
 			+"</li>"
 			);
@@ -33,6 +39,9 @@
 		}
 		this.notification = function( title, message, badge_count ) {
 			_t.notice( 'notifications', title, message, badge_count );
+		}
+		this.message = function( title, message, when, who ) {
+			_t.notice( 'messages', title, message, 1, when, who );
 		}
 	}
 
