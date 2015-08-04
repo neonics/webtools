@@ -192,6 +192,8 @@ abstract class AbstractAuthModule extends AbstractModule
 			if ( !isset( $user ) )
 				throw new SecurityException( 'login attempt for unknown username: '.$username );
 
+			if ( $user['status'] != 'normal' )
+				throw new SecurityException( "User login prohibited." );
 
 			# sanity check complete: the authentication is for an existing user.
 

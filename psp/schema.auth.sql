@@ -6,7 +6,7 @@ SET search_path TO auth,public;
 -- \i search_path.sql
 
 
-CREATE TYPE user_status AS ENUM('new','normal','disabled');
+CREATE TYPE user_status AS ENUM('new','verified','normal','disabled');
 
 -- Create table 'users'
 -- NOTE: use "SELECT .. FROM ONLY users" for admin accounts (that transcend merchant and client accounts)
@@ -14,9 +14,9 @@ CREATE TYPE user_status AS ENUM('new','normal','disabled');
 
 CREATE TABLE users (
 	id		SERIAL NOT NULL,
-	username	varchar (32) NOT NULL,
-	password	varchar (40) NOT NULL,
-	password_type	varchar (32) NOT NULL,
+	username	varchar (255) NOT NULL,
+	password	varchar (40) NULL,
+	password_type	varchar (32) NOT NULL default 'plain',
 	activation_code	varchar (32) NULL,
 	creation_date	timestamptz NOT NULL default current_date,
 	creation_ip	varchar (64) NOT NULL default 'system',
@@ -25,7 +25,8 @@ CREATE TABLE users (
 	real_name	varchar (128) NULL,
 	status		user_status not null default 'new',
 	
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	UNIQUE (username)
 );
 
 insert into users (username, password, password_type, status) values ('admin', 'admin', 'plain', 'normal');

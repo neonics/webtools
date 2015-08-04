@@ -220,10 +220,10 @@ class EMail extends MimeMessage
 		return $this;
 	}
 
-	public function sender		($r = null)	{ return $this->_attr( 'sender',		$r ); }
-	public function recipient	($r = null)	{ return $this->_attr( 'recipient', $r ); }
-	public function subject		($r = null)	{ return $this->_attr( 'subject', 	$r ); }
-	public function body			($r = null)	{ return $this->_attr( 'body',			$r ); }
+	public function sender		($r = null)	{ if ( count(func_get_args()) ) { $this->_attr( 'sender',		$r ); return $this; } else return $this->_attr( 'sender' ); }
+	public function recipient	($r = null)	{ if ( count(func_get_args()) ) { $this->_attr( 'recipient',$r ); return $this; } else return $this->_attr( 'recipient' ); }
+	public function subject		($r = null)	{ if ( count(func_get_args()) ) { $this->_attr( 'subject', 	$r ); return $this; } else return $this->_attr( 'subject' ); }
+	public function body			($r = null)	{ if ( count(func_get_args()) ) { $this->_attr( 'body',			$r ); return $this; } else return $this->_attr( 'body' ); }
 
 }
 
