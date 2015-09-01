@@ -213,7 +213,7 @@ class EMail extends MimeMessage
 		;
 	}
 
-	private function _attr( $k, $v ) {
+	private function _attr( $k, $v = null ) {
 		if ( $v === null )
 			return $this->$k;//$k=='body' ? $this->format_body() : $this->$k;
 		$this->$k = $v;
