@@ -45,7 +45,7 @@ class AuthFilter
 						</xsl:when>
 XSL;
 				},
-				auth_roles()
+				gd_( auth_roles(), [] )
 			)
 
 		);
