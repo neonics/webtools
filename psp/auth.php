@@ -52,7 +52,7 @@ abstract class AbstractAuthModule extends AbstractModule
 		return $this;
 	}
 
-	protected function realm() {
+	public function realm() {
 		return $this->realm;
 	}
 
@@ -65,7 +65,7 @@ abstract class AbstractAuthModule extends AbstractModule
 	protected abstract function _get_user_id( $user );
 	protected abstract function _get_username( $user );
 	protected abstract function _get_roles( $user );
-	protected abstract function _get_permissions( $role );
+	protected abstract function _get_permissions( $role, $realm = null );
 	protected abstract function _get_numusers();
 	protected abstract function _listUsers();
 	protected abstract function _list_roles();
@@ -338,21 +338,21 @@ abstract class AbstractAuthModule extends AbstractModule
 			: "";
 	}
 
-	public function roles()
+	public function roles( $realm = null )
 	{
 		$user = $this->getSessionUser();
-		return $user ? $this->_get_roles( $user ) : null;
+		return $user ? $this->_get_roles( $user, $realm ) : null;
 	}
 
-	public function permissions()
+	public function permissions( $realm = null )
 	{
 		$user = $this->getSessionUser();
 		if ( ! $user )
 			return null;
 
 		$perms = array();
-		foreach ( $this->_get_roles( $user ) as $role )
-			$perms = array_merge( $perms, gd_( $this->_get_permissions( $role ), array() ) );
+		foreach ( $this->_get_roles( $user, $realm ) as $role )
+			$perms = array_merge( $perms, gd_( $this->_get_permissions( $role, $realm ), array() ) );
 		return array_unique( $perms );
 	}
 
@@ -378,7 +378,7 @@ abstract class AbstractAuthModule extends AbstractModule
 	}
 
 
-	public function role( $role )
+	public function role( $role, $realm = null )
 	{
 		global $debug;
 
@@ -389,7 +389,7 @@ abstract class AbstractAuthModule extends AbstractModule
 			return false;
 		}
 #		echo "Session User: id=" . $_SESSION['auth.user.id'].': '. str_replace( '<', '&lt;', $this->authTable->saveXML( $user) ); var_dump( $user);
-		$roles = $this->_get_roles( $user );
+		$roles = $this->_get_roles( $user, $realm );
 
 		return $user
 			? in_array( $role, $roles )
@@ -409,9 +409,16 @@ abstract class AbstractAuthModule extends AbstractModule
 
 		$this->_assert_permission_exists( $permission, $realm );
 
-		foreach ( $this->_get_roles( $user ) as $role )
-			if ( in_array( $permission, gd_( $this->_get_permissions( $role ), array() ) ) )
+#		echo "CHECK PERMISSION $realm/$permission";
+
+		foreach ( $this->_get_roles( $user, $realm ) as $role ) {
+			if ( in_array( $permission, gd_( $this->_get_permissions( $role, $realm ), array() ) ) )
 				return true;
+		}
+
+		// fallback!
+		if ( $this->role( 'admin', 'core' ) )
+			return true;
 
 		return false;
 	}
@@ -472,12 +479,12 @@ class XMLDBAuthModule extends AbstractAuthModule
 		return $user->getAttribute( 'username' );
 	}
 
-	protected function _get_roles( $user )
+	protected function _get_roles( $user, $realm = null )
 	{
 		return explode( ",", $user->getAttribute( 'roles' ) );
 	}
 
-	protected function _get_permissions( $role ) {
+	protected function _get_permissions( $role, $realm = null ) {
 		$p = $this->db->query( 'auth', "/auth:auth/auth:role[@name='$role']/@permissions" );
 		debug( "GET PERMISSIONS FOR $role: <pre>".print_r($p,1)."</pre>" );
 		return isset( $r ) ? explode( ',', $r ) : null;
@@ -561,7 +568,7 @@ class SQLDBAuthModule extends AbstractAuthModule
 	}
 
 	/** @Override */
-	protected function realm() {
+	public function realm() {
 		$r = parent::realm();
 		if ( $r === null )
 			throw new SecurityException( __CLASS__ . " requires a realm to be set" );
@@ -595,27 +602,45 @@ class SQLDBAuthModule extends AbstractAuthModule
 	}
 
 
-	protected function _get_roles( $user )
+	private function _realmval( $realm )
 	{
+		$realm = gd_( $realm, $this->realm() );
+		return is_int( $realm ) || ( intval($realm) . "") == $realm
+		? array( 'id', $realm )
+		: array( 'name', $realm )
+		;
+	}
+
+	protected function _get_roles( $user, $realm = null )
+	{
+		list( $realmfield, $realmval ) = $this->_realmval( $realm );
 		$sth = $this->db->prepare( "
-			SELECT name
+			SELECT roles.name
 			FROM user_roles
-			LEFT JOIN roles ON user_roles.role_id = roles.id
-			WHERE user_roles.user_id = ?
+			LEFT JOIN realms ON user_roles.realm_id = realms.id
+			LEFT JOIN roles ON user_roles.role_id = roles.id AND roles.realm_id = realms.id
+			WHERE realms.$realmfield = ?
+			AND user_roles.realm_id = realms.id AND user_roles.user_id = ?
 		" );
-		$sth->execute( array( $user['id'] ) );
+		$sth->execute( array( $realmval, $user['id'] ) );
 		return $sth->fetchAll( \PDO::FETCH_COLUMN, 0 );
 	}
 
-	protected function _get_permissions( $role ) {
+	protected function _get_permissions( $role, $realm = null ) {
+		#echo "<code>GET PERM $realm/$role</code>";
+		list( $realmfield, $realmval ) = $this->_realmval( $realm );
 		$sth = $this->db->prepare( "
 			SELECT permissions.name
 			FROM permissions
+			LEFT JOIN realms ON realms.id = permissions.realm_id
 			LEFT JOIN role_permissions ON role_permissions.permission_id = permissions.id
 			LEFT JOIN roles ON role_permissions.role_id = roles.id
-			WHERE roles.name = ?
-		" );
-		$sth->execute( array( $role ) );
+			WHERE realms.$realmfield = ?
+				AND roles.name = ?
+			"
+			//AND permissions.realm_id=roles.realm_Id AND permissions.realm_id=role_permissions.realm_id
+		);
+		$sth->execute( array( $realmval, $role ) );
 		return $sth->fetchAll( \PDO::FETCH_COLUMN );
 		// XXX if null, check $this->options['auto-create-permissions']
 	}
@@ -708,17 +733,20 @@ class SQLDBAuthModule extends AbstractAuthModule
 	}
 
 	protected function _get_permission( $permission, $realm = null ) {
+		list( $realmfield, $realmval ) = $this->_realmval( $realm );
 		$sth = $this->db->prepare( "
 			SELECT permissions.*
 			FROM permissions
 			LEFT JOIN realms ON permissions.realm_id = realms.id
-			WHERE realms.name = ? AND permissions.name=?
+			WHERE realms.$realmfield = ?
+			AND permissions.name=?
 		" );
-		$sth->execute( array( gd_( $realm, $this->realm() ), $permission ) );
+		$sth->execute( array( $realmval, $permission ) );
 		return $sth->rowCount() ? $sth->fetch( \PDO::FETCH_ASSOC ) : null;
 	}
 
 	protected function _create_permission( $permission, $realm = null ) {
+		echo "<code>INSERT permission $realm/$permission</code>";
 		$sth = $this->db->prepare( "
 			INSERT INTO permissions (realm_id,name,description)
 			VALUES ( (SELECT id FROM realms WHERE name=?), ?, ? )

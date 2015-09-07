@@ -45,7 +45,12 @@ class AuthFilter
 						</xsl:when>
 XSL;
 				},
-				gd_( auth_roles(), [] )
+
+				array_merge(
+					$x=array_map( function($v){return "core/$v";}, gd_( auth_roles( 'core' ), [] ) ),
+					#array_map( function($v){return auth_realm()."/$v";}, gd_( auth_roles(), [] ) )	# XXX! must set a default realm with auth_realm()
+					gd_( auth_roles(), [] )	# XXX! must set a default realm with auth_realm(); this does NOT use prefix checking! security risk!
+				)
 			)
 
 		);
