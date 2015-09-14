@@ -20,6 +20,15 @@ function template_init( $request ) {
  * At current, permissions are assumed to become more restrictive with increasing
  * specificity. In other words, a basic permission or role to access the module
  * is required, and pages within the module may have more restrictive permissions.
+ *
+ * Have $request->template_data = [
+ * 		'permission' => '...',
+ *		'role' => '...',
+ *		'pages' => [
+ *			'my_page'	=> [ 'permission' => 'my_permission' ],
+ *			'my_page2'=> [ 'role' => 'my_role' ],
+ *		]
+ * ];
  */
 function _module_auth( $request ) {
 	#echo "<pre><b>module_auth</b>:\n".print_r($request,1)."</pre>";
@@ -28,40 +37,39 @@ function _module_auth( $request ) {
 	)
 		return;
 
-	if ( !empty( $request->template_data['permission'] ) ) {
-		if ( ! auth_permission( $request->template_data['permission'] ) )
-			throw new SecurityException( "No permission to access $page" );
-	}
-	else if ( !empty( $request->template_data['role'] ) ) {
-		if ( ! auth_role( $request->template_data['role'] ) )
-			throw new SecurityException( "No permission to access $page" );
-	}
-	else
+	$page = preg_replace( "@\.(php|html)$@", "", $request->requestRelURI );
+
+	$pperm = gad( gad( gad( $request->template_data, 'pages' ), $page ), 'permission' );
+	$prole = gad( gad( gad( $request->template_data, 'pages' ), $page ), 'role' );
+
+	$mperm = gad( $request->template_data, 'permission' );
+	$mrole = gad( $request->template_data, 'role' );
+
+	if ( empty( $pperm ) && empty( $prole ) && empty( $mperm ) && empty( $mrole ) )
+		warn( "missing permission setting for page <b>$page</b> in module <b>".$request->template_data['template_module']."</b>" );
+
+	// If page specific permissions are specified, these must be satisfied.
+	if ( !empty( $pperm ) || !empty( $prole ) )
 	{
-		$page = preg_replace( "@\.(php|html)$@", "", $request->requestRelURI );
-
-		$perm = gad( gad( gad( $request->template_data, 'pages' ), $page ), 'permission' );
-		$role = gad( gad( gad( $request->template_data, 'pages' ), $page ), 'role' );
-
-		if ( empty( $perm ) && empty( $role ) )
-		{
-			warn( "missing permission setting for page <b>$page</b> in module <b>".$request->template_data['template_module']."</b>" );
-		}
-		else
-		{
-			if ( ! empty( $perm ) )
-			{
-				if ( !auth_permission( $perm ) )
-					throw new SecurityException( "No permission '$perm' to access $page" );
-			}
-			else #if ( ! empty( $role ) 
-			{
-				if ( !auth_role( $role ) )
-					throw new SecurityException( "No permission to access $page" );
-			}
-		}
-
+		if ( !empty( $pperm ) && auth_permission( $pperm ) )
+			return;
+		if ( !empty( $prole ) && auth_role( $prole ) )
+			return;
 	}
+	else	// fallback to module permissions
+	{
+		if ( !empty( $mperm ) && auth_permission( $mperm ) )
+			return;
+		if ( !empty( $mrole ) && auth_role( $mrole ) )
+			return;
+	}
+
+	if ( $p = gd( $pperm, $mperm ) )
+		throw new SecurityException( "No <i>$p</i> permission to access $page" );
+	else if ( $r = gd( $prole, $mrole ) )
+		throw new SecurityException( "No permission to access $page (requires role <i>$r</i>)" );
+	else
+		throw new SecurityException( "No permission to access page $page, and no permissions/roles defined! ($pperm / $prole / $mperm / $mrole)" );
 }
 
 function template_content( $request ) // only one module per page

@@ -733,6 +733,8 @@ class SQLDBAuthModule extends AbstractAuthModule
 	}
 
 	protected function _get_permission( $permission, $realm = null ) {
+		if ( ! is_string( $permission ) )
+			throw new Exception( __CLASS__.'.'.__METHOD__.": first arg \$permission not a string but a ".gettype( $permission ) );
 		list( $realmfield, $realmval ) = $this->_realmval( $realm );
 		$sth = $this->db->prepare( "
 			SELECT permissions.*
@@ -746,6 +748,10 @@ class SQLDBAuthModule extends AbstractAuthModule
 	}
 
 	protected function _create_permission( $permission, $realm = null ) {
+		if ( ! is_string( $permission ) )
+			throw new Exception( __CLASS__.'.'.__METHOD__.": first arg \$permission not a string but a ".gettype( $permission ) );
+		else if ( empty( $permission ) )
+			throw new Exception( __CLASS__.'.'.__METHOD__.": refusing to insert permission with empty name" );
 		echo "<code>INSERT permission $realm/$permission</code>";
 		$sth = $this->db->prepare( "
 			INSERT INTO permissions (realm_id,name,description)
