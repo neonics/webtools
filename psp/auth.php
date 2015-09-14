@@ -177,6 +177,8 @@ abstract class AbstractAuthModule extends AbstractModule
 
 		$user = null;
 
+		debug( 'auth', "handle Login" );
+
 		try
 		{
 			$username = gad( $_REQUEST, 'username', null );
@@ -282,6 +284,7 @@ abstract class AbstractAuthModule extends AbstractModule
 	private function setSessionChallenge( $v )
 	{
 		global $request;
+		debug( 'auth', 'set session challenge: ' . $v );
 		return $_SESSION["realm[$request->requestBaseURI]:auth.challenge"] = $v;
 	}
 
