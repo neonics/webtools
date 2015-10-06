@@ -79,7 +79,7 @@
 		</xsl:element>
 	</xsl:template>
 
-	<xsl:template match="l:table | l:tr | l:th | l:td ">
+	<xsl:template match="l:table | l:caption | l:colgroup | l:col | l:thead | l:tbody | l:tfoot | l:tr | l:th | l:td ">
 		<xsl:element name="{local-name(.)}">
 			<xsl:apply-templates select="node()|@*"/>
 		</xsl:element>
