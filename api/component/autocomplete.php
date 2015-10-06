@@ -93,13 +93,14 @@ HTML;
 		box.css({
 			position: 'absolute',//'relative',
 			boxShadow: '1px 2px 3px 4px rgba(128,190,128,.5)',
-			width: undefined !== here.parent().width() ? here.parent().width() + 5 : '200px',
+	//		width: undefined !== here.parent().width() ? here.parent().width() + 5 : '200px',
 			minWidth: '100px',
-			left: here.parent().position().left,// nothing when relative
+	//		left: here.parent().position().left,// nothing when relative
 			'top': here.parent().position().bottom,//10 when relative
 	//		padding: '1px',
 			boxSizing: 'border-box',
-			background: 'white',
+			backgroundColor: 'white',
+			zIndex: 10,
 		});
 
 		console.log("input coords:", here.parent(), here.parent().position() );
@@ -114,7 +115,7 @@ HTML;
 			padding: '3px', // inclusive border etc..
 		});
 		here.parent().css({
-			background: 'transparent'
+		//	background: 'transparent'
 		});
 
 		var selIndex = null;
@@ -164,12 +165,16 @@ HTML;
 				case 9: // tab
 					here.parent().data( 'prev-val', here.parent().val() ); // preserve for when up/down again
 					here.parent().val( box.find("li:nth-of-type("+(selIndex+1)+")").text() );
+
+					box.hide();
+					//return true;
 					return false; // don't lose focus
 
 
 				case 13: // enter
 					here.parent().val( box.find("li:nth-of-type("+(selIndex+1)+")").text() );
-					return;
+					box.hide();
+					return false;	// don't submit form
 			}
 		} );
 
