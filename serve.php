@@ -81,7 +81,7 @@ try
 	RequestHandler::handle( $request );
 
 } catch ( Exception $e ) {
-	fatal( 'serve', "Fatal error: ". $e );
+	fatal( 'serve', "Fatal error: ". $e->getMessage() );
 }
 
 $PSP_TIMING_END = microtime(true);
