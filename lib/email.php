@@ -161,7 +161,7 @@ class EMail extends MimeMessage
 		}
 		else
 			return mail(
-				$this->recipient,
+				preg_replace( "@^(.*?)\s+<(.*?)>\s*@", '"$1" <$2>', $this->recipient ),
 				$this->subject,
 				$this->format_body(),
 				$this->format_headers()
