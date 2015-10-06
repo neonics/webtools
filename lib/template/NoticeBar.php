@@ -127,16 +127,20 @@ HTML
 .
 
 		"<ul class='navbar-nav nav noticebar navbar-collapse'>"
+		.(!auth_user()?null:""
 		.$this->component( 'Messages',      'envelope',             'messages',      $this->messages )
 		.$this->component( 'Notifications', 'bell',                 'notifications', $this->notifications )
 		.$this->component( 'Alerts',        'exclamation-triangle', 'alerts',        $this->alerts )
+		)
 		."</ul>"
 		.$this->getExtraMenus()
 		."<ul class='nav navbar-nav noticebar navbar-right'>"
 		.		$this->getRightNavContent()
-		."  <li class='{$this->manage_theme_class}'>{$this->manage_theme_form}</li>"
-		."	<li><a href='{$request->requestBaseURI}auth.html?action:auth:logout' title='Logout'><i class='fa fa-sign-out'></i></a></li>
-      </ul>
+		.(!auth_user()?null:"
+		  <li class='{$this->manage_theme_class}'>{$this->manage_theme_form}</li>
+		   <li><a href='{$request->requestBaseURI}auth.html?action:auth:logout' title='Logout'><i class='fa fa-sign-out'></i></a></li>
+		")
+		."</ul>
 		"
 		."<div>
 				<button type='button' class='navbar-toggle' data-toggle='collapse' data-target='#nav-collapse-1'>
