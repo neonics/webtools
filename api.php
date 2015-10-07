@@ -57,10 +57,25 @@ set_include_path(get_include_path()
   setupPaths( $pspBaseDir );# dirname( __FILE__ ) );
 
 	ModuleManager::loadModule( "auth" );
-	if ( ! auth_user() )
-		fatal('auth', "authentication required");
-	Session::close();
+  if ( ! auth_user() ) {
+		if ( 0 )
+		{
+			require_once 'db/pdo.php';
+			$auth = new SQLAuthentication( new PDODB( $dsn, $user, $pass ) );
+			if ( ! $auth->process_headers() )
+			{
+				$auth->send_challenge( 'api-v1' );
+				fatal('auth', "authentication required");
+			}
+			// else authenticated.
+		}
+		else
+			fatal('auth', "authentication required");
+  }
+  Session::close();
 }
+
+# Sample
 
 #if( file_exists( __DIR__."/api/".$m[1].".php" ) )
 	require_once( __DIR__."/api/".$m[1].".php" );

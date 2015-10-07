@@ -125,6 +125,23 @@ class PDODB extends PDO
 			default:	return $v;
 		}
 	}
+
+	public function identifier( $id ) {
+		Check::identifier( $id );
+
+		$q = $this->_id_quote_char();
+		return $q . str_replace( $q, "\\$q", $id ) . $q;
+	}
+
+	protected function _id_quote_char() {
+		switch ( $this->driver )
+		{
+			case 'pgsql': return '"';
+			default:
+			case 'mysql': return '`';
+		}
+	}
+
 }
 
 
@@ -181,7 +198,7 @@ function executeInsertQuery( $db, $table, $fields )
 	$lid = $db->last_insert_id( $sth[ $sthn ] );
 
 	$sth[ $sthn ]->closeCursor(); // xxx not closed on exception
-	return $lid;
+	return $lid !== null && $lid !== false ? $lid : $result;
 }
 
 
