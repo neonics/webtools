@@ -8,7 +8,7 @@
 	print
 			new_email()
 			->sender("test")
-			->recipient( "kenneyw@gmail.com" )
+			->recipient( "test@example.com" )
 			->subject( "Test - [Webtools]" )
 			->text( "Called from ".__FILE__ )
 			->attachment( "Plain content", "text/plain" )
@@ -141,6 +141,37 @@ class EMail extends MimeMessage
 		parent::init();
 		foreach ( explode(' ', "sender recipient" ) as $f )
 			if ( ! $this->$f ) throw new Exception(__CLASS__.": no $f");
+			else $this->$f = $this->fmt_addr( $this->$f );
+	}
+
+	/**
+	 * Formats a recipient (To, Cc, Bcc) address.
+	 */
+	protected function fmt_addr( $addr )
+	{
+		#return preg_replace( "@^(.*?)\s+<(.*?)>\s*@", '"$1" <$2>', $addr );
+		if ( preg_match( '@^([^<>]*?)\s*<(.*?)>@', $addr, $m ) )
+		{
+			$name = $m[1];
+			$email= $m[2];
+
+			if ( !$name )
+				return $addr;
+
+			if ( strpos( $name, '"' ) !== false )
+			{
+				if ( preg_match( "@^\s*\"(.*?)\"\s*$@", $name ) )
+					$addr;
+				else
+				{
+					warn( "removing malformed name '$name' from address '$addr'" );
+					return $email;
+				}
+			}
+			else
+				return "\"$name\" <$email>";
+		}
+		return $addr;
 	}
 
 	public function send()
@@ -161,7 +192,7 @@ class EMail extends MimeMessage
 		}
 		else
 			return mail(
-				preg_replace( "@^(.*?)\s+<(.*?)>\s*@", '"$1" <$2>', $this->recipient ),
+				$this->recipient,
 				$this->subject,
 				$this->format_body(),
 				$this->format_headers()
@@ -170,6 +201,8 @@ class EMail extends MimeMessage
 
 	public function format()
 	{
+		$this->init();
+
 	#	return print_r( $this,1 );
 		return implode("\r\n", array(
 					"To: $this->recipient",
