@@ -101,6 +101,18 @@ HTML;
 HTML;
 	}
 
+	var $scripts = [];
+
+	/**
+	 * @return string
+	 */
+	protected function scripts( $request ) {
+		return implode( "\n", array_map( function($_) {
+			return "<script type='text/javascript' src='$request->requestBaseURI' src='$_'></script>";
+		}, $this->scripts
+		) );
+	}
+
 	function main( $request, $legacyContent )
 	{
 		if ( !isset( $this->noticebar ) )
@@ -161,6 +173,7 @@ HTML;
 
 	$noticeBar = $this->noticebar->render();
 
+
 	echo <<<HTML
   <body class='theme {$this->theme} {$this->anim}'>
 		<!-- header has position relative for content flow; nested nav (navbar-default) has position fixed. -->
@@ -187,7 +200,11 @@ HTML;
 
 echo <<<HTML
 		</div>
+HTML;
 
+		echo $this->scripts( $request );
+
+echo <<<HTML
   </body>
 </html>
 HTML;
