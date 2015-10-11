@@ -28,6 +28,13 @@ class PDODB extends PDO
 		else fatal("can't extract driver/dbname from '$dsn'");
 	}
 
+	public function __debugInfo() {
+		return array(
+			'driver' => $this->driver,
+			'dsn' => $this->dsn
+		);
+	}
+
 	/**
 	 * Generates SQL to append to insert queries to have them return the last_insert_id.
 	 * This is a NOP for MySQL, but required for PostgreSQL.
@@ -212,9 +219,28 @@ function executeSelectQuery2( $db, $sql, $values = [] ) {
 }
 
 
+/**
+ * @param PDODB		$db (PDO will work too)
+ * @param string	$table
+ * @param array		$where	optional [ 'column' => 'value' ] equality tests; will be joined using AND.
+ * @param mixed		$extra	legacy: string, "ORDER BY" etc.,
+ *   Or[ $extra => "ORDER BY LIMIT...", $fetch_mode => \PDO::FETCH_OBJ ]
+ */
 function executeSelectQuery( $db, $table, $where = null, $extra = null )
 {
 	static $sth = array();
+
+	if ( empty( $extra ) || is_string( $extra ) ) // backwards compat
+	$extra = [ 'extra' => $extra ];
+
+	$args = (object) array_merge(
+		[
+			'extra' => null,
+			'fetch_mode' => \PDO::FETCH_ASSOC,
+		],
+		$extra
+	);
+	// XXX FIXME: a parse error here can cause a print_r db settings someplace!
 
 	$sthn = $table."_select:" . ( is_null($where) ? "" : implode(':', array_keys( $where ) ) );
 #	debug( "(executeSelectQuery: $sthn)" );
@@ -226,7 +252,7 @@ function executeSelectQuery( $db, $table, $where = null, $extra = null )
 				? ""
 				: " WHERE " . implode( " AND ", array_map( function($i) { return "$i=?"; }, array_keys( $where ) ) )
 				)
-			. " $extra"	// order by, limit etc.
+			. " $args->extra"	// order by, limit etc.
 		);
 #		debug( "sthn: $sthn; " . print_r( $sth[ $sthn ], true ) );
 	}
@@ -236,7 +262,7 @@ function executeSelectQuery( $db, $table, $where = null, $extra = null )
 	if ( ( $result = $sth[ $sthn ]->execute( $values ) ) !== false )
 	{
 #		debug( "queried $table; numrows: ".$sth[ $sthn ]->rowCount() );
-		$result = $sth[ $sthn ]->fetchAll( PDO::FETCH_ASSOC );
+		$result = $sth[ $sthn ]->fetchAll( $args->fetch_mode );
 	}
 	else
 		throw new Exception( "Error querying $table: " . implode(':', $sth[ $sthn ]->errorInfo() ) );

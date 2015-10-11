@@ -18,5 +18,12 @@ class Check
 		else
 			$fatal ? fatal( "not an e-mail address: '" . htmlspecialchars( $value ) . "'" ) : false;
 	}
+
+	public static function length( $value, $minLen = 1, $maxLen = null, $fatal = true ) {
+		if ( $minLen !== null && strlen( $value ) < $minLen )
+			$fatal ? fatal( "invalid length: ".strlen($value). "<$minLen" ) : false;
+		else
+			return $fatal ? $value : true;
+	}
 }
 
