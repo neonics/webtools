@@ -1,5 +1,33 @@
 <?php
 /**
+ * clears the db meta cache.
+ */
+function db_clear_meta( $db = null )
+{
+	$tmpdir = DirectoryResource::findFile( "", 'default', 'tmp' );
+
+	if ( $db !== null )
+	{
+		if ( file_exists( $x = "$tmpdir/_cache_metadb_" . _db_get_cache_id( $db ) ) )
+		{
+			unlink( $x );
+			db_get_tables_meta( $db );
+		}
+	}
+	else
+		foreach ( scandir( $tmpdir ) as $f )
+		{
+			if ( is_file( $x = "$tmpdir/$f" ) && strpos( $f, '_cache_metadb_' ) === 0 )
+				unlink( $x );
+		}
+}
+
+function _db_get_cache_id( PDODB $db ) {
+	return preg_replace( '@[^\w\d_-]+@', '_', $db->dsn );
+}
+
+
+/**
  * fetches information from the SQL standard information_schema,
  * and extends it with pg_catalog inheritance information IF the driver is PostgreSQL.
  *
@@ -14,7 +42,7 @@ function db_get_tables_meta( $db )
 		$timing = microtime(true);
 
 		$dbid = $db->getAttribute( PDO::ATTR_DRIVER_NAME ); // unfortunately dbname is lost
-		$dbid = preg_replace( '@[^\w\d_-]+@', '_', $db->dsn );
+		$dbid = _db_get_cache_id( $db );
 		#echo "<pre>DBID: $dbid  ($db->dsn)</pre>";
 
 		$tmpdir = DirectoryResource::findFile( "", 'default', 'tmp' );
@@ -398,4 +426,6 @@ function db_get_inheritance( $db )
 	$sth->execute();
 	return $sth->fetchAll(PDO::FETCH_OBJ);
 }
+
+
 
