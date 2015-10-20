@@ -21,7 +21,7 @@
 $PSP_TIMING_BEGIN = microtime(true);
 
 if ( !isset( $psp_timing_show ) )
-$psp_timing_show = true;
+$psp_timing_show = false; // note that this is applied to all files, not just html!
 
 try
 {
