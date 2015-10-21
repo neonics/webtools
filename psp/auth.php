@@ -333,6 +333,14 @@ abstract class AbstractAuthModule extends AbstractModule
 		return !empty( $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] );
 	}
 
+	public function userid()
+	{
+		global $request;
+		return !empty( $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] )
+		? $_SESSION["realm[$request->requestBaseURI]:auth.user.id"]
+		: false;
+	}
+
 	public function username()
 	{
 		$user = $this->getSessionUser();
