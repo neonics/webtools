@@ -117,8 +117,6 @@ class PDODB extends PDO
 	}
 
 
-	public function rollback() { return $this->rollBack(); }
-
 	/** array_map function */
 	public function fix_sql_value( $v ) {
 		switch ( $this->driver )
