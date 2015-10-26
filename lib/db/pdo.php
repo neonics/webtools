@@ -5,6 +5,7 @@
  * @author Kenney Westerhof <kenney@neonics.com>
  */
 require_once( 'db/meta.php' );
+require_once( 'db/upgrade.php' );
 
 class PDODB extends PDO
 {

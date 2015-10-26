@@ -241,7 +241,7 @@ SQL
 			case 'UNIQUE':	// constraint_name is the column name
 				$ret[ $row->table_name ][] = $row->constraint_name;
 				break;
-			default: warn( "unknown constraint type: $row->constraint_type" );
+			default: debug( 'db', "unknown constraint type: $row->constraint_type" );	# XXX warn not in this lib!
 		}
 	}
 
