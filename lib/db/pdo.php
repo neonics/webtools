@@ -14,6 +14,11 @@ class PDODB extends PDO
 	public $name;
 	public $driver;
 
+	/**
+	 * @Readonly update via db_upgrade( $db, $version, 'auto' );
+	 */
+	public $prefix = 'auto_';
+
 	public function __construct( $dsn, $user, $pass, array $attributes = null )
 	{
 		parent::__construct( $this->dsn = $dsn, $this->user = $user, $pass, $attributes );

@@ -32,6 +32,7 @@
 /** Included from pdo.php, but can be used standalone */
 require_once 'Util.php';	// for gd, notice etc.
 require_once 'Check.php';	// preventing caller SQL injection
+require_once 'action.php'; // UI interaction via ?action:
 
 
 /**
@@ -50,8 +51,7 @@ require_once 'Check.php';	// preventing caller SQL injection
  *
  * @param string $prefix default 'auto'; Must be formatted as an identifier.
  *
- * The table prefix to use for the options table.
- *
+ * The table prefix to use for managed tables.
  *
  * *) REQUIRES: fatal()**) is called otherwise
  * **) (default implementation in Debug.php)
@@ -59,7 +59,8 @@ require_once 'Check.php';	// preventing caller SQL injection
 function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 {
 	$db_version	= max( 0, intval( $db_version ) );
-	$table  = Check::identifier( rtrim( $table_prefix , '_' ) . '_' ) . 'options';
+	$db->prefix = Check::identifier( $prefix = rtrim( $table_prefix , '_' ) . '_' );
+	$table = $db->prefix . 'options';
 
 	$options = db_get_auto_options( $db, $table );
 
@@ -67,14 +68,22 @@ function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 	{
 		if ( $err = gad( $options, 'db_upgrade_error' ) )
 		{
-			debug( 'sys_warning', "A previous database upgrade failed. Have admin take a look." );
+			if ( isAction( 'db-upgrade-retry' ) ) {
+				executeDeleteQuery( $db, $table, [ 'name' => 'db_upgrade_error' ] );
+				$err = null;
+			}
+			else
+				debug( 'sys_warning', "A previous database upgrade failed: <pre>".$err['value']."</pre>"
+					. "<a href='?action:db-upgrade-retry'>Retry?</a>"
+				);
 		}
-		else
+
+		if ( ! $err )
 		{
 			debug( 'sys_notice', "Upgrading database from version $cur_version to $db_version, one moment please..." );
 			flush();
 
-			for( ; $cur_version <= $db_version; $cur_version++ )
+			while( ++$cur_version <= $db_version )
 				try
 				{
 					debug( 'sys_notice', "Upgrading to version $cur_version" );
@@ -83,7 +92,7 @@ function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 				}
 				catch ( \Exception $e )
 				{
-					debug( 'sys_error', "Upgrade failed: " . $e->getMessage() );
+					debug( 'sys_error', "Upgrade to $cur_version failed: " . $e->getMessage() );
 					executeInsertQuery( $db, $table, [
 						'name' => 'db_upgrade_error',
 						'value' => $e->getMessage(),
@@ -91,6 +100,7 @@ function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 					] );
 					break;
 				}
+			$cur_version--;
 
 			debug( 'sys_notice', "Updating database metadata...");
 			flush();
