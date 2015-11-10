@@ -122,6 +122,17 @@ class PDODB extends PDO
 	}
 
 
+	/** @Override
+	 */
+	public function query( $sql ) {
+		$args = array_slice( func_get_args(), 1 );
+		$sth = $this->prepare( $sql );
+		$sth->execute( $args );
+		return $sth;
+	}
+
+
+
 	/** array_map function */
 	public function fix_sql_value( $v ) {
 		switch ( $this->driver )
