@@ -28,6 +28,52 @@
 		return $array !== null && array_key_exists( $key, $array ) && isset( $array[ $key ] )
 			? $array[ $key ] : $default;
 	}
+		
+
+	function make_object( $arg ) {
+		switch ( gettype( $arg ) )
+		{
+			case 'array':
+				foreach ( $arg as $k => $v )
+					$arg[ $k ] = make_object( $v );
+				return (object) $arg;
+			default:
+				return $arg;
+		}
+	}
+
+	function make_array( $arg ) {
+		switch ( gettype( $arg ) )
+		{
+			/** @noinspection PhpMissingBreakStatementInspection */
+			case 'object':
+				$arg = (array) $arg;
+			case 'array':
+				foreach ( $arg as $k => $v )
+					$arg[ $k ] = make_array( $v );
+				return $arg;
+
+			default:
+				return $arg;
+		}
+	}
+
+	/** makes an array of arrays into an array of objects */
+	function make_object_array( $array )
+	{
+		foreach ( $array as $i => $data )
+			$array[ $i ] = make_object( $data );
+		return $array;
+	}
+
+	function array_hash( $array, $key, $value = null )
+	{
+		$sh = array();
+		foreach ( $array as $i=>$row )
+			$sh[$row[$key]] = $value === null ? $row : $row[$value];
+		return $sh;
+	}
+
 
 
 	function esc_js_str( $str )
