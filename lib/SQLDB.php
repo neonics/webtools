@@ -88,6 +88,8 @@ class DBTable
 				
 				$this->dbh->exec( $sql );
 			}
+			else
+				$a->closeCursor();
 		}
 		catch ( PDOException $e )
 		{

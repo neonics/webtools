@@ -155,7 +155,7 @@ function db_upgrade_v0( $db, $table )
 			updated		timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
 		)",
 	 ] as $q )
-		$db->query( $q );
+		$db->exec( $q );
 
 	executeInsertQuery( $db, $table, $option = [
 		'name'			=> 'db_version',

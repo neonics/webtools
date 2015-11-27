@@ -19,7 +19,7 @@ class ManagedTable
 
 	public function create( $optional = "IF NOT EXISTS"  )
 	{
-		$this->db->query( implode(' ', //call_user_func_array('array_merge',  // ... // )
+		$this->db->exec( implode(' ', //call_user_func_array('array_merge',  // ... // )
 		array_map(function($v) {
 			return is_array($v) ? implode(' ', $v) : $v ;
 		},
@@ -88,7 +88,7 @@ class SQLAuthentication extends Authentication
 					$t->create();
 				}
 				else
-				$this->db->query( "
+				$this->db->exec( "
 					CREATE TABLE IF NOT EXISTS $this->table_tokens(
 						realm		varchar(32) not null,
 						token		varchar(128) not null,
@@ -102,7 +102,7 @@ class SQLAuthentication extends Authentication
 
 			case 'nonce':
 			case 'sessions':
-			case $this->table_sessions: $this->db->query( "
+			case $this->table_sessions: $this->db->exec( "
 					CREATE TABLE IF NOT EXISTS $this->table_sessions(
 						nonce		char(40),
 						site		varchar(255),
@@ -130,7 +130,7 @@ class SQLAuthentication extends Authentication
 		$db = $this->dbinit( $this->table_tokens );
 
 		// XXX postgres only
-		$db->query("DELETE FROM $this->table_tokens WHERE NOW() - created > '1h'::interval" );
+		$db->exec("DELETE FROM $this->table_tokens WHERE NOW() - created > '1h'::interval" );
 
 		$sth = $db->prepare("SELECT * from $this->table_tokens WHERE realm=? AND key=?");
 		$sth->execute( [ $realm, $key ] );
