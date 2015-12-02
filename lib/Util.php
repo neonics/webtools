@@ -190,4 +190,41 @@
 			) .
 			$_SERVER["REQUEST_URI"] . gd( $_SERVER["QUERY_STRING"], "" );
 	}
-?>
+
+
+	/**
+	 * Closes the output buffers, saving the contents of each and returning them.
+	 *
+	 * Usage:
+	 *
+	 *   ob_save();
+	 *   echo "Unbuffered out-of-band output";
+	 *   ob_restore();
+	 *
+	 * @return array of output buffer content, from top level to most nested.
+	 */
+	global $__ob_save_buffers;
+	function ob_save() {
+		global $__ob_save_buffers;
+		$obs = [];
+		while ( ob_get_level() )
+			$obs[] = ob_get_clean();
+		return $__ob_save_buffers = array_reverse( $obs );
+	}
+
+	/**
+	 * Re-opens and fills the output buffers closed by ob_save().
+	 *
+	 * @param array $obs (optional) the return value of ob_save(). If null,
+	 * will use the buffer array created by the last ob_save() call.
+	 */
+	function ob_restore( $obs = null ) {
+		global $__ob_save_buffers;
+		if ( $obs === null )
+			$obs = $__ob_save_buffers;
+		$__ob_save_buffers = null;
+		foreach ( $obs as $ob ) {
+			ob_start();
+			echo $ob;
+		}
+	}
