@@ -6,7 +6,7 @@
  *        The third value, if present, is an attribute map (i.e. [key=>value]), injected into the <td>.
  * @param $columns array( dbcol => false || '' || label )
  */
-function html_table( $result, $fn = null, $columns = null, $hdrfn = null, $opts = [] )
+function html_table( & $result, $fn = null, $columns = null, $hdrfn = null, $opts = [] )
 {
 	$debug=false;
 
@@ -110,6 +110,8 @@ HTML;
 		</tbody>
 	</table>
 HTML;
+
+	return $result;
 }
 
 
