@@ -73,7 +73,7 @@
 			console.log("data=", data, "option=", option);
 
 			var component_args = {};
-			var tmp0 = "data-" + data + '-';
+			var tmp0 = "data-" + data.replace(/\?.*/,'') + '-';
 			for ( var i=0; i < this.attributes.length; i ++ )
 			{
 				if ( this.attributes[i].name.slice( 0, tmp0.length ) == tmp0 )
@@ -82,6 +82,10 @@
 					var paramvalue= this.attributes[i].value;
 					component_args[ paramname ] = paramvalue;
 				}
+
+				var m;
+				if ( m = this.attributes[i].name.match( /^data-component-(.*)/ ) )
+					component_args[ m[1] ] = this.attributes[i].value;
 			}
 
 			var spinner=null;
