@@ -119,7 +119,7 @@ class PDODB extends PDO
 		or fatal( "error opening database" );
 
 		if ( isset( $connInfo->prefix ) )
-			$db->prefix = $connInfo->prefix;
+			$db->prefix = rtrim( $connInfo->prefix, '_' ) . '_';
 
 		return $db;
 	}
