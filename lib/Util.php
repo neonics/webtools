@@ -222,9 +222,16 @@
 		global $__ob_save_buffers;
 		if ( $obs === null )
 			$obs = $__ob_save_buffers;
+		else if ( empty( $obs ) )
+			$obs = array_map(function($v){return null;}, $obs );
 		$__ob_save_buffers = null;
 		foreach ( $obs as $ob ) {
 			ob_start();
 			echo $ob;
 		}
 	}
+
+
+	function qw( $string ) { return explode(' ', $string); }	// might need preg explode on \s+
+
+	function cb_prefix( $with ) { return function($v) use($with) { return "$with$v"; }; }
