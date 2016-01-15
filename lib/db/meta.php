@@ -116,6 +116,11 @@ function db_get_tables_meta( $db )
 			foreach ( db_get_primary_keys( $db ) as $table => $col )
 				$tables[ $table ]['primary_key'] = $col;
 
+			foreach ( db_get_indices( $db ) as $table => $indices ) {
+				$tables[ $table ]['indices'] = $indices;
+				$tables[ $table ]['index_columns'] = array_unique( call_user_func_array( 'array_merge', array_values( $indices ) ) );
+			}
+
 			foreach ( db_get_inheritance( $db ) as $r )
 			{
 				if ( ! isset( $tables[$r->sub]['inherits'] )
@@ -208,6 +213,51 @@ SQL
 
 	return $ret;
 }
+
+function db_get_indices( $db )
+{
+	switch ( $db->driver )
+	{
+
+		case 'pgsql':
+			return [];	// TODO
+
+
+		case 'mysql':
+		// XXX constraint_schema = table_schema = dbname
+		// XXX referenced_table_schema is not null for foreign keys - we want KEY, UNIQUE, and PRIMARY KEY.
+
+		$sth = $db->prepare( <<<SQL
+		SELECT  *
+		FROM information_schema.statistics
+		WHERE table_schema = ? and index_schema = table_schema
+		AND NON_UNIQUE <> 0 
+SQL
+				//referenced_table_schema IS NULL -- mysql only (not postgres)
+		);
+		$sth->execute( array( $db->name ) );
+		$rows = $sth->fetchAll( PDO::FETCH_ASSOC );
+
+		$ret = array();
+		foreach ( $rows as $i => $row )
+		{
+			$row = (object) array_combine(
+					array_map( 'strtolower', array_keys( $row ) ),
+					array_values( $row )
+			);
+
+			$tn = $row->table_name;
+			$cn = $row->column_name;
+			$in = $row->index_name;
+
+			$ret[ $tn ][ $in ][] = $cn;
+		}
+
+		return $ret;
+	}
+}
+
+
 
 
 /**
