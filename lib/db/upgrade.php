@@ -136,7 +136,7 @@ function db_get_auto_options( $db, $table )
 function db_upgrade_invoke( $db, $table, $callable )
 {
 	if ( is_string( $callable ) && ! function_exists( $callable ) )
-		throw new Exception( "Missing DB upgrade function <code>$function</code>" );
+		throw new Exception( "Missing DB upgrade function <code>$callable</code>" );
 	if ( !is_callable( $callable ) )
 		throw new Exception( __FUNCTION__ . ": Argument not callable" );
 
