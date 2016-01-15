@@ -477,5 +477,21 @@ function db_get_inheritance( $db )
 	return $sth->fetchAll(PDO::FETCH_OBJ);
 }
 
-
-
+/** only drops a column if it exists */
+function db_meta_drop_column( $db, $table, $column )
+{
+	Check::identifier( $table );
+	Check::identifier( $column );
+	// mysql
+	foreach ( [
+		"drop procedure if exists schema_change",
+		"create procedure schema_change() begin
+			if exists (select * from information_schema.columns where table_name = '$table' and column_name = '$column') then
+					alter table $table drop column $column;
+			end if;
+		end",
+		"call schema_change()",
+		"drop procedure if exists schema_change"
+	] as $q )
+		$db->query( $q );
+}
