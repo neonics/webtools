@@ -124,14 +124,13 @@ class PDODB extends PDO
 		return $db;
 	}
 
-/*
-	public function q( $sql ) {
-		$args = array_slice( func_get_args(), 1 );
+
+	public function q( $sql, $args = [] ) {
 		$sth = $this->prepare( $sql );
 		$sth->execute( $args );
 		return $sth;
 	}
-*/
+
 
 
 	/** array_map function */
