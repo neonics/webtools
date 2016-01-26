@@ -87,12 +87,15 @@ function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 				try
 				{
 					debug( 'sys_notice', "Upgrading to version $cur_version" );
+					$db->beginTransaction();
 					db_upgrade_invoke( $db, $table, "db_upgrade_v$cur_version" );
 					executeUpdateQuery( $db, $table, [ 'name' => 'db_version' ], ['value' => $cur_version ] );
+					$db->commit();
 				}
 				catch ( \Exception $e )
 				{
 					debug( 'sys_error', "Upgrade to $cur_version failed: " . $e->getMessage() );
+					$db->rollback();
 					executeInsertQuery( $db, $table, [
 						'name' => 'db_upgrade_error',
 						'value' => $e->getMessage(),
