@@ -174,7 +174,7 @@ class PDODB extends PDO
  * produces comma separated string of count($array) question marks for use
  * in 'IN (...)' clauses.
  */
-function sql_q_list( &$array ) { return substr( str_repeat( ",?", count( $array ) ), 1 ); }
+function sql_q_list( $array ) { return substr( str_repeat( ",?", count( $array ) ), 1 ); }
 
 /**
  * @returns last_insert_id
