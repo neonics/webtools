@@ -35,9 +35,10 @@ function _db_get_cache_id( PDODB $db ) {
  */
 function db_get_tables_meta( $db )
 {
-	static $tables = null;
+	static $_db_tables_meta_cache = [];
+	$db_cache_id = _db_get_cache_id( $db );
 
-	if ( $tables == null )
+	if ( ! isset( $_db_tables_meta_cache[ $db_cache_id ] ) )
 	{
 		$timing = microtime(true);
 
@@ -46,6 +47,7 @@ function db_get_tables_meta( $db )
 		#echo "<pre>DBID: $dbid  ($db->dsn)</pre>";
 
 		$tmpdir = DirectoryResource::findFile( "", 'default', 'tmp' );
+		if ( !is_dir( $tmpdir ) ) throw new Exception("Cannot find temporary directory: not a directory: '$tmpdir'" );
 		if ( file_exists( $cf = "$tmpdir/_cache_metadb_$dbid" ) ) // filemtime( $cf )  - now > ....
 		{
 			$tables = json_decode( file_get_contents( $cf ), true );
@@ -137,10 +139,14 @@ function db_get_tables_meta( $db )
 			$tables = json_decode( $tables, true ); // make sure everything is array()
 		}
 
+		$_db_tables_meta_cache[ $db_cache_id ] = $tables;
+
 		$timing = sprintf("%.3f", ( microtime(true) - $timing ) * 1000 );
 		debug( 'lib/db', "<code>fetched metadata in $timing ms</code>" );
+
 	}
-	return $tables;
+
+	return $_db_tables_meta_cache[ $db_cache_id ];
 }
 
 
