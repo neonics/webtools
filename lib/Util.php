@@ -232,6 +232,6 @@
 	}
 
 
-	function qw( $string ) { return explode(' ', $string); }	// might need preg explode on \s+
+	function qw( $string, $sep =' ' ) { return explode($sep, $string); }	// might need preg explode on \s+
 
 	function cb_prefix( $with ) { return function($v) use($with) { return "$with$v"; }; }
