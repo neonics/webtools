@@ -316,3 +316,14 @@ function html_form_button_action( $action, $label = null, $hidden = null, $butto
 HTML;
 }
 
+
+/** Generates an identifier that's usable in HTML, JS, and PHP. */
+function html_id($prefix=null, $stackdepth=1) {
+	if ( $prefix == null ) {
+		$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, $stackdepth + 1 );
+		$caller = array_shift( $trace );
+		$prefix = basename( $caller['file'], '.php' );
+	}
+
+	return str_replace('-','_', $prefix ) . '_' . hash('md5', __FILE__ . $prefix . microtime(true) . rand() );
+}
