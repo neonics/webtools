@@ -481,6 +481,43 @@
 		</div>
 	</xsl:template>
 
+
+	<xsl:template match="l:password-reset">
+		<xsl:variable name="id" select="generate-id()"/>
+
+		<div class='account-wrapper' id='loginForm'>
+			<div class='account-body'>
+
+				<h3>Reset Password</h3>
+
+				<form method="POST" action="{@action}" onsubmit="return login_submit(this);" name="login" class='form account-form'>
+					<xsl:apply-templates select="l:field"/>
+
+					<div class='form-group'>
+						<label class='placeholder-hidden' for="user{$id}">Username or E-Mail</label>
+						<input class='form-control' id="user{$id}" type="text" name="{@userfield}" placeholder='Username or E-Mail'/>
+					</div>
+					<div class='form-group'>
+						<input type="submit" value="Send Password Reset E-Mail" class='btn btn-primary'/>
+						<i style='padding: 1em'><a href='/'>Back to login</a></i>
+					</div>
+
+				</form>
+				<script type="text/javascript">
+					document.getElementById("user<xsl:value-of select="$id"/>").focus();
+				</script>
+
+				<h4 style='text-align: right'><a href='/signup'>Sign up</a></h4>
+
+			</div>
+			<div class='account-footer'>
+				<!-- footer -->
+			</div>
+		</div>
+
+	</xsl:template>
+
+
 	<xsl:template match="l:field">
 		<input type="{@type}" name="{@name}" value="{@value}"/>
 	</xsl:template>

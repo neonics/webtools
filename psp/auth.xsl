@@ -163,6 +163,12 @@ Produces:
 		</l:login>
 	</xsl:template>
 
+	<xsl:template match="auth:password-reset">
+		<l:password-reset userfield='username' email='email'>
+			<l:field type="hidden" name="action:auth:request-password-reset-email"/>
+		</l:password-reset>
+	</xsl:template>
+
 	<xsl:template match="auth:username">
 		<xsl:value-of select="php:function('auth_username')"/>
 	</xsl:template>
