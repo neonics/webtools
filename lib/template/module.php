@@ -46,7 +46,9 @@ function _module_auth( $request ) {
 	$mrole = gad( $request->template_data, 'role' );
 
 	if ( empty( $pperm ) && empty( $prole ) && empty( $mperm ) && empty( $mrole ) )
-		warn( "missing permission setting for page <b>$page</b> in module <b>".$request->template_data['template_module']."</b>" );
+		throw new SecurityException( "Missing permission setting for page <b>$page</b>"
+			. ( gad($request->template_data, 'template_module') ?" in module <b>".$request->template_data['template_module']."</b>" : '')
+		);
 
 	// If page specific permissions are specified, these must be satisfied.
 	if ( !empty( $pperm ) || !empty( $prole ) )
