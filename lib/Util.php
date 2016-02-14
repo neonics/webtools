@@ -66,14 +66,26 @@
 		return $array;
 	}
 
+	/**
+	 * @param $array unassociative array of associative arrays (list of hashtables): $array of $items
+	 * @param $key   returned array will be keyed by $array[*][$key]
+	 * @param $value returned array will be valued as follows.
+	 *                 null (default):   $array[*]         -> []
+	 *								 string:           $array[*][$value] -> column value
+	 * 								 [] (empty array)  [$array[*]]       -> for when $key is not unique, return array of arrays of arrays.
+	 */
 	function array_hash( $array, $key, $value = null )
 	{
 		$sh = array();
 		foreach ( $array as $i=>$row )
-			$sh[$row[$key]] = $value === null ? $row : $row[$value];
+			if ( is_array( $value ) ) {
+				#if ( ! isset( $sh[$row[$key]] ) ) $sh[$row[$key]] = [];
+				$sh[$row[$key]][] = $row;
+			}
+			else
+				$sh[$row[$key]] = $value === null ? $row : $row[$value];
 		return $sh;
 	}
-
 
 
 	function esc_js_str( $str )
@@ -235,3 +247,5 @@
 	function qw( $string, $sep =' ' ) { return explode($sep, $string); }	// might need preg explode on \s+
 
 	function cb_prefix( $with ) { return function($v) use($with) { return "$with$v"; }; }
+
+	function cb_column( $key )  { return function($v) use($key)  { return $v[$key];  }; }
