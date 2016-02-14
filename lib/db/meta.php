@@ -31,9 +31,11 @@ function _db_get_cache_id( PDODB $db ) {
  * fetches information from the SQL standard information_schema,
  * and extends it with pg_catalog inheritance information IF the driver is PostgreSQL.
  *
- * @return nested array structure with table info
+ * @param PDODB $db
+ * @param string $for_table optional, the table name. When given, returns only the metadata for the given table.
+ * @return nested array structure with table info: [ table_name => [ 'columns' => [...], ...] ]
  */
-function db_get_tables_meta( $db )
+function db_get_tables_meta( $db, $for_table = null )
 {
 	static $_db_tables_meta_cache = [];
 	$db_cache_id = _db_get_cache_id( $db );
@@ -146,9 +148,13 @@ function db_get_tables_meta( $db )
 
 	}
 
-	return $_db_tables_meta_cache[ $db_cache_id ];
+	return $for_table !== null
+		? $_db_tables_meta_cache[ $db_cache_id ][$for_table]
+		: $_db_tables_meta_cache[ $db_cache_id ];
 }
 
+
+/// internal
 
 function db_get_rows( $db )
 {
