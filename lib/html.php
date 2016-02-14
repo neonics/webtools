@@ -170,11 +170,33 @@ function html_radio( $name, $array, $selected = null )
 
 function html_ul( $array, $function = null ) { return html_array( "ul", "li", $array, $function ) ; }
 
+/** @param $array associative array */
+function html_dl( $array ) {
+	return html_tag( "dl", implode( "",
+		array_map( function($k,$v) {
+			return "<dt>$k</dt>"
+				. ( is_array( $v )
+					? implode( "", array_map( function($x) { return "<dd>$x</dd>\n"; }, $v ) )
+					: "<dd>$v</dd>\n" )
+				;
+		}, array_keys($array), array_values($array) )
+	) );
+}
+
+/**
+ * This method turns an array into HTML, typically used for <ul><li/></ul>.
+ *
+ * @param string $container The tag name and possible attributes for the container element, for example "div class='foo'", 
+ * @param string $element Likewise for the element tag wrapping each array entry.
+ * @param array $array array of strings (calls html_array_simple) or array of arrays (calls html_array_complex).
+ * @param callable $function (optional) when given, transforms the $array using this function. Signature: function($arrayitem, $element).
+ * @return string A HTML representation of the array.
+ */
 function html_array( $container, $element, $array, $function = null )
 {
 	if ( ! count( $array ) ) return "";
 
-	if ( ! isset( $array[0] ) )
+	if ( ! isset( $array[0] ) && ! array_key_exists( 0, $array ) )
 	{
 		warn( "html_array: malformed array" . fold_debug( $array ) . html_tag( 'pre', stacktrace() ) );
 		return "";
@@ -193,20 +215,21 @@ function html_array( $container, $element, $array, $function = null )
 	;
 }
 
-/** @param $array associative array */
-function html_dl( $array ) {
-	return html_tag( "dl", implode( "",
-		array_map( function($k,$v) {
-			return "<dt>$k</dt>"
-				. ( is_array( $v )
-					? implode( "", array_map( function($x) { return "<dd>$x</dd>\n"; }, $v ) )
-					: "<dd>$v</dd>\n" )
-				;
-		}, array_keys($array), array_values($array) )
-	) );
-}
 
 
+/**
+ * Handles html_array calls where $array is an array of arrays. Each $array entry is
+ * a 2 element array, the first element being the content, the second being an associative
+ * array with element attributes, injected into the $element tag that wraps the entry.
+ *
+ * Example: <pre>html_array_complex( 'ul', 'li', [ ['foo'], ['bar', ['class' => 'test'] ] ] )</pre>
+ * produces <xmp><ul><li>foo</li><li class='bar'>bar</li></ul></xmp>.
+ *
+ * @param string $container the container element to use.
+ * @param string $element The element to wrap each array entry in.
+ * @param array $array An array of [ $content, [ elAttrKey => elAttrValue ] ].
+ * @see html_array.
+ */
 function html_array_complex( $container, $element, $array )
 {
 	if ( is_array( $element ) || is_array( $container )
@@ -225,9 +248,11 @@ function html_array_complex( $container, $element, $array )
 	.")"
 	) );
 
+	$elementName = html_strip_attributes( $element );
+
 	return "<$container>"
 		. implode( '', array_map(
-				function($v) use ($element) {
+				function($v) use ($element, $elementName) {
 					$attrs = count($v) <=1 ? "" :
 						implode( " ", array_map(
 							function($k,$v) { return "$k=\"".htmlspecialchars( (is_array($v)?implode(" ", $v):$v) )."\""; },
@@ -235,16 +260,25 @@ function html_array_complex( $container, $element, $array )
 							array_values( $v[1] )
 						) )
 					;
-					return "<$element $attrs>" . $v[0] . "</$element>";
+					return "<$element $attrs>" . $v[0] . "</$elementName>";
 				},
 				$array
 		) )
-		. "</$container>";
+		. "</" . html_strip_attributes($container) . ">";
 
 }
 
+/**
+ * Implementation of html_array taking an array of strings.
+ *
+ * Example: <pre>html_array_simple( 'ul', 'li', [ 'foo', 'bar' ] )</pre>
+ * produces <xmp><ul><li>foo</li><li>bar</li></ul></xmp>
+ *
+ * @param string $container
+ * @param string $element
+ * @param array $array array of strings
+ */
 function html_array_simple( $container, $element, $array )
-#{	is_array( $array[0] ) || is_array( $element ) || is_array( $container ) and debug_backtrace();
 {
 	if(is_array( $array[0] ) || is_array( $element ) || is_array( $container ) )
 	fatal( __FUNCTION__ . htmlentities(
@@ -260,29 +294,33 @@ function html_array_simple( $container, $element, $array )
 	.")"
 	) );
 
-	return $element{0} >= 'a' && $element{0} <= 'z'
-	? "<$container><$element>" . implode("</$element><$element>", $array) . "</$element></$container>"
-	: "<$container>$element" . implode($element, $array) . "$element</$container>"	// no enters because of javascript
-	;
+	$elementName = html_strip_attributes( $element );
+
+	return html_tag( $container, "<$element>" . implode("</$element><$elementName>", $array) . "</$elementName>" );
 }
 
-function html_tag( $name, $content, $attributes = null )
+function html_tag( $name, $content )
 {
-#	if ( ! is_string( $content ) ) xchg( $content, $attributes );
-#	$attributes = html_combine( $attributes );
-	return "<$name>$content</$name>";
+	return "<$name>$content</".html_strip_attributes( $name ).">";
 }
+
+function html_strip_attributes( $el ) {
+	return ( $pos = strpos( $el, ' ' ) ) === false ? $el : substr( $el, 0, $pos );
+	//return preg_replace( '/ .*$/', null, $el );
+}
+
 
 function html_combine( $array ) {
+	if ( empty( $array ) ) return null;
 #	echo fold_debug(func_get_args(), "html_combine");
 	if ( ! is_array( $array ) ) error( __FUNCTION__
 		."(array): illegal call: (".gettype($array).")"
 		. html_tag( 'pre', print_r(func_get_args(),1) . "\n" . stacktrace() ) );
-	return
+	return ' ' .
 	implode( "", array_map(
 		function($k,$v) { return " $k=\"".htmlspecialchars( $v )."\""; },
 		array_keys( $array ), array_values( $array )
-	) );
+	) ) . ' ';
 }
 
 define( 'HTML_SINGULAR_TAGS', "link" );
