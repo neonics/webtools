@@ -25,5 +25,12 @@ class Check
 		else
 			return $fatal ? $value : true;
 	}
+
+	public static function int( $value, $fatal = true ) {
+		if ( ! is_int( $value ) || intval($value) != $value )
+			$fatal ? fatal( "invalid int: $value" ) : false;
+		else
+			return $fatal ? $value : true;
+	}
 }
 
