@@ -12,7 +12,7 @@ class HTMLView extends \template\View {
 	}
 
 	protected function _render() {
-        $tmp = $this->data;
+		$tmp = $this->data;
 		if ( is_callable( $tmp ) )
         /*
             gettype($this->data)=='function'
@@ -20,7 +20,7 @@ class HTMLView extends \template\View {
 		|| ( gettype( $this->data ) == 'string' && function_exists( $this->data ) )
 		*/
         {  $tmp(); }
-		else echo $this->data;
+		else echo $tmp;
 	}
 }
 

@@ -37,7 +37,7 @@ abstract class View {
 		{
 			if ( strpos( $data[0], "$this->id-" ) === 0 )
 				return true;
-			}
+		}
 		return false;
 	}
 
