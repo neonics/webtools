@@ -161,10 +161,10 @@ class EMail extends MimeMessage
 			if ( strpos( $name, '"' ) !== false )
 			{
 				if ( preg_match( "@^\s*\"(.*?)\"\s*$@", $name ) )
-					$addr;
+					return $addr;
 				else
 				{
-					warn( "removing malformed name '$name' from address '$addr'" );
+					trigger_error( "removing malformed name '$name' from address '$addr'", E_USER_WARNING );
 					return $email;
 				}
 			}

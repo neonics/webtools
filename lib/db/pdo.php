@@ -28,7 +28,7 @@ class PDODB extends PDO
 		if ( preg_match( '/^([^:]+):.*?dbname=([^;]+)/', $dsn, $m ) )
 		{
 			if ( $this->driver != $m[1] )
-				warn( "[".__FILE__.":".__LINE__."] DB driver conflict: DSN reports <code>{$m[1]}</code>, PDO reports <code>$this->driver</code>");
+				trigger_error( "[".__FILE__.":".__LINE__."] DB driver conflict: DSN reports <code>{$m[1]}</code>, PDO reports <code>$this->driver</code> (using $this->driver)", E_USER_WARNING );
 			$this->name = $m[2];
 		}
 		else fatal("can't extract driver/dbname from '$dsn'");
@@ -76,7 +76,7 @@ class PDODB extends PDO
 							return $val;
 						}
 					}
-					#warn( "no <code>id</code> column for <code>$t</code><pre>".print_r($sth,1)."</pre>" );
+					trigger_error( "no <code>id</code> column for <code>$t</code><pre>".print_r($sth,1)."</pre>", E_USER_WARNING );
 					return null;
 
 				default:
@@ -96,6 +96,7 @@ class PDODB extends PDO
 	*/
 
 	private static function _is_insert( $sql ) {
+	// TODO: SELECT ... INTO
 		return preg_match( "/^\s*insert\s+into\s+(\S+)/i", $sql, $m )
 			? $m[1]
 			: null;

@@ -196,18 +196,11 @@ function html_array( $container, $element, $array, $function = null )
 {
 	if ( ! count( $array ) ) return "";
 
-	if ( ! isset( $array[0] ) && ! array_key_exists( 0, $array ) )
-	{
-		warn( "html_array: malformed array" . fold_debug( $array ) . html_tag( 'pre', stacktrace() ) );
-		return "";
-	}
+	if ( ! is_array( $array ) || ( ! isset( $array[0] ) && ! array_key_exists( 0, $array ) ) )
+		trigger_error( __FUNCTION__ . ": malformed array", E_USER_WARNING );
 
 	if ( is_callable($function) )
 		$array = array_map( function($v) use( $function, $array, $element ) { return $function( $v, $element );}, $array );
-
-#	if ( ! count( $array ) ) {
-#		warn( "html_array:
-#	}
 
 	return is_array( $array[0] )
 		? html_array_complex( $container, $element, $array )

@@ -38,18 +38,13 @@ function getActions() {
 		$m = null;
 		if ( preg_match( "/^action:([^:]+)((:[^:]+)*)$/", $k, $m ) )
 		{
-			#debug("found action: $k -> $v:  action=$m[1] args=$m[2]" );
 			$args = explode( ":", substr( $m[2], 1 ) );
 			$actions[] = array_merge( array( $m[1]), array_merge( array_map(
 				function($a) use($args)
 				{
-#					return explode("=", $a );
-#					debug(" $a -> {$args[$a]} ");
-
 					if ( strpos( $a, "/" ) === false )
 					{
 							return $a;
-						
 					}
 					else
 					{
@@ -75,8 +70,6 @@ function getActions() {
 			) ) ) ;
 		}
 	}
-
-	#warn( print_r( $actions, true ) );
 
 	return $actions;
 }
