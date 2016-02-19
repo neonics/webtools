@@ -108,6 +108,7 @@ if ( substr( $_SERVER['REQUEST_URI'], 0, 5 ) == '/api/' )	// also included as li
 		if ( !isset( $_REQUEST[ $param ] ) || !strlen( trim( $_REQUEST[ $param ] ) ) )
 		{
 			header( "HTTP/1.1 400 Bad request - missing parameter '$param'" );
+			echo "ERROR: missing parameter '$param'";
 			return;
 		}
 		else
@@ -143,7 +144,7 @@ function query_execute( $query_id )
 
 	gd( $_REQUEST['debug'], 0 ) and $TIME_START = microtime(true);
 	$sth = $db->prepare( $query );
-	$sth->execute();
+	$sth->execute( gad( $_SESSION, $query_id . '.args', [] ) );
 	gd( $_REQUEST['debug'], 0 ) and $TIME_MIDDLE = microtime(true);
 
 	$rows = $sth->fetchAll( PDO::FETCH_ASSOC );
