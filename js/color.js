@@ -5,7 +5,7 @@
  * @param s : saturation [0..1]
  * @param v : value		 [0..1]
  */
-function hsv2rgb(h,s,v)
+function hsv2rgb(h,s,v,a)
 {
 	var m = ( h / 60.0 ) % 6,
 		i = Math.floor(m),
@@ -21,7 +21,7 @@ function hsv2rgb(h,s,v)
 		Math.round( r * 255 ),
 		Math.round( g * 255 ),
 		Math.round( b * 255 ),
-		1
+		a || 1
 	];
 }
 
