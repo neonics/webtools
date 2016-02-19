@@ -12,8 +12,12 @@ class Bootstrap {
 	 */
 	public static function accordion( $arr, $panelgroupclass = '', $panelclass = 'panel-default' ) {
 		$ret = null;
-		foreach ( $arr as $title => $content )
-			$ret .= self::panel( self::collapse_link( $title, $content ), $panelclass );
+		foreach ( $arr as $title => $content ) {
+			if ( is_array( $content ) )
+				list( $content, $attrs ) = $content;
+			else $attrs = null;
+			$ret .= self::panel( self::collapse_link( $title, $content, 'div', $attrs ), $panelclass );
+		}
 
 		return <<<HTML
 			<div class='panel-group $panelgroupclass'>
@@ -45,18 +49,27 @@ HTML;
 	 * @param string $label The link tabel.
 	 * @param string $data The collapsable content.
 	 * @param string $tag Tag to wrap content in - default 'div'.
-	 * @param string $classes Additional CSS classes for $tag.
+	 * @param mixed $classes_or_attrs string: additional CSS classes for $tag; associative array: attributes
 	 * @return array [$anchor_tag, $tag_wrapped_data]
 	 */
-	public static function collapse_link( $label, $data, $tag='div', $classes=null ) 
+	public static function collapse_link( $label, $data, $tag='div', $classes_or_attrs=null ) 
 	{
-		$id = html_id( 'cl' );
+		if ( is_array( $classes_or_attrs ) )
+		{
+			$classes = gad( $classes_or_attrs, 'class' );
+			$id = gad( $classes_or_attrs, 'id', html_id('cl') );
+			unset( $classes_or_attrs['class'] );
+			unset( $classes_or_attrs['id'] );
+			$attrs = implode( ' ', array_map( function($k,$v){return "$k='".esc_attr($v)."'";}, array_keys($classes_or_attrs),array_values($classes_or_attrs) ) );
+		}
+		else
+			list( $id, $classes, $attrs ) = [ html_id('cl'), $classes_or_attrs, null ];
 
 		return array( <<<HTML
 			<a data-toggle='collapse' data-target='#$id'>$label<b class='caret'></b></a>
 HTML
 			, <<<HTML
-			<$tag id='$id' class='collapse $classes'>
+			<$tag id='$id' class='collapse $classes' $attrs>
 				 $data
 			</$tag>
 HTML
