@@ -41,29 +41,25 @@ class PSPModule extends AbstractModule
 	{
 		//	Session::start();
 
-		$fn = "errorHandler";
-
-		#if ( false )
-		{
-		$code = <<<EOF
-			function $fn( \$errno, \$errstr, \$errfile, \$errline, \$errcontext )
+		$prev_handler =
+		set_error_handler( function( $errno, $errstr, $errfile, $errline, $errcontext = null )
 			{
-				switch ( \$errno )
+				switch ( $errno )
 				{
-					case E_NOTICE: case E_USER_NOTICE: \$errno = "notice";break;
-					case E_WARNING: case E_USER_WARNING: \$errno = "warning";break;
-					case E_ERROR: case E_USER_ERROR: default: \$errno = "error";
+					case E_NOTICE: case E_USER_NOTICE: $errno = "notice";break;
+					case E_WARNING: case E_USER_WARNING: $errno = "warning";break;
+					case E_ERROR: case E_USER_ERROR: default: $errno = "error";
 				}
-				AbstractModule::smessage( Array( "\$errstr", "@ \$errfile:\$errline"), "error" );
+				AbstractModule::smessage( Array( "$errstr", "@ $errfile:$errline"), "error" );
 
 				echo "<div width='100%' style='color:white; background-color:red;font-weight:bold;'>"
-					."[\$errno] \$errstr<br/>"
-					."<i>  @ \$errfile:\$errline</i></div><br/>";
+					."PSP ERR: [$errno] $errstr<br/>"
+					."<i>  @ $errfile:$errline</i></div><br/>";
 			}
-EOF;
-		eval( $code );
-		set_error_handler( $fn );
-		}
+		);
+
+		if ( $prev_handler )
+			set_error_handler( $prev_handler );
 	}
 
 
