@@ -1,6 +1,8 @@
 <?php
 namespace template;
 
+require_once 'html.php';
+
 class ModalDialog
 {
 
@@ -69,5 +71,37 @@ HTML;
 	}
 
 	private static $_js_ajaxify = 0;
+
+	public static function js_opener( $actionSelector, $modalSelector, $url ) {
+
+		$id = html_id('modal_intercept');
+
+		return <<<HTML
+			<script type="text/javascript" id='{$id}'>
+				console.log( "js_intercept for modal $modalSelector, activator $actionSelector, url $url" );
+
+				(function(script) { $(function($) {
+
+					$(script).closest('form').find('{$actionSelector}')//, input[type="submit"]')
+					.click( function() {
+
+						$.ajax({
+							type:"GET",
+							url:"$url",
+							complete:function(jqXHR,status) {
+								(on=$('{$modalSelector}')).find('.modal-body').html( jqXHR.responseText )
+								on.modal({}).show();
+							}
+						})
+
+						return false;
+					} )
+					.length || console.error("cannot find '", script, ' form ', "$actionSelector'" )
+
+				})})( document.currentScript || '#{$id}' )
+
+			</script>
+HTML;
+	}
 
 }
