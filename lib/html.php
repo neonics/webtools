@@ -122,6 +122,7 @@ function _echo_col( $k, $x )
 		? "<i style='color:grey'>NULL</i>"
 		: $x;
 	$a = is_array( $x ) ? ( count($x) ? $x[0] : null ) : $x;
+	$a = $a === null ? "<i style='color:grey'>NULL,/i>" : $a;
 	$b = ! is_array( $x ) || count( $x ) <= 2 ? null :
 		" " . implode(' ', array_map( function($X,$Y){return "$X=\"".htmlspecialchars($Y)."\"";}, array_keys( $x[2] ), array_values( $x[2] ) ) )
 	;
@@ -334,7 +335,7 @@ function html_close( $name ) {
 }
 
 
-function html_form_button_action( $action, $label = null, $hidden = null, $buttonClasses = 'btn btn-primary', $form_action = null, $form_attrs = null )
+function html_form_button_action( $action, $label = null, $hidden = null, $buttonClasses = 'btn btn-primary', $form_action = null, $form_attrs = 'class="form-button-action"' )
 {
 	$action_str = htmlspecialchars( $action );
 	$label = gd( $label, $action );
