@@ -16,21 +16,28 @@ class Check
 		if ( preg_match ( "/^[^@]+@([\w\d-]+\.)+[\w\d-]+$/", $value ) )
 			return $fatal ? $value : true;
 		else
-			$fatal ? fatal( "not an e-mail address: '" . htmlspecialchars( $value ) . "'" ) : false;
+			return $fatal ? fatal( "not an e-mail address: '" . htmlspecialchars( $value ) . "'" ) : false;
 	}
 
 	public static function length( $value, $minLen = 1, $maxLen = null, $fatal = true ) {
 		if ( $minLen !== null && strlen( $value ) < $minLen )
-			$fatal ? fatal( "invalid length: ".strlen($value). "<$minLen" ) : false;
+			return $fatal ? fatal( "invalid length: ".strlen($value). "<$minLen" ) : false;
 		else
 			return $fatal ? $value : true;
 	}
 
 	public static function int( $value, $fatal = true ) {
 		if ( ! is_int( $value ) || intval($value) != $value )
-			$fatal ? fatal( "invalid int: $value" ) : false;
+			return $fatal ? fatal( "invalid int: $value" ) : false;
 		else
 			return $fatal ? $value : true;
+	}
+
+	public static function date( $value, $fatal = true ) {
+		if ( preg_match( '@^\d\d\d\d([/-])\d\d?\1\d\d?$@', $value ) )
+			return $fatal ? $value : true;
+		else
+			return $fatal ? fatal( "invalid date: $date" ) : false;
 	}
 }
 
