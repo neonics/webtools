@@ -99,7 +99,7 @@ function template_content( $request ) // only one module per page
 		module_menu( $request, $submenu_classes );
 		$submenu = ob_get_clean();
 
-		$submenu = \template\AuthFilter::filter( $submenu );
+		$submenu = strlen(trim($submenu)) ? \template\AuthFilter::filter( $submenu ) : null;
 
 		if ( strlen($submenu) )
 		{
