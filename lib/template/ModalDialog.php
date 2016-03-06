@@ -58,6 +58,11 @@ HTML
 				</div>
 			</div>
 		</div>
+		<script type='text/javascript'>
+			jQuery( function($) {
+				$('#{$id}').appendTo('body')
+			} );
+		</script>
 
 HTML;
 
