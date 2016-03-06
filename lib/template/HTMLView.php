@@ -19,7 +19,7 @@ class HTMLView extends \template\View {
 		|| ( gettype($this->data)=='object' && get_class( $this->data ) == 'Closure' )
 		|| ( gettype( $this->data ) == 'string' && function_exists( $this->data ) )
 		*/
-        {  $tmp(); }
+        {  $tmp( $this ); }
 		else echo $tmp;
 	}
 }
