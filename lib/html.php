@@ -135,8 +135,8 @@ function _echo_col( $k, $x )
 
 
 /**
- * @param $array associative array; keys are option values, values are labels
- * @param $selected selected key
+ * @param mixed $array associative array; keys are option values, values are labels
+ * @param string $selected selected key
  */
 function html_options( $array, $selected = null, $show_none = true )
 {
@@ -144,8 +144,19 @@ function html_options( $array, $selected = null, $show_none = true )
 	.	implode('',
 			array_map
 			(
-				function($k, $v) use($selected) {
-					return "<option value='".esc_attr($k)."'".($selected==$k?" selected":"").">$v</option>";
+				function($k, $val) use($selected) {
+					if ( is_array( $val ) )
+					{
+						$label = $val['label'];
+						$disabled = gad( $val, 'disabled' ) ? ' disabled' : null;
+					}
+					else
+					{
+						$label = $val;
+						$disabled = null;
+					}
+
+					return "<option value='".esc_attr($k)."'".($selected==$k?" selected":"")."$disabled>$label</option>";
 				},
 				array_keys( $array ),
 				array_values( $array )
