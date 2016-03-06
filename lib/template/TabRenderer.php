@@ -5,7 +5,7 @@ class TabRenderer {
 	var $state;
 	var $components = array();
 
-	var $navClasses = 'nav nav-pills';
+	var $navClasses = 'nav nav-tabs';
 
 	public function __construct( &$state ) {
 		$this->state = $state;
@@ -71,7 +71,7 @@ class TabRenderer {
 
 		foreach ( $this->components as $i => $tab )
 		{
-			$b = $tab->navbadge ? "<span class='badge badge-$tab->navbadge_type'>$tab->navbadge</span>" : "";
+			$b = null !== $tab->navbadge ? "<span class='badge badge-$tab->navbadge_type'>$tab->navbadge</span>" : "";
 			$tabnav .= <<<HTML
 				<li class='{$cssClasses[$i]}'><a href="#$tab->id" role='tab' data-toggle='tab'>$tab->navlabel $b</a></li>
 HTML;
@@ -85,7 +85,7 @@ HTML;
 				$tabnav
 				{$this->state->infotab}
 			</ul>
-			<div class='tab-content' style='margin: 0; border: 0'>
+			<div class='tab-content'>
 				$tabcontent
 			</div>
 HTML;
