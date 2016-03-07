@@ -63,8 +63,10 @@ HTML;
 		else
 		//foreach ( $result[0] as $k=>$v ) echo "<th>A $k</th>";
 		*/
-		foreach ( $rowmap as $k=>$v ) echo "<th class='sql-col-$k'>",
-			(is_callable($hdrfn) ? $hdrfn( $k, $v ) : "$v")."</th>";
+		foreach ( $rowmap as $k=>$v )
+			echo "<th class='sql-col-$k'>",
+				is_callable($hdrfn) ? $hdrfn( $k, $v ) : "$v",
+			"</th>";
 
 	echo <<<HTML
 			</tr>
@@ -123,10 +125,17 @@ function _echo_col( $k, $x )
 		: $x;
 	$a = is_array( $x ) ? ( count($x) ? $x[0] : null ) : $x;
 	$a = $a === null ? "<i style='color:grey'>NULL,/i>" : $a;
-	$b = ! is_array( $x ) || count( $x ) <= 2 ? null :
-		" " . implode(' ', array_map( function($X,$Y){return "$X=\"".htmlspecialchars($Y)."\"";}, array_keys( $x[2] ), array_values( $x[2] ) ) )
-	;
-	echo "<td class='sql-col-$k'$b>$a</td>";
+	$cls = null;
+	if ( ! is_array( $x ) || count( $x ) <= 2 )
+		$b = null;
+	else {
+		$tmp = array_filter( $x[2], function($v){ return $v!='class'; } );
+		$cls = gad( $tmp, 'class' );
+		$b = " " . implode(' ',
+			array_map( function($X,$Y){return "$X=\"".htmlspecialchars($Y)."\"";}, array_keys( $x[2] ), array_values( $x[2] ) )
+		);
+	}
+	echo "<td class='sql-col-$k $cls'$b>$a</td>";
 
 	return is_array( $x ) && count($x)>1
 		? $x[1]
