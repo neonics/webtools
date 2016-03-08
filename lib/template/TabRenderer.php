@@ -26,9 +26,7 @@ class TabRenderer {
 		// aggregate output
 		$taboutput = array();
 		foreach ( $this->components as $tab )
-		{
 			$taboutput[] = $tab->render();
-		}
 
 		// find active tab
 		$cssClasses = array();
@@ -80,7 +78,7 @@ HTML;
 HTML;
 		}
 
-		echo <<<HTML
+		return <<<HTML
 			<ul class='{$this->navClasses}' role='tablist'>
 				$tabnav
 				{$this->state->infotab}
