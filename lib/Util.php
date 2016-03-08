@@ -249,3 +249,23 @@
 	function cb_prefix( $with ) { return function($v) use($with) { return "$with$v"; }; }
 
 	function cb_column( $key )  { return function($v) use($key)  { return $v[$key];  }; }
+
+	/**
+	 * Saves $content to the file "$name.$ext" after renaming "$name.$ext" to "$name-1.$ext",
+	 * "$name-1.$ext" to "$name-2.$ext" etc., in the correct order.
+	 *
+	 * @param string $name File path and base name.
+	 * @param string $ext Filename extension (without leading '.')
+	 * @param string $content File content.
+	 */
+	function save_file_with_backups( $name, $ext, $content ) {
+		$f = "$name.$ext";
+		$i = 0;
+		while ( file_exists( $f ) )
+			$f = "$name-".++$i.".$ext";
+
+		while ( $i > 0 )
+			rename( $name.(--$i==0?"":"-$i").".$ext", "$name-".($i+1).".$ext" );
+
+		file_put_contents( "$name.$ext", $content );
+	}
