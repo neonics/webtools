@@ -111,9 +111,7 @@ function template_content( $request ) // only one module per page
 						<ul class='nav navbar-nav'>
 							<li>
 								<h2><?php echo $submenu_label;?></h2>
-								<button data-target="#module-menu" data-toggle="collapse" class="navbar-toggle" type="button"
-									style='color:red;background-color:blue'
-								>
+								<button data-target="#module-menu" data-toggle="collapse" class="navbar-toggle" type="button">
 									<span class="sr-only">Toggle Navigation</span>
 									<span class="icon-bar"></span>
 								</button>
