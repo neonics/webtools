@@ -25,7 +25,7 @@ HTML
 	];
 
 
-	static function render( $id, $title, $button_flags = 0, $body = null ) {
+	static function render( $id, $title, $button_flags = 0, $body = null, $attrs = null ) {
 
 		if ( ! $body )
 			$body = " ... (dialog only shows after ajax complete)";
@@ -38,10 +38,12 @@ HTML
 			return $button_flags & $f ? $h : null;
 		}, array_keys( self::$bottom_button_definitions ), array_values( self::$bottom_button_definitions ) ) );
 
+		$css_classes = gad( $attrs, 'class' );
+
 		echo <<<HTML
 
 		<!-- Modal -->
-		<div class="modal NO-fade" id="{$id}" tabindex="-1" role="dialog" aria-labelledby="{$id}Label" aria-hidden="true">
+		<div  id="{$id}" class="modal NO-fade $css_classes" tabindex="-1" role="dialog" aria-labelledby="{$id}Label" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -83,9 +85,9 @@ HTML;
 
 		return <<<HTML
 			<script type="text/javascript" id='{$id}'>
-				console.log( "js_intercept for modal $modalSelector, activator $actionSelector, url $url" );
 
 				(function(script) { $(function($) {
+					console.log( "js_intercept for modal $modalSelector, activator $actionSelector, url $url" );
 
 					$(script).closest('form').find('{$actionSelector}')//, input[type="submit"]')
 					.click( function() {
