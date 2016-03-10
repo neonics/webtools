@@ -15,7 +15,13 @@ function ajaxify(form, pe) // AJAX save
 	for ( var i in d = form.serializeArray() )
 	{
 //				console.log("FORM", d[i].name, " = ", d[i].value );
-		data[d[i].name] = d[i].value;
+
+		if ( d[i].name.match( /\[\]$/ ) ) {
+			data[d[i].name] = data[d[i].name] || [];
+			data[d[i].name].push( d[i].value );
+		}
+		else
+			data[d[i].name] = d[i].value;
 	}
 
 	var values = data; // alias
