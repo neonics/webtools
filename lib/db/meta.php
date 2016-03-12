@@ -511,15 +511,33 @@ function db_meta_drop_column( $db, $table, $column )
 function db_meta_drop_constraint( $db, $fromtable, $fromcolumn, $totable, $tocolumn )
 {
 	$m = db_get_tables_meta( $db, $fromtable );
+	$fromcolumn = is_array( $fromcolumn ) ? $fromcolumn : [ $fromcolumn ];
+	$tocolumn = is_array( $tocolumn ) ? $tocolumn : [ $tocolumn ];
+
 	foreach ( gad( $m, 'foreign_keys', [] ) as $fk => $ar )
-		foreach ( $ar as $constraint )
-			if ( $constraint['fk_column_name'] == $fromcolumn
+	{
+		if ( count( $ar ) != count( $fromcolumn ) )
+			continue;
+
+		$match = true;
+
+		foreach ( $ar as $i => $constraint )
+			if ( $constraint['fk_column_name'] == $fromcolumn[$i]
 				&& $constraint['referenced_table_name'] == $totable
-				&& $constraint['referenced_column_name'] == $tocolumn
+				&& $constraint['referenced_column_name'] == $tocolumn[$i]
 			)
+			;
+			else
 			{
-				$db->query( "ALTER TABLE bonus_points DROP FOREIGN KEY ".$constraint['fk_constraint_name'] );
-				return true;
+				$match = false;
+				break;
 			}
+
+		if ( $match )
+		{
+			$db->query( "ALTER TABLE $fromtable DROP FOREIGN KEY ".$constraint['fk_constraint_name'] );
+			return true;
+		}
+	}
 	return false;
 }
