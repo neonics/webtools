@@ -269,3 +269,17 @@
 
 		file_put_contents( "$name.$ext", $content );
 	}
+
+	/**
+	 * This function is used to allow array_map etc. to return [$k,$v]
+	 * which is then weaved into an associative array.
+	 *
+	 * @param array $arr array of 2-element arrays.
+	 * @return associative array
+	 */
+	function assoc_array( $arr ) {
+		return array_combine(
+			array_map( function($x) { return $x[0]; }, $arr ),
+			array_map( function($x) { return $x[1]; }, $arr )
+		);
+	}
