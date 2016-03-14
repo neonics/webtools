@@ -67,7 +67,7 @@
 	}
 
 	/**
-	 * @param $array unassociative array of associative arrays (list of hashtables): $array of $items
+	 * @param $array unassociative array of associative arrays (list of hashtables) or objects: $array of $items
 	 * @param $key   returned array will be keyed by $array[*][$key]
 	 * @param $value returned array will be valued as follows.
 	 *                 null (default):   $array[*]         -> []
@@ -80,10 +80,10 @@
 		foreach ( $array as $i=>$row )
 			if ( is_array( $value ) ) {
 				#if ( ! isset( $sh[$row[$key]] ) ) $sh[$row[$key]] = [];
-				$sh[$row[$key]][] = $row;
+				$sh[ is_array($row) ? $row[$key] : $row->$key ][] = $row;
 			}
 			else
-				$sh[$row[$key]] = $value === null ? $row : $row[$value];
+				$sh[ is_array($row) ? $row[$key] : $row->$key ] = $value === null ? $row : $row[$value];
 		return $sh;
 	}
 
