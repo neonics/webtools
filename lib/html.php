@@ -44,9 +44,10 @@ function html_table( & $result, $fn = null, $columns = null, $hdrfn = null, $opt
 
 
 	$table_id = gad( $opts, 'id' );
+	$table_class = gad( $opts, 'class' );
 
 	echo <<<HTML
-	<table class='table sql' id="$table_id">
+	<table class='table sql $table_class' id="$table_id">
 		<thead>
 			<tr>
 HTML;
