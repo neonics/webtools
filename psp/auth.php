@@ -302,11 +302,27 @@ abstract class AbstractAuthModule extends AbstractModule
 		$_SESSION["realm[$request->requestBaseURI]:auth.user.id"] = $this->_get_user_id( $user );
 	}
 
+	private function _clear_cache() {
+		$this->_user_cache = [];
+		$this->_id_to_user_cache = [];
+		$this->_user_roles_cache = [];
+		$this->_role_permissions_cache = [];
+		$this->_username_to_user_cache = [];
+		$this->_permission_cache = [];
+	}
+
+	private $_user_cache = [];
+
 	private function getSessionUser()
 	{
 		global $request;
+		$id = $_SESSION["realm[$request->requestBaseURI]:auth.user.id"];
 
-		$u= $this->user() ? $this->_get_user_by_id( $_SESSION["realm[$request->requestBaseURI]:auth.user.id"] ) : null;
+		if ( array_key_exists( $id, $this->_user_cache ) )
+			return $this->_user_cache[ $id ];
+
+		$this->_user_cache[ $id ] =
+		$u = $this->user() ? $this->_get_user_by_id( $id ) : null;
 
 		return $u;
 	}
@@ -599,10 +615,16 @@ class SQLDBAuthModule extends AbstractAuthModule
 		return $this->db->rollback();
 	}
 
+	private $_id_to_user_cache = [];
+
 	protected function _get_user_by_id( $id ) {
+		if ( array_key_exists( $id, $this->_id_to_user_cache ) )
+			return $this->_id_to_user_cache[ $id ];
+
 		$sth = $this->db->prepare( "SELECT * FROM users WHERE id=?" );
 		$sth->execute( array( $id ) );
-		return $sth->rowCount()
+		return $this->_id_to_user_cache[ $id ] =
+			$sth->rowCount()
 			? $sth->fetch( \PDO::FETCH_ASSOC )
 			: null;
 	}
@@ -622,8 +644,13 @@ class SQLDBAuthModule extends AbstractAuthModule
 		;
 	}
 
+	private $_user_roles_cache = [];
+
 	protected function _get_roles( $user, $realm = null )
 	{
+		if ( isset( $this->_user_roles_cache[ $realm ][ $user['id'] ] ) )
+			return $this->_user_roles_cache[ $realm ][ $user['id'] ];
+
 		list( $realmfield, $realmval ) = $this->_realmval( $realm );
 		$sth = $this->db->prepare( "
 			SELECT roles.name
@@ -634,10 +661,16 @@ class SQLDBAuthModule extends AbstractAuthModule
 			AND user_roles.realm_id = realms.id AND user_roles.user_id = ?
 		" );
 		$sth->execute( array( $realmval, $user['id'] ) );
-		return $sth->fetchAll( \PDO::FETCH_COLUMN, 0 );
+		return $this->_user_roles_cache[ $realm ][ $user['id'] ] = $sth->fetchAll( \PDO::FETCH_COLUMN, 0 );
 	}
 
-	protected function _get_permissions( $role, $realm = null ) {
+	private $_role_permissions_cache = [];
+
+	protected function _get_permissions( $role, $realm = null )
+	{
+		if ( array_key_exists( $role, gad( $this->_role_permissions_cache, $realm, [] ) ) )
+			return $this->_role_permissions_cache[ $realm ][ $role ];
+
 		#echo "<code>GET PERM $realm/$role</code>";
 		list( $realmfield, $realmval ) = $this->_realmval( $realm );
 		$sth = $this->db->prepare( "
@@ -652,7 +685,7 @@ class SQLDBAuthModule extends AbstractAuthModule
 			//AND permissions.realm_id=roles.realm_Id AND permissions.realm_id=role_permissions.realm_id
 		);
 		$sth->execute( array( $realmval, $role ) );
-		return $sth->fetchAll( \PDO::FETCH_COLUMN );
+		return $this->_role_permissions_cache[ $realm ][ $role ] = $sth->fetchAll( \PDO::FETCH_COLUMN );
 		// XXX if null, check $this->options['auto-create-permissions']
 	}
 
@@ -707,14 +740,17 @@ class SQLDBAuthModule extends AbstractAuthModule
 		return $top;
 	}
 
+	private $_username_to_user_cache = [];
+
 	protected function _get_user_by_name( $username )
 	{
+		if ( isset( $this->_username_to_user_cache[ $username ] ) )
+			return $this->_username_to_user_cache[ $username ];
+
 		$sth = $this->db->prepare( "SELECT * FROM users WHERE username=?" );
 		$sth->execute( [ $username ] );
-		if ( $sth->rowCount() )
-			return $sth->fetch( \PDO::FETCH_ASSOC );
-		else
-			return null;
+		return $this->_username_to_user_cache[ $username ] =
+			$sth->rowCount() ? $sth->fetch( \PDO::FETCH_ASSOC ) : null;
 	}
 
 	/*...
@@ -743,9 +779,15 @@ class SQLDBAuthModule extends AbstractAuthModule
 		return $user['password_type'] . ':' . $user['password'];
 	}
 
+	private $_permission_cache = [];
+
 	protected function _get_permission( $permission, $realm = null ) {
 		if ( ! is_string( $permission ) )
 			throw new Exception( __CLASS__.'.'.__METHOD__.": first arg \$permission not a string but a ".gettype( $permission ) );
+
+		if ( array_key_exists( $permission, gad( $this->_permission_cache, $realm, [] ) ) )
+			return $this->_permission_cache[ $realm ][ $permission ];
+
 		list( $realmfield, $realmval ) = $this->_realmval( $realm );
 		$sth = $this->db->prepare( "
 			SELECT permissions.*
@@ -755,7 +797,7 @@ class SQLDBAuthModule extends AbstractAuthModule
 			AND permissions.name=?
 		" );
 		$sth->execute( array( $realmval, $permission ) );
-		return $sth->rowCount() ? $sth->fetch( \PDO::FETCH_ASSOC ) : null;
+		return $this->_permission_cache[ $realm ][ $permission ] = $sth->rowCount() ? $sth->fetch( \PDO::FETCH_ASSOC ) : null;
 	}
 
 	protected function _create_permission( $permission, $realm = null ) {
@@ -769,6 +811,7 @@ class SQLDBAuthModule extends AbstractAuthModule
 			VALUES ( (SELECT id FROM realms WHERE name=?), ?, ? )
 		" );
 		$sth->execute( array( gd_( $realm, $this->realm() ), $permission, "(auto-created)" ) );
+		$this->_clear_cache();
 	}
 }
 
