@@ -35,31 +35,30 @@
  */
 !function ($) {
 
-  "use strict"; // jshint ;_;
+	"use strict"; // jshint ;_;
 
-  var Component = function (element, options) {
+	var Component = function (element, options) {
 		// note: this doesn't seem to be called.
-    this.options = $.extend({}, $.fn.component.defaults, options)
-    this.$window = $(window)
-    this.$element = $(element)
+		this.options = $.extend({}, $.fn.component.defaults, options)
+		this.$window = $(window)
+		this.$element = $(element)
 		console.log("component constructor", element, options);
-  }
+	}
 
 
-  var old = $.fn.component
+	var old = $.fn.component
 
-  $.fn.component = function (option) {
+	$.fn.component = function (option) {
 
 
-    return this.each(function () {
-      var $this = $(this)
-        , data = $this.data('component')
-        , options = typeof option == 'object' && option
+		return this.each(function () {
+			var $this = $(this)
+				, data = $this.data('component')
+				, options = typeof option == 'object' && option
 
 			// xxx for autocomplete, inject = $this
 			// which adds tags under <input>.
 			// this doesn't work for textarea:
-			console.log("EL:", $this);
 
 			var inject = $this;
 			if ( $this[0].nodeName == 'TEXTAREA' )
@@ -68,9 +67,8 @@
 				inject = $this.after("<span data-component-target='#"+$this[0].id+"'></span>").next();
 			}
 
-      if (!data) $this.data('component', (data = new Component(this, options)))
-      if (typeof option == 'string') data[option]();
-			console.log("data=", data, "option=", option);
+			if (!data) $this.data('component', (data = new Component(this, options)))
+			if (typeof option == 'string') data[option]();
 
 			var component_args = {};
 			var tmp0 = "data-" + data.replace(/\?.*/,'') + '-';
@@ -142,24 +140,24 @@
 			//.then(function(){console.log("then",this,arguments)})
 			;
 
-    })
-  }
+		})
+	}
 
-  $.fn.component.Constructor = Component
-  $.fn.component.defaults = {}
+	$.fn.component.Constructor = Component
+	$.fn.component.defaults = {}
 	$.fn.component._idcounter = 0;
 
-  $.fn.component.noConflict = function () {
-    $.fn.component = old;
-    return this;
-  }
+	$.fn.component.noConflict = function () {
+		$.fn.component = old;
+		return this;
+	}
 
 
-  $(window).on('load', function () {
-    $('[data-component]').each(function () {
-      var $this = $(this);
-      $this.component( $this.data() )
-    })
-  })
+	$(window).on('load', function () {
+		$('[data-component]').each(function () {
+			var $this = $(this);
+			$this.component( $this.data() )
+		})
+	})
 
 }(window.jQuery);
