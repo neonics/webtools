@@ -11,16 +11,16 @@ class ModalDialog
 
 	static $top_button_definitions = [
 		self::BUTTON_REFRESH => <<<HTML
-			<button type="button" class="refresh" aria-label="Refresh"><span aria-hidden="true"><i class='fa fa-refresh'></i></span></button>
+			<button type="button" class="btn btn-secondary icon-button refresh" aria-label="Refresh"><span aria-hidden="true"><i class='fa fa-refresh'></i></span></button>
 HTML
 	, self::BUTTON_SAVE => <<<HTML
-			<button type="button" class="save btn-primary" aria-label="Save"><span aria-hidden="true"><i class='fa fa-save'></i></span></button>
+			<button type="button" class="btn btn-primary icon-button save" aria-label="Save"><span aria-hidden="true"><i class='fa fa-save'></i></span></button>
 HTML
 	];
 
 	static $bottom_button_definitions = [
 		self::BUTTON_SAVE => <<<HTML
-			<button type="button" class="btn btn-primary">Save changes</button>
+			<button type="button" class="btn btn-primary save" aria-label="Save">Save changes</button>
 HTML
 	];
 
@@ -54,7 +54,7 @@ HTML
 						$body
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-default close" data-dismiss="modal">Close</button>
 						$bottom_buttons
 					</div>
 				</div>
