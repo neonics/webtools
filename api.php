@@ -12,7 +12,10 @@ set_error_handler( function( $errno, $errstr, $errfile=null, $errline=null, $err
 
 	if ( isset( $errcontext['m'] ) )
 	{
-		header("HTTP/1.1 404 Unknown API: " . $errcontext['m'][1]);
+		header("HTTP/1.1 404 xUnknown API: " . $errcontext['m'][1]);
+		while ( ob_get_level() )
+			ob_end_flush();
+		echo "xUnknown API: " . $errcontext['m'][1] . "\n";
 	}
 	else
 	{
@@ -20,10 +23,12 @@ set_error_handler( function( $errno, $errstr, $errfile=null, $errline=null, $err
 		{
 			case 2:
 			case 8:
-				header("HTTP/1.1 500 API Error: [$errno] " . $errstr );
-				break;
 			default:
-				header("HTTP/1.1 500 API Error (errno=$errno, msg=$errstr)");
+				header( "HTTP/1.1 500 API Error: [$errno] $errstr" );
+				while ( ob_get_level() )
+					ob_end_flush();
+				echo "API Error [$errno] $errstr\n";
+				break;
 		}
 	}
 
