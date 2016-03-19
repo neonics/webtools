@@ -316,7 +316,9 @@ abstract class AbstractAuthModule extends AbstractModule
 	private function getSessionUser()
 	{
 		global $request;
-		$id = $_SESSION["realm[$request->requestBaseURI]:auth.user.id"];
+		$id = gad( $_SESSION, "realm[$request->requestBaseURI]:auth.user.id" );
+		if ( ! $id )
+			return null;
 
 		if ( array_key_exists( $id, $this->_user_cache ) )
 			return $this->_user_cache[ $id ];
