@@ -241,7 +241,7 @@ abstract class Authentication
 		$hv=array();
 		array_map( function($v) use (&$hv)
 			{
-				list($k,$v) = explode( '=', $v );
+				list($k,$v) = explode( '=', $v, 2 );
 				$hv[$k] = preg_replace( '@^"(.*?)"$@', '$1', $v );
 			},
 			array_map( 'trim', explode( ',', implode(' ', array_slice($h,1)) ) )

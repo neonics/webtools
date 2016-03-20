@@ -280,6 +280,7 @@ HTML;
 				default: fatal("unknown auth mechanism: $method,".print_r($auth_headers,1));
 			}
 		}
+		return [];
 	}
 
 }

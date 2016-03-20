@@ -5,38 +5,6 @@ require_once __DIR__.'/db/pdo.php';
  * Implementation using SQL storage engine for IP/nonce and consumer token (consumer_key/consumer_secret) pairs.
  */
 
-class ManagedTable
-{
-	private $config;
-
-	public function __construct( $db, $name, $config ) {
-		$this->db = $db;
-		$this->name = $name;
-		$this->config = $config;
-	}
-
-	public function columns() { return array_keys( $this->columns ); }
-
-	public function create( $optional = "IF NOT EXISTS"  )
-	{
-		$this->db->exec( implode(' ', //call_user_func_array('array_merge',  // ... // )
-		array_map(function($v) {
-			return is_array($v) ? implode(' ', $v) : $v ;
-		},
-		[
-			"CREATE TABLE",
-			$optional ? "IF NOT EXISTS" : null,
-			$this->name,
-			"(",
-			"PRIMARY KEY",
-			"(", array_map( ),
-			")",
-		]
-		)
-		) );
-	}
-}
-
 class SQLAuthentication extends Authentication
 {
 	/**
@@ -59,62 +27,51 @@ class SQLAuthentication extends Authentication
 	{
 		parent::__construct();
 		$this->db = $db;
-		// tables are created lazily
+		$this->dbinit();
 	}
 
 	/**
-	 * Called right before performing queries.
-	 * Prevents SQL injection through the $this->table_ fields.
+	 * Make sure required tables exist by examining the db metadata.
 	 */
-	final function dbinit( $init_table = null ) {
+	private function dbinit() {
 		Check::identifier( $this->table_sessions );
 		Check::identifier( $this->table_tokens );
-		
-		switch ( $init_table )
+
+		$change = 0;
+		if ( ! gad( db_get_tables_meta( $this->db ), $this->table_tokens ) )
 		{
-			case 'tokens':
-			case $this->table_tokens: 
-				if( 0 )  // new feature
-				{
-				$t = new ManagedTable( $this->table_tokens, [
-					'columns' => [
-						'realm' => "varchar(32) not null",
-						'key'		=> "varchar(64) not null",
-						'secret'=> "varchar(64) not null",
-						'token' => "varchar(128) not null",
-					],
-					'primary_key' => [ 'realm', 'key' ]
-				] );
-					$t->create();
-				}
-				else
-				$this->db->exec( "
-					CREATE TABLE IF NOT EXISTS $this->table_tokens(
-						realm		varchar(32) not null,
-						token		varchar(128) not null,
-						key			varchar(64) not null,
-						secret	varchar(64) not null,
-						created	timestamptz not null default NOW(),
-						PRIMARY KEY ( realm, token, key )
-					)
-				" );
-				break;
+			$this->trace( "creating $this->table_tokens" );
+			$this->db->exec( "
+				CREATE TABLE IF NOT EXISTS $this->table_tokens(
+					realm		varchar(32) not null,
+					token		varchar(128) not null,
+					key			varchar(64) not null,
+					secret	varchar(64) not null,
+					created	timestamptz not null default NOW(),
+					PRIMARY KEY ( realm, token, key )
+				)
+			" );
+			$change++;
+		}
 
-			case 'nonce':
-			case 'sessions':
-			case $this->table_sessions: $this->db->exec( "
-					CREATE TABLE IF NOT EXISTS $this->table_sessions(
-						nonce		char(40),
-						site		varchar(255),
-						data		varchar(255),
-						host		varchar(255),
-						ip			varchar(16),
-						".$this->db->identifier('when')." timestamp not null default NOW()
-					)
-				");
-				break;
+		if ( ! gad( db_get_tables_meta( $this->db ), $this->table_sessions ) )
+		{
+			$this->db->exec( "
+				CREATE TABLE IF NOT EXISTS $this->table_sessions(
+					nonce		char(40),
+					site		varchar(255),
+					data		varchar(255),
+					host		varchar(255),
+					ip			varchar(16),
+					".$this->db->identifier('when')." timestamp not null default NOW()
+				)
+			");
+			$change++;
+		}
 
-			default: $this->trace( __METHOD__. ": Warning: no table specified: $init_table" );
+		if ( $change ) {
+			db_clear_meta( $this->db );
+			db_get_tables_meta( $this->db );
 		}
 
 		return $this->db;
@@ -127,24 +84,23 @@ class SQLAuthentication extends Authentication
 	protected function fetch_consumer_tokens( $realm, $key )
 	{
 		#echo "<pre>".__FUNCTION__."</pre>";
-		$db = $this->dbinit( $this->table_tokens );
 
 		// XXX postgres only
-		$db->exec("DELETE FROM $this->table_tokens WHERE NOW() - created > '1h'::interval" );
+		$this->db->exec("DELETE FROM $this->table_tokens WHERE NOW() - created > '1h'::interval" );
 
-		$sth = $db->prepare("SELECT * from $this->table_tokens WHERE realm=? AND key=?");
+		$sth = $this->db->prepare("SELECT * from $this->table_tokens WHERE realm=? AND key=?");
 		$sth->execute( [ $realm, $key ] );
 		$res = $sth->fetchAll( PDO::FETCH_OBJ );
 
 		if ( empty( $res ) )
 		{
 			$this->trace( "no tokens, considering creating one.." );
-			$user = executeSelectQuery( $db, "users", [ "username" => $key ] );
+			$user = executeSelectQuery( $this->db, "users", [ "username" => $key ] );
 			if ( count( $user ) == 1 )
 			{
 				$this->trace( "creating token for user $key" );
 				if (
-					executeInsertQUery( $db, $this->table_tokens, $row = [
+					executeInsertQUery( $this->db, $this->table_tokens, $row = [
 						"realm"		=> $realm,
 						"key"			=> $key,
 						"secret" 	=> $user[0]['password'],	// XXX FIXME TODO issue token
@@ -165,28 +121,23 @@ class SQLAuthentication extends Authentication
 	 */
 	function fetch_nonce( $nonce, $timeout = 60 )
 	{
-		$db = $this->dbinit( $this->table_sessions );
 		$timeout = max( intval( $timeout ), 10 );
-		$when    = null;
-		switch ( $db->driver ) {
-			case 'pgsql':#$when = "EXTRACT('epoch' FROM ".$db->identifier('when')." - NOW())"; break;
-										$when = "\"when\" - NOW()";
-										$timeout = "'{$timeout}s'::interval";
-										break;
-			case 'mysql': $when = "TIMESTAMPDIFF(SECONDS, `when`, NOW())";
-										break;
-			default: fatal( "not implemented for $db->driver: timestamp differences" );
-		};
+		$when    = $this->db->sql_timestampdiff( 'when', 'NOW()', 'SECONDS' );
+		$timeout = $this->db->sql_interval( $timeout, 'SECONDS' );
 
-		# TODO: "DELETE FROM $this->table_sessions WHERE $when >= $timeout";
+		$this->db->query( $q = "DELETE FROM $this->table_sessions WHERE $when >= $timeout" );
 
-		$sth = $db->prepare( $q = "SELECT * FROM $this->table_sessions WHERE ip=? AND nonce=? AND $when < $timeout" );
+		$sth = $this->db->prepare( $q = "
+			SELECT * FROM $this->table_sessions
+			WHERE ip=? AND nonce=? AND $when < $timeout
+		" );
 
 		$this->trace >= 10 and
-		$this->trace( "[$db->driver] $q" );
+		$this->trace( "[{$this->db->driver}] $q" );
 		$sth->execute( [ $ip = $_SERVER['REMOTE_ADDR'], $nonce ] );
 		$res = $sth->fetchAll( PDO::FETCH_ASSOC );
 
+		$this->trace and
 		$this->trace("NONCE check for ip=$ip, nonce=$nonce: "
 		.($this->trace > 1 ? "Got ".count($res). " results":(count($res)==1?"Ok":"Not found")),
 			$this->trace > 3 ? $res : null
@@ -206,9 +157,7 @@ class SQLAuthentication extends Authentication
 	{
 		$nonce = parent::create_nonce();
 
-		$db = $this->dbinit( $this->table_sessions );
-
-		executeInsertQuery( $db, $this->table_sessions, [
+		executeInsertQuery( $this->db, $this->table_sessions, [
 			"nonce" => $nonce,
 			"site"	=> $key,
 			"data"	=> $value,

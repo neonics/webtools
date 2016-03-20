@@ -172,6 +172,34 @@ class PDODB extends PDO
 		}
 	}
 
+	/**
+	 * @param string $col  Column
+	 * @param string $time An SQL timestamp expression (usually 'NOW()')
+	 * @param string $unit The interval unit (SECONDS etc.)
+	 */
+	public function sql_timestampdiff( $col, $time, $unit ) {
+		Check::identifier( $col );
+		Check::identifier( $unit ); // 'SECONDS' etc.
+		switch ( $this->driver ) {
+			case 'pgsql':	#$when = "EXTRACT('epoch' FROM ".$db->identifier('when')." - NOW())"; break;
+										return $time . ' - ' . $this->identifier( $col );
+			case 'mysql': return "TIMESTAMPDIFF($unit, `$col`, NOW())";
+			default: fatal( "not implemented for $db->driver: timestamp differences" );
+		};
+	}
+
+	/**
+	 * @param int $interval A number of $unit
+	 * @param string $unit The interval unit (SECONDS etc.)
+	 */
+	public function sql_interval( $interval, $unit ) {
+		switch ( $this->driver ) {
+			case 'pgsql':	return sprintf( "'%s%s'::interval", $interval, substr(strtolower($unit), 0, 1) );
+			case 'mysql': return $interval;
+			default: fatal( "not implemented for $db->driver: timestamp differences" );
+		};
+	}
+
 }
 
 
