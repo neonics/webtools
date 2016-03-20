@@ -94,7 +94,7 @@ function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 				}
 				catch ( \Exception $e )
 				{
-					debug( 'sys_error', "Upgrade to $cur_version failed: " . $e->getMessage() );
+					debug( 'sys_error', "Upgrade to $cur_version failed: " . $e->getMessage() . "<pre>$db->last_query</pre>" );
 					$db->rollback();
 					executeInsertQuery( $db, $table, [
 						'name' => 'db_upgrade_error',
@@ -128,7 +128,7 @@ function db_get_auto_options( $db, $table )
 	{
 		$options = executeSelectQuery( $db, $table, ['autoload'=>1] );
 	}
-	catch (Exception $e)
+	catch (PDOException $e)
 	{
 		$options = [];
 	}

@@ -69,7 +69,7 @@ class PDODB extends PDO
 				case 'pgsql':
 					if ( $t = $this->_is_insert( $sth->queryString ) )
 					{
-						$tm = db_get_tables_meta( $this )[ $t ];
+						$tm = db_get_tables_meta( $this, $t );
 						if ( isset( $tm['columns']['id'] ) ) { // TODO better check for serial columns
 							$val = $this->query( "SELECT currval(pg_get_serial_sequence('$t','id'))" )->fetchColumn(0);
 							#notice("query <code>".$sth->queryString."</code> insert id <code>$val</code><br/>" );
@@ -125,13 +125,20 @@ class PDODB extends PDO
 		return $db;
 	}
 
+	/** @readonly */
+	public $last_query;
+
+	public function query( $sql ) {
+		$this->last_query = $sql;
+		return call_user_func_array( 'parent::query', func_get_args() );
+	}
 
 	public function q( $sql, $args = [] ) {
+		$this->last_query = $sql;
 		$sth = $this->prepare( $sql );
 		$sth->execute( $args );
 		return $sth;
 	}
-
 
 
 	/** array_map function */
@@ -141,7 +148,7 @@ class PDODB extends PDO
 			case 'pgsql':
 				switch ( gettype( $v ) )
 				{
-					case 'boolean': return $v ? "TRUE":"FALSE";// unfortunately php prints false as ''
+					case 'boolean': return $v ? "TRUE":"FALSE";
 					default: return $v;
 				}
 
@@ -184,6 +191,8 @@ function executeInsertQuery( $db, $table, $fields )
 {
 	static $sth = array();
 	static $query = null;
+
+	_check_table( $db, $table );
 
 	$sthn = $db->name . "_".$table."_insert:" . md5( implode(":", array_keys($fields) ) );
 
@@ -246,6 +255,8 @@ function executeSelectQuery( $db, $table, $where = null, $extra = null )
 {
 	static $sth = array();
 
+	$table = _check_table( $db, $table );
+
 	if ( empty( $extra ) || is_string( $extra ) ) // backwards compat
 	$extra = [ 'extra' => $extra ];
 
@@ -289,6 +300,8 @@ function executeSelectQuery( $db, $table, $where = null, $extra = null )
 }
 
 function executeSelectQueryRequireSingle( $db, $table, $where, $extra = null ) {
+	$table = _check_table( $db, $table );
+
 	$rows = executeSelectQuery( $db, $table, $where, $extra);
 
 	if ( $rows === false || $rows === null )
@@ -312,6 +325,9 @@ function executeSelectQueryRequireSingle( $db, $table, $where, $extra = null ) {
 function executeUpdateQuery( $db, $table, $where, $update )
 {
 	static $sth = array();
+
+	$table = _check_table( $db, $table );
+
 	#echo "<pre>".print_r(func_get_args(),1)."</pre>";
 
 	$sthn = $table."_update_" . md5( implode( '_', array_keys( $where ) ) . '_SET_' . implode('_', array_keys( $update ) ) );
@@ -354,6 +370,9 @@ function executeUpdateQuery( $db, $table, $where, $update )
 function executeDeleteQuery( $db, $table, $where )
 {
 	static $sth = array();
+
+	$table = _check_table( $db, $table );
+
 	if ( $where == null || ! is_array( $where ) || ! count( $where ) )
 		fatal("refusing delete without WHERE clause at ".__FILE__);
 
@@ -380,5 +399,13 @@ function executeDeleteQuery( $db, $table, $where )
 
 	return $result;
 
+}
+
+function _check_table( PDODB $db, $name ) {
+	if ( ! db_get_tables_meta( $db, $name ) )
+		fatal( "missing database table meta for " . print_r( $db, 1 ) . ": $name"
+			. "\n" . print_r( array_keys( db_get_tables_meta( $db ) ), 1 )
+		);
+	return $name;
 }
 
