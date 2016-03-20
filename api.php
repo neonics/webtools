@@ -5,39 +5,69 @@
 if ( !preg_match( "@api/([\w/\-_]+)@", $_SERVER['REQUEST_URI'], $m ) ) {
 	header("HTTP/1.1 400 Illegal call");echo "illegal call";exit;
 }
-//set_error_handler( function(/*integer*/ $errno,/* string*/ $errstr, string $errfile=null, int $errline=null, array $errcontext=null)
-set_error_handler( function( $errno, $errstr, $errfile=null, $errline=null, $errcontext=null)
+
+/**
+ * @return true if handled, false to let default error handler handle the error.
+ *         Note that you must `ini_set('display_errors', 'on' );` when returning false.
+ */
+set_error_handler( function( $errno, $errstr, $errfile = null, $errline = null, $errcontext = null)
 {
-	//ob_end_clean();	// drop 
+	$e2str = [
+		E_ERROR							=> 'E_ERROR',
+		E_PARSE							=> 'E_PARSE',
+		E_CORE_ERROR				=> 'E_CORE_ERROR',
+		E_CORE_WARNING			=> 'E_CORE_WARNING',
+		E_COMPILE_ERROR			=> 'E_COMPILE_ERROR',
+		E_COMPILE_WARNING		=> 'E_COMPILE_WARNING',
+		E_USER_ERROR				=> 'E_USER_ERROR',
+		E_STRICT						=> 'E_STRICT',
+		E_RECOVERABLE_ERROR	=> 'E_RECOVERABLE_ERROR',
+		E_DEPRECATED				=> 'E_DEPRECATED',
+		E_USER_DEPRECATED		=> 'E_USER_DEPRECATED',
+		E_WARNING						=> 'E_WARNING',
+		E_NOTICE						=> 'E_NOTICE',
+		E_USER_WARNING			=> 'E_USER_WARNING',
+		E_USER_NOTICE				=> 'E_USER_NOTICE',
+	];
 
-	if ( isset( $errcontext['m'] ) )
+
+	switch ( $errno )
 	{
-		header("HTTP/1.1 404 xUnknown API: " . $errcontext['m'][1]);
-		while ( ob_get_level() )
-			ob_end_flush();
-		echo "xUnknown API: " . $errcontext['m'][1] . "\n";
-	}
-	else
-	{
-		switch ( $errno )
-		{
-			case 2:
-			case 8:
-			default:
-				header( "HTTP/1.1 500 API Error: [$errno] $errstr" );
-				while ( ob_get_level() )
-					ob_end_flush();
-				echo "API Error [$errno] $errstr\n";
-				break;
-		}
+		case E_ERROR:
+		case E_PARSE:
+		case E_CORE_ERROR:
+		case E_CORE_WARNING:
+		case E_COMPILE_ERROR:
+		case E_COMPILE_WARNING:
+		case E_USER_ERROR:
+		case E_RECOVERABLE_ERROR:
+		default:
+			if ( ! headers_sent() )
+				header("HTTP/1.1 500 API Error: [$errno] " . $errstr );
+			while ( ob_get_level() )
+				ob_end_flush();
+			echo "fatal error:\n<pre>";
+			debug_print_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
+			echo "</pre>\n";
+			break;
+
+		case E_WARNING:
+		case E_NOTICE:
+		case E_DEPRECATED:
+		case E_STRICT:
+		case E_USER_WARNING:
+		case E_USER_NOTICE:
+		case E_USER_DEPRECATED:
+			//return false;
+			echo "<code><b>[".$e2str[$errno]."]</b> $errstr</code><br/>\n";
+			return true;
 	}
 
-	echo "<pre>ERROR: ".print_r( func_get_args(), 1 )."</pre>";
-
-	exit;
 	return true;
-}
-);
+}, -1 );
+#error_reporting( -1 );
+#ini_set('display_errors', 'on' );
+#ini_set('display_startup_errors', 'on' );
 
 
 // from handle.php:
