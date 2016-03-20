@@ -67,12 +67,53 @@
 	}
 
 	/**
+	 * Convert an array of $rows to a hash, keyed by $key. The $rows may be associative arrays or objects (stdClass).
+	 * The array_values() of the resultant array are:
+	 * - $row when $value is null/absent,
+	 * - $row[$value] or $row->$value when $value is a string
+	 * - [$row] when $value is []: an array of $row sharing the same value of $row[$key] (or $row->$key);
+	 * - [$row[$name]] when $value is [$name].
+	 *
+	 * Examples:
+	 *
+	 * Given $input = [
+	 *    ['a' => 'foo', 'b' => 't1'],
+	 *    ['a' => 'foo', 'b' => 't2'],
+	 *    ['a' => 'bar', 'b' => 't3']
+	 * ],
+	 *
+	 * - array_hash( $input, 'a' ) returns [
+	 *    'foo' => ['a' => 'foo', 'b' => 't2'],
+	 *    'bar' => ['a' => 'bar', 'b' => 't3']
+	 * ],
+	 *
+	 * - array_hash( $input, 'a', 'b' ) returns [
+	 *    'foo' => 't2',
+	 *    'bar' => 't3',
+	 * ],
+	 *
+	 * - array_hash(  $input, 'a', [] ) returns [
+	 *    'foo' => [
+	 *       ['a' => 'foo', 'b' => 't1'],
+	 *       ['a' => 'foo', 'b' => 't2'],
+	 *     ],
+	 *    'bar' => [
+	 *       ['a' => 'bar', 'b' => 't3']
+	 *    ]
+	 * ],
+   *
+	 * - array_hash(  $input, 'a', ['b'] ) returns [
+	 *    'foo' => [ 't1', 't2' ],
+	 *    'bar' => [ 't3' ]
+	 * ].
+	 *
 	 * @param $array unassociative array of associative arrays (list of hashtables) or objects: $array of $items
 	 * @param $key   returned array will be keyed by $array[*][$key]
 	 * @param $value returned array will be valued as follows.
 	 *                 null (default):   $array[*]         -> []
 	 *								 string:           $array[*][$value] -> column value
 	 * 								 [] (empty array)  [$array[*]]       -> for when $key is not unique, return array of arrays of arrays.
+	 *                 [$name]           $array[$key]      -> [$name]
 	 */
 	function array_hash( $array, $key, $value = null )
 	{
@@ -80,7 +121,7 @@
 		foreach ( $array as $i=>$row )
 			if ( is_array( $value ) ) {
 				#if ( ! isset( $sh[$row[$key]] ) ) $sh[$row[$key]] = [];
-				$sh[ is_array($row) ? $row[$key] : $row->$key ][] = $row;
+				$sh[ is_array($row) ? $row[$key] : $row->$key ][] = (count($value) ? $row[$value[0]] : $row );
 			}
 			else
 				$sh[ is_array($row) ? $row[$key] : $row->$key ] = $value === null ? $row : $row[$value];
