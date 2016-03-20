@@ -184,7 +184,7 @@ HTML;
 					{$noticeBar}
 					</div>
 				</nav>
-			{$menu}
+				{$menu}
 			</div>
 		</header>
 		<script src="{$request->requestBaseURI}js/menu.js"></script>
@@ -261,7 +261,7 @@ HTML;
 		}
 		catch (Exception $e)
 		{
-			echo "<pre class='alert alert-danger'>$e</pre>";
+			echo "<pre class='alert alert-danger'><b>Exception</b>: ".$e->getMessage()."\nCaught at ".__METHOD__."</pre>";
 		}
 	}
 
@@ -277,7 +277,7 @@ HTML;
 		}
 		catch (Exception $e)
 		{
-			$c = "<pre class='alert alert-danger'>$e</pre>";
+			$c = "<pre class='alert alert-danger'><b>Exception</b>: ".$e->getMessage()."\nCaught at ".__METHOD__."</pre>";
 		}
 
 		return $c = ob_get_clean() . $c;

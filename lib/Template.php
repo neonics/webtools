@@ -82,7 +82,7 @@ HTML;
 			}
 			catch (Exception $e )
 			{
-				$c = "<pre class='alert alert-danger'>$e</pre>";
+				$c = "<pre class='alert alert-danger'><b>Exception:</b> ".$e->getMessage()."\ncaught at ".__METHOD__."</pre>";
 			}
 
 			return ob_get_clean() . $c;
