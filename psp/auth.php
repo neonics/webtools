@@ -458,8 +458,10 @@ abstract class AbstractAuthModule extends AbstractModule
 		if ( $p )
 			return;
 
-		if ( $this->options['auto-create-permissions'] )
+		if ( $this->options['auto-create-permissions'] ) {
 			$this->_create_permission( $permission, $realm );
+			$this->_clear_cache();
+		}
 		else
 			throw new SecurityException( "undefined permission '$permission' in realm '$this->realm'" );
 	}
@@ -813,7 +815,6 @@ class SQLDBAuthModule extends AbstractAuthModule
 			VALUES ( (SELECT id FROM realms WHERE name=?), ?, ? )
 		" );
 		$sth->execute( array( gd_( $realm, $this->realm() ), $permission, "(auto-created)" ) );
-		$this->_clear_cache();
 	}
 }
 
