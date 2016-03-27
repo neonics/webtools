@@ -52,7 +52,7 @@ HTML;
 	 * @param mixed $classes_or_attrs string: additional CSS classes for $tag; associative array: attributes
 	 * @return array [$anchor_tag, $tag_wrapped_data]
 	 */
-	public static function collapse_link( $label, $data, $tag='div', $classes_or_attrs=null ) 
+	public static function collapse_link( $label, $data, $tag='div', $classes_or_attrs=null, $collapsed = true ) 
 	{
 		if ( is_array( $classes_or_attrs ) )
 		{
@@ -65,11 +65,13 @@ HTML;
 		else
 			list( $id, $classes, $attrs ) = [ html_id('cl'), $classes_or_attrs, null ];
 
+		$collapse = $collapsed ? 'collapse' : '';
+
 		return array( <<<HTML
 			<a data-toggle='collapse' data-target='#$id'>$label<b class='caret'></b></a>
 HTML
 			, <<<HTML
-			<$tag id='$id' class='collapse $classes' $attrs>
+			<$tag id='$id' class='$collapse $classes' $attrs>
 				 $data
 			</$tag>
 HTML

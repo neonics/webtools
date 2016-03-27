@@ -324,3 +324,15 @@
 			array_map( function($x) { return $x[1]; }, $arr )
 		);
 	}
+
+	function makeDir( $path )
+	{
+		if ( ! is_dir( $path ) )
+		{
+			echo "creating directory $path";
+			mkdir( $path, 0755, true ) or die ("failed to create $path" );
+			echo " ok.\n";
+		}
+
+		return $path;
+	}
