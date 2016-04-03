@@ -25,6 +25,8 @@
 
 			<section title="Resource Paths">
 				<pre><psp:expr>
+					//contains lambda 'return' so need statement:
+					return
 					trim( implode( "\n",
 						array_map(
 							function( $r ) {
@@ -33,6 +35,7 @@
 							DirectoryResource::$resources
 						)
 					) )
+					;
 				</psp:expr>
 				</pre>
 			</section>
