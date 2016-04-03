@@ -1,4 +1,4 @@
-<?
+<?php
 class APIClient
 {
 	var $debug = 1;
