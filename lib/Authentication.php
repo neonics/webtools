@@ -252,25 +252,36 @@ abstract class Authentication
 		return $h;
 	}
 
+	var $authenticated_user;
+
 	public function process_headers()
 	{
+		$this->authenticated_user = null;
 	#	echo "<pre>".__FUNCTION__.": ".print_r($_SERVER,1)."</pre>";
 		foreach ( self::parse_auth_headers( getallheaders(), 'Authorization' ) as $i => $h )
 		{
 			#echo "<pre><b>".__METHOD__." -- Server</b>: ".print_r($h,1)."</pre>";
 			list( $method, $attributes ) = $h;
-			switch ( strtolower( $method ) )
-			{
-				case 'oauth':
-					return $this->oauth_verify( $attributes );
-				case 'digest':
-					return $this->digest_verify( $attributes );
-				default:
-					echo "<code>error: unknown method: $method</code>";
-					break;
+			if ( $this->_verify_auth_header( $method, $attributes ) ) {
+				$this->authenticated_user = $attributes->username;
+				return true;
 			}
 		}
 		return false;
 	}
+
+
+	private function _verify_auth_header( $method, $attributes )
+	{
+		switch ( strtolower( $method ) )
+		{
+			case 'oauth':		return $this->oauth_verify( $attributes );
+			case 'digest':	return $this->digest_verify( $attributes );
+			default:
+				echo "<code>error: unknown method: $method</code>";
+				return false;
+		}
+	}
+
 
 }

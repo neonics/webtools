@@ -173,4 +173,17 @@ class SQLAuthentication extends Authentication
 		return $this->fetch_consumer_tokens( $realm, $consumer_key );
 	}
 
+	var $authenticated_user_id;
+
+	/** @Override */
+	public function process_headers() {
+		$this->authenticated_user_id = null;
+		if ( ! parent::process_headers() )
+			return false;
+
+		global $request;
+		$_SESSION[ "realm[$request->requestBaseURI]:auth.user.id" ] = 
+		$this->authenticated_user_id = executeSelectQueryRequireSingle( $this->db, 'users', [ 'username' => $this->authenticated_user ] )['id'];
+		return true;
+	}
 }
