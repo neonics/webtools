@@ -138,7 +138,7 @@ HTML
 		.		$this->getRightNavContent()
 		.(!auth_user()?null:"
 		  <li class='{$this->manage_theme_class}'>{$this->manage_theme_form}</li>
-		   <li><a href='{$request->requestBaseURI}auth.html?action:auth:logout' title='Logout'><i class='fa fa-sign-out'></i></a></li>
+		   <li><a href='{$request->requestBaseURI}auth.html?action:auth:logout' title='Logout'><i class='fa fa-sign-out' title='Logout'></i></a></li>
 		")
 		."</ul>
 		"
