@@ -65,6 +65,11 @@ class Request
 	{
 		global $debug;
 
+		if ( php_sapi_name() == 'cli' )
+		{
+			debug('request', 'CLI mode');
+			return;
+		}
 
 		if ( !preg_match( "@^(.*?)(\?.*)?$@", $_SERVER["REQUEST_URI"], $matches ) )
 			die ("Regexp error");
@@ -238,10 +243,15 @@ abstract class RequestHandler
 			debug( 'request', "delegate handler $k" );
 			if ( $h->_handle( $request ) )
 			{
+				$debug > 1 and
+				debug( 'request', "handler $k completes response" );
 				#ob_flush();flush();return;
 				#exit;
 				return;
 			}
+			else
+				$debug > 1 and
+				debug( 'request', "handler $k continues response" );
 		}
 	}
 

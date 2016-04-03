@@ -30,6 +30,8 @@
 #require_once( __DIR__."/Template.php" );
 class TemplateRequestHandler extends RequestHandler
 {
+	protected $use_publicURIs = true;
+
 	public function __construct()
 	{
 		$this->regexp = '@^/(.*?)\.(html|php)@';
@@ -81,31 +83,31 @@ class TemplateRequestHandler extends RequestHandler
 					ModuleManager::loadModule( "auth" );
 
 					global $publicURIs;
-					if ( ! auth_user() && ! array_filter( $publicURIs, function($v)use($request){return $v == $request->requestURI;} ) )
-					{
-					  #header( "Location: $request->requestBaseURI"."login.html" );
-						#echo "login first.";
-						#return true;
-						#require_once( 'login.php' );
+					if ( $this->use_publicURIs )	// deprecated feature: should be handled in auth handler.
+						if ( ! auth_user() && ! array_filter( $publicURIs, function($v)use($request){return $v == $request->requestURI;} ) )
+						{
+							debug( $this, "no user and no public URI: redirecting to auth.html" );
+							#header( "Location: $request->requestBaseURI"."login.html" );
+							#echo "login first.";
+							#return true;
+							#require_once( 'login.php' );
 
-						$request->requestRelURI = "auth.html";#"login.html";#"auth.html";
-						#RequestHandler::handle( $request );
-						return false;	// we're early in the request chain
-					}
-					else
-					{
-						// this could be (and was) written simpler, but we want any errors in 
-						// tempalte_data_filter to show up.
-						ob_start();
-						$request->template_data =	require_once( $file );
-						$legacy_content = ob_get_clean();
+							$request->requestRelURI = "auth.html";#"login.html";#"auth.html";
+							#RequestHandler::handle( $request );
+							return false;	// we're early in the request chain
+						}
 
-						$request->template_data = $this->template_data_filter( $request, $request->template_data );
+					// this could be (and was) written simpler, but we want any errors in 
+					// template_data_filter to show up.
+					ob_start();
+					$request->template_data =	require_once( $file );
+					$legacy_content = ob_get_clean();
 
-						#echo "<pre>".print_r($request,1)."</pre>";
+					$request->template_data = $this->template_data_filter( $request, $request->template_data );
 
-						template_do( $request, $legacy_content, is_array( $request->template_data ) ? gd( $request->template_data['template'] ) : null );
-					}
+					#echo "<pre>".print_r($request,1)."</pre>";
+
+					template_do( $request, $legacy_content, is_array( $request->template_data ) ? gd( $request->template_data['template'] ) : null );
 					return true;
 				}
 				else
