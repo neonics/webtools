@@ -76,7 +76,7 @@ class PDODB extends PDO
 							return $val;
 						}
 					}
-					trigger_error( "no <code>id</code> column for <code>$t</code><pre>".print_r($sth,1)."</pre>", E_USER_WARNING );
+					#trigger_error( "no <code>id</code> column for <code>$t</code><pre>".print_r($sth,1)."</pre>", E_USER_WARNING );
 					return null;
 
 				default:
