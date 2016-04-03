@@ -43,6 +43,7 @@ abstract class AbstractAuthModule extends AbstractModule
 			$this->options[ $option_name ] = $option_value;
 		else
 			throw new SecurityException( "unknown option '$option_name'" );
+		return $this;
 	}
 
 	private $realm;
@@ -302,13 +303,8 @@ abstract class AbstractAuthModule extends AbstractModule
 		$_SESSION["realm[$request->requestBaseURI]:auth.user.id"] = $this->_get_user_id( $user );
 	}
 
-	private function _clear_cache() {
+	protected function _clear_cache() {
 		$this->_user_cache = [];
-		$this->_id_to_user_cache = [];
-		$this->_user_roles_cache = [];
-		$this->_role_permissions_cache = [];
-		$this->_username_to_user_cache = [];
-		$this->_permission_cache = [];
 	}
 
 	private $_user_cache = [];
@@ -432,13 +428,13 @@ abstract class AbstractAuthModule extends AbstractModule
 		$user = $this->getSessionUser();
 		if ( !isset ($user) )
 		{
-			if ( $debug > 2 ) debug( "No user - can't check role '$role'" );
+			if ( $debug > 2 ) debug( "No user - can't check permission '$realm/$permission'" );
 			return false;
 		}
 
-		$this->_assert_permission_exists( $permission, $realm );
+		# echo "<pre>check perm: '$permission' ($realm)</pre>";
 
-#		echo "CHECK PERMISSION $realm/$permission";
+		$this->_assert_permission_exists( $permission, $realm );
 
 		foreach ( $this->_get_roles( $user, $realm ) as $role ) {
 			if ( in_array( $permission, gd_( $this->_get_permissions( $role, $realm ), array() ) ) )
@@ -558,7 +554,6 @@ class XMLDBAuthModule extends AbstractAuthModule
 	}
 
 	protected function _create_permission( $permission, $realm = null ) {
-		file_put_contents("/tmp/webtools.log", __CLASS__." create permission $permission" );
 		$doc = new DOMDocument();
 		$perm = $doc->createElementNS( $this->ns, 'permission' );
 		$perm->setAttribute( 'name', $permission );
@@ -617,6 +612,17 @@ class SQLDBAuthModule extends AbstractAuthModule
 
 	protected function _db_rollback() {
 		return $this->db->rollback();
+	}
+
+
+	/** @Override */
+	protected function _clear_cache() {
+		parent::_clear_cache();
+		$this->_user_roles_cache = [];
+		$this->_id_to_user_cache = [];
+		$this->_role_permissions_cache = [];
+		$this->_username_to_user_cache = [];
+		$this->_permission_cache = [];
 	}
 
 	private $_id_to_user_cache = [];

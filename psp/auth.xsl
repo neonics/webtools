@@ -119,8 +119,15 @@ Produces:
   </xsl:template>
 
   <xsl:template match="auth:permission">
+		<xsl:variable name="condition">
+			<xsl:choose>
+				<xsl:when test='@permission'><xsl:value-of select="php:function('auth_permission', string(@permission))"/></xsl:when>
+				<xsl:when test='@role'      ><xsl:value-of select="php:function('auth_role',       string(@role      ))"/></xsl:when>
+			</xsl:choose>
+		</xsl:variable>
+
 		<xsl:call-template name="ifelse">
-			<xsl:with-param name="condition" select="php:function('auth_permission', string(@permission))"/>
+			<xsl:with-param name="condition" select="$condition"/>
 		</xsl:call-template>
   </xsl:template>
 
