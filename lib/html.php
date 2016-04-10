@@ -11,7 +11,12 @@ function html_table( & $result, $fn = null, $columns = null, $hdrfn = null, $opt
 	$debug=false;
 
 	if ( ! isset( $fn ) )
-		$fn = function($k,$v,$row,$i=null) { return $v===null?"<i style='color:grey'>NULL</i>":$v; };
+		$fn = function($k,$v,$row,$i=null) {
+			return is_array( $v )
+				? ( $v[0] === null ? $v + [ "<i style='color:grey'>NULL</i>" ] : $v )
+				: ( $v===null?"<i style='color:grey'>NULL</i>":$v );
+		}
+	;
 
 	$debug and print "<pre><b>columns:</b> ".print_r( $columns, true ). "</pre>";
 
@@ -124,8 +129,9 @@ function _echo_col( $k, $x )
 	$x = $x === null
 		? "<i style='color:grey'>NULL</i>"
 		: $x;
+	if ( is_array($x) && count($x) && ! array_key_exists( '0', $x ) ) throw new Exception( __FUNCTION__ . ": no value: ".print_r($x,1));
 	$a = is_array( $x ) ? ( count($x) ? $x[0] : null ) : $x;
-	$a = $a === null ? "<i style='color:grey'>NULL,/i>" : $a;
+	$a = $a === null ? "<i style='color:grey'>NULL</i>" : $a;
 	$cls = null;
 	if ( ! is_array( $x ) || count( $x ) <= 2 )
 		$b = null;
