@@ -41,7 +41,9 @@ HTML
 		$css_classes = gad( $attrs, 'class' );
 
 		echo <<<HTML
-
+		<script>
+			if ( $('#{$id}' ).length ) $('#{$id}').remove();
+		</script>
 		<!-- Modal -->
 		<div  id="{$id}" class="modal NO-fade $css_classes" tabindex="-1" role="dialog" aria-labelledby="{$id}Label" aria-hidden="true">
 			<div class="modal-dialog">
