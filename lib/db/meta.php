@@ -1,4 +1,13 @@
 <?php
+namespace db\meta {
+
+use \PDODB;
+use \PDO;
+use \Exception;
+use \DirectoryResource;
+
+$_db_tables_meta_cache = [];
+
 /**
  * clears the db meta cache.
  */
@@ -11,6 +20,8 @@ function db_clear_meta( $db = null )
 		if ( file_exists( $x = "$tmpdir/_cache_metadb_" . _db_get_cache_id( $db ) ) )
 		{
 			unlink( $x );
+			global $_db_tables_meta_cache;
+			unset( $_db_tables_meta_cache[ _db_get_cache_id( $db ) ] );
 			db_get_tables_meta( $db );
 		}
 	}
@@ -37,7 +48,7 @@ function _db_get_cache_id( PDODB $db ) {
  */
 function db_get_tables_meta( $db, $for_table = null )
 {
-	static $_db_tables_meta_cache = [];
+	global $_db_tables_meta_cache;
 	$db_cache_id = _db_get_cache_id( $db );
 
 	if ( ! isset( $_db_tables_meta_cache[ $db_cache_id ] ) )
@@ -149,7 +160,7 @@ function db_get_tables_meta( $db, $for_table = null )
 	}
 
 	return $for_table !== null
-		? $_db_tables_meta_cache[ $db_cache_id ][$for_table]
+		? gad( $_db_tables_meta_cache[ $db_cache_id ], $for_table )
 		: $_db_tables_meta_cache[ $db_cache_id ];
 }
 
@@ -540,4 +551,22 @@ function db_meta_drop_constraint( $db, $fromtable, $fromcolumn, $totable, $tocol
 		}
 	}
 	return false;
+}
+
+}
+
+// backwards compatibility
+namespace {
+	function db_clear_meta( $db = null ) { return \db\meta\db_clear_meta( $db ); }
+	function _db_get_cache_id( PDODB $db ) { return \db\meta\_db_get_cache_id( $db ); }
+	function db_get_tables_meta( $db, $for_table = null ) { return \db\meta\db_get_tables_meta( $db, $for_table ); }
+	function db_get_rows( $db ) { return \db\meta\db_get_rows( $db ); }
+	function db_get_primary_keys( $db ) { return \db\meta\db_get_primary_keys( $db ); }
+	function db_get_keys( $db ) { return \db\meta\db_get_keys( $db ); }
+	function db_get_indices( $db ) { return \db\meta\db_get_indices( $db ); }
+	function db_get_table_constraints( $db ) { return \db\meta\db_get_table_constraints( $db ); }
+	function db_get_references( $db ) { return \db\meta\db_get_references( $db ); }
+	function db_get_inheritance( $db ) { return \db\meta\db_get_inheritance( $db ); }
+	function db_meta_drop_column( $db, $table, $column ) { return \db\meta\db_meta_drop_column( $db, $table, $column ); }
+	function db_meta_drop_constraint( $db, $fromtable, $fromcolumn, $totable, $tocolumn ) { return \db\meta\db_meta_drop_constraint( $db, $fromtable, $fromcolumn, $totable, $tocolumn ); }
 }
