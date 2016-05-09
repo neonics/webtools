@@ -8,6 +8,8 @@
  */
 function ajaxify(form, pe) // AJAX save
 {
+	pe = pe || form.closest('.modal-dialog');
+
 //			form.find('.btn-primary')[0].value= 'Saving...';//.val('Saving...'); -- bug, no re-layout
 	console.log("submitting ", form, "to ", form.attr('action'));
 
