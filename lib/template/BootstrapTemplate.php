@@ -46,7 +46,7 @@ namespace {
 
 namespace template {
 
-class BootstrapTemplate
+class BootstrapTemplate extends AbstractTemplate
 {
 	protected $themes = ['basic'];
 	protected $theme = 'basic';
@@ -54,7 +54,8 @@ class BootstrapTemplate
 
 	public $noticebar = null;
 
-	public function __construct() {
+	public function __construct( $request = null ) {
+		parent::__construct( $request );
 	}
 
 	protected function theme() {
@@ -89,210 +90,42 @@ class BootstrapTemplate
 	protected function favicon() {
 		global $request;
 		return <<<HTML
-			<link rel="icon" href="{$request->requestBaseURI}img/favicon.ico" type="image/x-icon"/>
+			<link rel="icon" href="{$this->request->requestBaseURI}img/favicon.ico" type="image/x-icon"/>
 HTML;
 	}
 
-
+	/** @Override */
 	protected function themeCSS() {
 		global $request;
     return <<<HTML
-			<link href="{$request->requestBaseURI}css/skin-{$this->theme()}.css" rel="stylesheet">
+			<!-- Bootstrap -->
+			<!--
+			<link href="{$this->request->requestBaseURI}css/bootstrap.min.css" rel="stylesheet">
+			-->
+			<link href="{$this->request->requestBaseURI}css/3p/bootstrap.min.css" rel="stylesheet">
+
+			<!-- structural requirements -->
+			<link href="{$this->request->requestBaseURI}css/style.css" rel="stylesheet">
+
+			<!-- styling: skin -->
+			<link href="{$this->request->requestBaseURI}css/skin-{$this->theme()}.css" rel="stylesheet">
+
+			<!-- -->
+			<!--link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"-->
+			<link href="{$this->request->requestBaseURI}css/3p/font-awesome.min.css" rel="stylesheet">
 HTML;
 	}
 
-	var $scripts = [];
-
-	/**
-	 * @return string
-	 */
-	protected function scripts( $request ) {
-		return implode( "\n", array_map( function($_) {
-			return "<script type='text/javascript' src='$request->requestBaseURI' src='$_'></script>";
-		}, $this->scripts
-		) );
-	}
-
-	function main( $request, $legacyContent )
-	{
-		if ( !isset( $this->noticebar ) )
-			$this->noticebar = new NoticeBar( $this );
-
-		// allow to modify the header
-		if ( function_exists( 'template_init' ) )
-			$request->template_init = $this->call( 'template_init', $request );
-
-		$menu = $this->menu( $request ); // modifies HEAD (styles)
-
-		#echo "REQUEST: <pre>".print_r($request,1)."</pre>";
-		echo <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-		{$this->favicon()}
-
-    <!-- Bootstrap -->
-		<!--
-    <link href="{$request->requestBaseURI}css/bootstrap.min.css" rel="stylesheet">
-		-->
-    <link href="{$request->requestBaseURI}css/3p/bootstrap.min.css" rel="stylesheet">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-		<!-- -->
-		<!--link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"-->
-		<link href="{$request->requestBaseURI}css/3p/font-awesome.min.css" rel="stylesheet">
-
-		<!-- -->
-
-		<!-- structural requirements -->
-    <link href="{$request->requestBaseURI}css/style.css" rel="stylesheet">
-
-		<!-- styling: skin -->
-		{$this->themeCSS()}
-
-    <script src="{$request->requestBaseURI}js/3p/jquery.min.js"></script>
-    <script src="{$request->requestBaseURI}js/3p/bootstrap.min.js"></script>
-
-		<script src='/js/component.js'></script>
-		<script src='/js/noticebar.js'></script>
-  </head>
-HTML;
-
-	if ( ob_get_level() ) ob_flush();
-	flush();
-
-	$noticeBar = $this->noticebar->render();
-
-
-	echo <<<HTML
-  <body class='theme {$this->theme} {$this->anim}'>
-		<!-- header has position relative for content flow; nested nav (navbar-default) has position fixed. -->
-		<header id="top" class="theme {$this->theme}  navbar navbar-static-top  bs-docs-nav" role="banner">
-			<div>
-				<nav id="noticebar" class='navbar navbar-noticebar'>
-					<div class='container-fluid'>
-					{$noticeBar}
-					</div>
-				</nav>
-				{$menu}
-			</div>
-		</header>
-		<script src="{$request->requestBaseURI}js/menu.js"></script>
-HTML;
-	if ( ob_get_level() ) ob_flush();
-	flush();
-
-	echo <<<HTML
-		<div class="theme {$this->theme}" id='content'><!-- class container-fluid -->
-HTML;
-
-	$this->content($request, $legacyContent);
-
-echo <<<HTML
-		</div>
-HTML;
-
-		echo $this->scripts( $request );
-
-echo <<<HTML
-  </body>
-</html>
-HTML;
-
-		flush();
-	}
-
-	function menu( $request )
-	{
-		return (new \template\Menu($request))->content();
-	}
-
-	protected $request;
-	function content( $request, $legacyContent )
-	{
-		$c = null;
-		$this->request = $request;
-
-		{
-			$tmp = isset( $this->request->template_data ) && is_array($this->request->template_data) ?
-				$this->request->template_data : null;
-			$mods = gd( $tmp['template_module'], 'admin' );
-			echo <<<HTML
-				<div class='module $mods'>
-HTML;
-		}
-
-
-		if ( ! function_exists( 'template_content' ) )
-		{
-			debug( $this, "legacy mode - not a template" );
-			echo <<<HTML
-				<div class='alert alert-danger'>legacy mode - not a template</div>
-				$legacyContent;
-HTML;
-		}
-		else
-		{
-			#$c = $this->call( 'template_content', $request );
-			$this->call_streaming( 'template_content', $request );
-		}
-
-		echo <<<HTML
-			</div><!-- module -->
-HTML;
-		#return $this->wrap_content( $c );
-	}
-
-	protected function call_streaming( $function_name, $request )
-	{
-		try
-		{
-			$function_name( $request );
-		}
-		catch (Exception $e)
-		{
-			echo "<pre class='alert alert-danger'><b>Exception</b>: ".$e->getMessage()."\nCaught at ".__METHOD__."</pre>";
-		}
-	}
-
-	protected function call( $function_name, $request )
-	{
-		$c = "";
-
-		ob_start();
-
-		try
-		{
-			$function_name( $request );
-		}
-		catch (Exception $e)
-		{
-			$c = "<pre class='alert alert-danger'><b>Exception</b>: ".$e->getMessage()."\nCaught at ".__METHOD__."</pre>";
-		}
-
-		return $c = ob_get_clean() . $c;
-	}
-
-
-	
-	protected function wrap_content( $c ) {
-		$tmp = is_array($this->request->template_data) ?
-			$this->request->template_data : null;
-		$mods = gd( $tmp['template_module'], 'admin' );
+	/** @Override */
+	protected function themeJS() {
 		return <<<HTML
-			<div class='module $mods'>$c</div>
+    <script src="{$this->request->requestBaseURI}js/3p/jquery.min.js"></script>
+    <script src="{$this->request->requestBaseURI}js/3p/bootstrap.min.js"></script>
+		<script src='{$this->request->requestBaseURI}js/component.js'></script>
+		<script src='{$this->request->requestBaseURI}js/noticebar.js'></script>
 HTML;
 	}
-}
 
 }
+
+} // end namespace
