@@ -1,10 +1,41 @@
 <?php
 /**
- * @param $fn a callable function, returning either a string or an array.
- *        The first value must be the string otherwise returned.
- *        The second value, if present, is printed after the row ends, and can be used to inject custom rows.
- *        The third value, if present, is an attribute map (i.e. [key=>value]), injected into the <td>.
- * @param $columns array( dbcol => false || '' || label )
+ * Renders a HTML table given an array of rows.
+ *
+ * Basic example:
+ *
+ *    html_table( [
+ *        ['col1' => 'A', 'col2' => '10' ]
+ *        ['col1' => 'B', 'col2' => '20' ]
+ *    ] );
+ *
+ * will render
+ *
+ *		<table>
+ *			<thead>
+ *				<tr><th>col1</th><th>col2</th></tr>
+ *			</thead>
+ *			<tbody>
+ *				<tr><td>A</td><td>10</td></tr>
+ *				<tr><td>B</td><td>20</td></tr>
+ *			</tbody>
+ *		</table>
+ *
+ * @param array &$result A flat array of associative arrays (table rows). All should have the same keys.
+ * @param callable $fn a callable function, returning either a string (the td/cell value) or an array.
+ *        Signature:  function( $k, $v, $row, $i ) { return $v; }
+ *				$k is the column name, $v it's value in the current row, $row is the current row, and $i is the row index in $result.
+ *				So, $v === $row[ $k ] === $result[ $i ][ $k ].
+ *        In the case the callback returns an array,
+ *        - the first value must be the string otherwise returned.
+ *        - the second value, if present, is printed after the row ends, and can be used to inject custom rows. Be sure to
+ *				  wrap it in <tr></tr>.
+ *        - the third value, if present, is an attribute map (i.e. [key=>value]), injected into the <td>.
+ * @param array $columns array( dbcol => false || '' || label ). This defines which columns to show. Keys must match
+ *				keys in the $result array. If the value is false, the row isn't shown, otherwise it is, and if the value is not
+ *				the empty string, it is used as the label.
+ * @param callable $hdrfn Callback function for each <th> in the <thead>. Signature: function($k, $v) { return $v; }. This
+ *				callback may return an array [ $string, $attrmap = [ 'attrname' => 'attrvalue', ].
  */
 function html_table( & $result, $fn = null, $columns = null, $hdrfn = null, $opts = [] )
 {
@@ -70,9 +101,24 @@ HTML;
 		//foreach ( $result[0] as $k=>$v ) echo "<th>A $k</th>";
 		*/
 		foreach ( $rowmap as $k=>$v )
-			echo "<th class='sql-col-$k'>",
-				is_callable($hdrfn) ? $hdrfn( $k, $v ) : "$v",
-			"</th>";
+		{
+			$class = null;
+			$atts = [];
+			if ( is_callable( $hdrfn ) )
+			{
+				$z = $hdrfn( $k, $v );
+				if ( is_string( $z ) )
+					list( $v, $atts ) = [ $z, [] ];
+				else
+					list( $v, $atts ) = $z;
+			}
+
+			$class = gad( $atts, 'class' );
+			unset( $atts['class'] );
+			$atts = !$atts ? null : implode(' ', array_map(function($x,$y) { return "$x=\"".esc_attr($y)."\""; }, array_keys( $atts ), array_values( $atts ) ) );
+
+			echo "<th class='sql-col-$k $class' $atts>$v</th>";
+		}
 
 	echo <<<HTML
 			</tr>
