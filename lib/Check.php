@@ -27,7 +27,7 @@ class Check
 	}
 
 	public static function int( $value, $fatal = true ) {
-		if ( ! is_int( $value ) || intval($value) != $value )
+		if ( ! is_int( $value ) && intval($value) != $value )
 			return $fatal ? fatal( "invalid int: $value" ) : false;
 		else
 			return $fatal ? $value : true;
