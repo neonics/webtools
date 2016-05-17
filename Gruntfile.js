@@ -11,19 +11,19 @@ module.exports = function(grunt) {
 		},
 
 		//The uglify task and its configurations
-//		uglify: {
-//				 options: {
-//							banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-//				 },
-//				 build: {
-//					 files: [{
-//							expand: true,     // Enable dynamic expansion.
-//							src: ['resources/**/*.js', '!resources/**/*.min.js'], // Actual pattern(s) to match.
-//							ext: '.min.js',   // Dest filepaths will have this extension.
-//					 }]
-//				 }
-//		},
-//
+		uglify: {
+				 options: {
+							banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+				 },
+				 build: {
+					 files: [{
+							expand: true,     // Enable dynamic expansion.
+							src: ['js/*.js', '!js/*.min.js'],
+							ext: '.min.js',
+					 }]
+				 }
+		},
+
 		//The jshint task and its configurations
 		jshint: {
 			all: [ 'assets/**/*.js', '!assets/**/*.min.js' ]
