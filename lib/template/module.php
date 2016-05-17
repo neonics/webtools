@@ -123,7 +123,9 @@ function template_content( $request ) // only one module per page
 
 						</ul>
 						<script type='text/javascript'>
-							menuActive( document.getElementById( 'module-menu' ) );
+							document.addEventListener( 'DOMContentLoaded', function() {
+								menuActive( document.getElementById( 'module-menu' ) );
+							} );
 						</script>
 					</nav>
 
