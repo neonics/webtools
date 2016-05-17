@@ -25,6 +25,7 @@
 
 		// prefix and postfix
 		static $templates = Array(
+			'cli' => '[$time][$cat:$level$pad] $msg\n',
 			'1' => '<!-- [$cat:$level$pad] $msg -->\n',
 			'2' => '<code style=\'white-space:pre; font-size: 8pt; color:black;\'>[$time][<span style=\'color:".$templates[$cat]["color"]."\'>$cat:$level$pad</span>] $msg</code><br/>\n',
 
@@ -114,17 +115,26 @@ HTML
 			if ( ! ( $debug && $logging & 2 ) )
 				return;
 
+			if ( php_sapi_name() != 'cli' ) {
 			$msg = str_replace( "[", "[<span style='font-weight:bold;color:".$templates['[]']['color']."'>", $msg );
 			$msg = str_replace( "]", "</span>]", $msg );
 			#$msg = preg_replace( "@([\[^\]\]+])@",
 			#	"<span style='color:purple;'>\\1</span>", $msg );
+			}
 
 			if ( !array_key_exists( $cat, $templates ) )
 				$templates[$cat] = Array( 'color' => 'red' );
 		}
 
-		$r = $templates[ $level ];
+		$tmpl = php_sapi_name() == 'cli' ? 'cli' : $level;
+
+		$r = $templates[ $tmpl ];
 		eval ( "echo \"$r\";" );
+
+		if ( php_sapi_name() != 'cli' ) {
+		for ( $i = 0; $i < 4096; $i++ ) echo "\n";
+		flush();
+		}
 	}
 
 
