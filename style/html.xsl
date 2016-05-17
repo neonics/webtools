@@ -97,6 +97,12 @@
 		</xsl:element>
 	</xsl:template>
 
+	<xsl:template match="l:script">
+		<xsl:element name="{local-name(.)}">
+			<xsl:apply-templates select="@*|node()"/>
+		</xsl:element>
+	</xsl:template>
+
 
 
 

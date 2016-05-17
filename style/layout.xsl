@@ -46,7 +46,7 @@
 
 	<xsl:template match="l:body">
 		<xsl:comment>core layout.xsl</xsl:comment>
-    <body id="body" onload="InitDragDrop()">
+    <body id="body">
 			<xsl:apply-templates select="@*"/>
 			<div id="main">
 				<xsl:apply-templates select="l:menu"/>
