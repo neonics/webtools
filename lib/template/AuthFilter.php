@@ -10,7 +10,20 @@ class AuthFilter
 
 	public static function filter( $d )
 	{
-    return self::authFilter( self::loadHTMLDoc( $d ) )->saveHTML();
+    $doc = self::authFilter( self::loadHTMLDoc( $d ) );
+
+		$result = null;
+
+		foreach ( $doc->documentElement->childNodes as $c )
+			if ( $c->nodeType == XML_ELEMENT_NODE && $c->tagName == 'body')
+				foreach ( $c->childNodes as $c )
+					if ( $c->nodeType == XML_ELEMENT_NODE )
+						$result .= $doc->saveHTML( $c );
+
+		if ( !$result )
+			trigger_error(__METHOD__ . ": cannot find /html/body/*[0]");
+
+		return $result;
 	}
 
 	private static function loadHTMLDoc( $d )
