@@ -356,6 +356,8 @@ function executeUpdateQuery( $db, $table, $where, $update )
 
 	$table = _check_table( $db, $table );
 
+	_check_where( $db, $table, $where );
+
 	#echo "<pre>".print_r(func_get_args(),1)."</pre>";
 
 	$sthn = $table."_update_" . md5( implode( '_', array_keys( $where ) ) . '_SET_' . implode('_', array_keys( $update ) ) );
@@ -401,6 +403,8 @@ function executeDeleteQuery( $db, $table, $where )
 
 	$table = _check_table( $db, $table );
 
+	_check_where( $db, $table, $where );
+
 	if ( $where == null || ! is_array( $where ) || ! count( $where ) )
 		fatal("refusing delete without WHERE clause at ".__FILE__);
 
@@ -432,8 +436,15 @@ function executeDeleteQuery( $db, $table, $where )
 function _check_table( PDODB $db, $name ) {
 	if ( ! db_get_tables_meta( $db, $name ) )
 		fatal( "missing database table meta for " . print_r( $db, 1 ) . ": $name"
-			. "\n" . print_r( array_keys( db_get_tables_meta( $db ) ), 1 )
+		#	. "\n" . print_r( array_keys( db_get_tables_meta( $db ) ), 1 )
 		);
 	return $name;
 }
 
+
+function _check_where( PDODB $db, $table, $where ) {
+	$tm = db_get_tables_meta( $db, $table );
+	foreach ( $where as $k=>$v )
+		if ( ! isset( $tm['columns'][$k] ) )
+			fatal( "Illegal where clause: unknown column name '$k'" );
+}
