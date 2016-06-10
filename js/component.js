@@ -128,6 +128,8 @@
 						$nested.component(data)
 					} );
 
+					a.trigger('component:loaded');
+
 				},
 				complete:function(jqXHR, status){console.log("complete",status)},
 				//timeout:millisecs,
