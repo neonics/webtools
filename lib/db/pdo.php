@@ -7,6 +7,9 @@
 require_once( 'db/meta.php' );
 require_once( 'db/upgrade.php' );
 
+class TableRowNotFoundException extends Exception{}
+class MultipleTableRowsFoundException extends Exception{}
+
 class PDODB extends PDO
 {
 	public $dsn;
@@ -337,8 +340,10 @@ function executeSelectQueryRequireSingle( $db, $table, $where, $extra = null ) {
 			implode( " AND ", array_map( function($i) { return "$i=".$where[$i]; }, array_keys( $where ) ) )
 		);
 
-	if ( count($rows) != 1 )
-		throw new Exception( "expected 1 row for query on $table, got ".count( $rows ) );
+	if ( count($rows) == 0 )
+		throw new TableRowNotFoundException( "expected 1 row for query on $table, got ".count( $rows ) );
+	else if ( count( $rows ) > 1 )
+		throw new MultipleTableRowsFoundException( "expected 1 row for query on $table, got ".count( $rows ) );
 
 	return $rows[0];
 }
