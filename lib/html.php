@@ -368,6 +368,8 @@ function html_array_simple( $container, $element, $array )
 
 function html_tag( $name, $content )
 {
+	if ( is_array( $content ) )
+		$content = implode( "", $content );
 	return "<$name>$content</".html_strip_attributes( $name ).">";
 }
 
