@@ -18,6 +18,9 @@
  * Custom handlers*)
  *   $psp_custom_handlers is an array( name => classname ). All handlers are
  *   at current executed in sequence of class RequestHandler instantiation.
+ *
+ *   Handlers may be unset by specifying a null value as classname.
+ *
  *   It is foreseen that the sequence might be modeled by a RequestLifecycle
  *   using different processing phases (and possibly complex decision trees),
  *   so, treat any of the above listed 'phase' names as reserved.
@@ -216,7 +219,10 @@ abstract class RequestHandler
 		self::add( 'static', new StaticRequestHandler( $staticContent ) );
 
 		foreach ( gd( $psp_custom_handlers, array() ) as $name => $class )
-			self::add( $name, new $class() ); // be sure to set up an __autoload function!
+			if ( $class === null )
+				self::remove( $name );
+			else
+				self::add( $name, new $class() ); // be sure to set up an __autoload function!
 
 		self::add( 'content', new ContentRequestHandler( Array('content/') ) );
 		self::add( 'dynamic', new DynamicRequestHandler() );
@@ -228,6 +234,11 @@ abstract class RequestHandler
 	public static function add( $label, $function )
 	{
 		self::$requestHandlers[ $label ] = $function;
+	}
+
+	private static function remove( $label )
+	{
+		unset( self::$requestHandlers[ $label ] );
 	}
 
 	public static function handle( $request )
