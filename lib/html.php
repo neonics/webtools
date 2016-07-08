@@ -434,3 +434,5 @@ function html_id($prefix=null, $stackdepth=1) {
 
 	return str_replace('-','_', $prefix ) . '_' . hash('md5', __FILE__ . $prefix . microtime(true) . rand() );
 }
+
+function esc_attr( $v ) { return htmlspecialchars( $v, ENT_QUOTES ); }
