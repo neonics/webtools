@@ -65,6 +65,7 @@ abstract class AbstractAuthModule extends AbstractModule
 	protected abstract function _get_user_by_name( $username );
 	protected abstract function _get_user_id( $user );
 	protected abstract function _get_username( $user );
+	protected abstract function _get_realms( $user );
 	protected abstract function _get_roles( $user );
 	protected abstract function _get_permissions( $role, $realm = null );
 	protected abstract function _get_numusers();
@@ -363,6 +364,12 @@ abstract class AbstractAuthModule extends AbstractModule
 			: "";
 	}
 
+	public function realms( $realm = null )
+	{
+		$user = $this->getSessionUser();
+		return $user ? $this->_get_realms( $user ) : null;
+	}
+
 	public function roles( $realm = null )
 	{
 		$user = $this->getSessionUser();
@@ -504,6 +511,11 @@ class XMLDBAuthModule extends AbstractAuthModule
 	protected function _get_username( $user )
 	{
 		return $user->getAttribute( 'username' );
+	}
+
+	protected function _get_realms( $user )
+	{
+		return explode( ",", $user->getAttribute( 'realms' ) );
 	}
 
 	protected function _get_roles( $user, $realm = null )
@@ -652,6 +664,25 @@ class SQLDBAuthModule extends AbstractAuthModule
 		? array( 'id', $realm )
 		: array( 'name', $realm )
 		;
+	}
+
+	private $_user_realms_cache = [];
+
+	protected function _get_realms( $user )
+	{
+		return isset( $this->_user_realms_cache[ $user['id'] ] )
+			? $this->_user_realms_cache[ $user['id'] ]
+			: $this->_user_realms_cache[ $user['id'] ]
+			= 
+			$this->db->q( "
+				SELECT name
+				FROM realms
+				LEFT JOIN user_realms ON id = realm_id
+				WHERE user_id = ?
+				ORDER BY id
+			",
+			[ $user['id'] ]
+			)->fetchAll( \PDO::FETCH_COLUMN, 0 );
 	}
 
 	private $_user_roles_cache = [];
