@@ -366,11 +366,46 @@ function html_array_simple( $container, $element, $array )
 	return html_tag( $container, "<$element>" . implode("</$element><$elementName>", $array) . "</$elementName>" );
 }
 
+/**
+ * Creates a HTML tag.
+ *
+ * Usage:
+
+		html_tag( "span", "Foo" );
+		html_tag( "a href='/'", 'Link' );
+		html_tag( ['span', [ 'title' => "It's escaped" ] ], 'Test' );
+ *
+ * will output
+
+		<span>Foo</span>
+		<a href='/'>Link</a>
+		<span title='It&#039;s escaped'>Test</span>
+
+ *
+ *
+ * @param mixed $name The tag name of the element to output.
+ *        If `$name` is a string, it is treated as an opening tag with the '<' and '>' removed, for instance `html_tag( 'div, 'Foo')` will return `<div>Foo</div>`
+ *				and `html_tag( "div class='foo'", "Bar" )` will return `<div class='foo'>Bar</div>`.
+ *				When `$name` is an array, the first element is the tag name, and the second element an associative array of attributes: `[ 'tagname', [ $attrname => $attrval ] ]`.
+ *				For example: `html_tag( [ 'div', [ 'class' => 'foo' ] ], 'Bar')` will output `<div class='foo'>Bar</div>`. Attribute values will be passed through `esc_attr()`.
+ * @param mixed $content The content of the tag, either a string or an array of strings which will be imploded to a single string.
+ * @return string The HTML representation the tag, it's attributes, and it's content.
+ */
 function html_tag( $name, $content )
 {
+	if ( is_array( $name ) )
+		list( $name, $attr ) = [
+			$name[0],
+				' ' . implode( ' ',
+				array_map( function($k,$v) { return "$k='" . esc_attr( $v ) . "'"; }, array_keys( $attr = $name[1] ), array_values( $attr )
+			) )
+		];
+	else
+		$attr = null;
+
 	if ( is_array( $content ) )
 		$content = implode( "", $content );
-	return "<$name>$content</".html_strip_attributes( $name ).">";
+	return "<$name$attr>$content</".html_strip_attributes( $name ).">";
 }
 
 function html_strip_attributes( $el ) {
