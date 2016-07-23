@@ -71,20 +71,21 @@ class APIClient
 
 			case 'POST':
 				curl_setopt($ch, CURLOPT_POST, 1);
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 				break;
 
 			case 'PUT':
 
 			case 'PATCH':
 				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method );
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 				break;
 		}
 
 		$response = curl_exec($ch);
 		$responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		list($header, $body) = explode("\r\n\r\n", $response, 2);
+
+		list( $header, $body ) = self::split_response( $response );
 
 		if ( $this->debug > 1 )
 			echo <<<HTML
@@ -103,6 +104,17 @@ class APIClient
 HTML;
 
 		return array( $responseCode, self::parse_headers( $header ), $body );
+	}
+
+	private static function split_response( $response ) {
+		$i=0;
+		$header = null;
+		$body = $response;
+		while ( preg_match( "@^HTTP.*?\r\n\r\n@s", $body, $m ) && ++ $i < 5 ) {
+			$header .= $m[0];
+			$body = substr( $body, strlen( $m[0] ) );
+		}
+		return [ $header, $body ];
 	}
 
 
