@@ -291,7 +291,10 @@ function executeSelectQuery( $db, $table, $where = null, $extra = null )
 	static $sth = array();
 
 	_check_table( $db, Check::identifier( $table ) );
-	array_walk( $where, function( $v, $k ) { Check::identifier( $k ); } );
+	if ( $where !== null ) {
+		array_walk( $where, function( $v, $k ) { Check::identifier( $k ); } );
+		_check_where( $db, $table, $where );
+	}
 
 	if ( empty( $extra ) || is_string( $extra ) ) // backwards compat
 	$extra = [ 'extra' => $extra ];
@@ -365,9 +368,12 @@ function executeUpdateQuery( $db, $table, $where, $update )
 	static $sth = array();
 
 	_check_table( $db, Check::identifier( $table ) );
-	array_walk( $where, function( $v, $k ) { Check::identifier( $k ); } );
-	array_walk( $update, function( $v, $k ) { Check::identifier( $k ); } );
-	_check_where( $db, $table, $where );	// this checks column metadata
+	if ( $where !== null ) {
+		array_walk( $where, function( $v, $k ) { Check::identifier( $k ); } );
+		_check_where( $db, $table, $where );
+	}
+	if ( $update !== null )
+		array_walk( $update, function( $v, $k ) { Check::identifier( $k ); } );
 
 	#echo "<pre>".print_r(func_get_args(),1)."</pre>";
 
@@ -414,11 +420,10 @@ function executeDeleteQuery( $db, $table, $where )
 	static $sth = array();
 
 	_check_table( $db, Check::identifier( $table ) );
+	if ( $where === null || ! is_array( $where ) || ! count( $where ) )
+		fatal("refusing delete without WHERE clause at ".__FILE__);
 	array_walk( $where, function( $v, $k ) { Check::identifier( $k ); } );
 	_check_where( $db, $table, $where );
-
-	if ( $where == null || ! is_array( $where ) || ! count( $where ) )
-		fatal("refusing delete without WHERE clause at ".__FILE__);
 
 	$sthn = $table."_delete:" . ( is_null($where) ? "" : implode(':', array_keys( $where ) ) );
 
