@@ -1,6 +1,7 @@
 <?php
 namespace db\meta {
 
+use \Check;
 use \PDODB;
 use \PDO;
 use \Exception;
@@ -59,8 +60,8 @@ function db_get_tables_meta( $db, $for_table = null )
 		$dbid = _db_get_cache_id( $db );
 		#echo "<pre>DBID: $dbid  ($db->dsn)</pre>";
 
-		$tmpdir = DirectoryResource::findFile( "", 'default', 'tmp' );
-		if ( !is_dir( $tmpdir ) ) throw new Exception("Cannot find temporary directory: not a directory: '$tmpdir'" );
+		$tmpdir = rtrim( DirectoryResource::findFile( "", 'default', 'tmp' ), '/' );
+		if ( !is_dir( $tmpdir ) ) throw new Exception("Cannot find temporary directory: not a directory: '$tmpdir' (create a 'tmp' dir!)" );
 		if ( file_exists( $cf = "$tmpdir/_cache_metadb_$dbid" ) ) // filemtime( $cf )  - now > ....
 		{
 			$tables = json_decode( file_get_contents( $cf ), true );
@@ -156,7 +157,6 @@ function db_get_tables_meta( $db, $for_table = null )
 
 		$timing = sprintf("%.3f", ( microtime(true) - $timing ) * 1000 );
 		debug( 'lib/db', "<code>fetched metadata in $timing ms</code>" );
-
 	}
 
 	return $for_table !== null
