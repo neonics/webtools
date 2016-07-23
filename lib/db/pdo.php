@@ -271,7 +271,7 @@ function executeInsertQuery( $db, $table, $fields )
 
 function executeSelectQuery2( $db, $sql, $values = [] ) {
 	$sth = $db->prepare( $sql );
-	if ( $db instanceof PDODB ) $db->last_query = $sth[ $sthn ]->queryString;
+	if ( $db instanceof PDODB ) $db->last_query = $sql;
 	$sth->execute( $values );
 	$result = $sth->fetchAll( \PDO::FETCH_ASSOC );
 	$sth->closeCursor();
