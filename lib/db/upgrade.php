@@ -45,18 +45,17 @@ require_once 'action.php'; // UI interaction via ?action:
  *
  * @param int $db_version default 0; Complex versions are not implemented.
  *
- * Specifying a higher db_version than 0 REQUIRES*) you to write
- * callback functions named db_upgrade_v\d+( $db, $options_table )
- * where \d ranges from 1 to $version.
+ * Specifying a higher db_version than 0 requires you to write
+ * callback functions named `db_upgrade_v\d+( $db, $options_table )`
+ * where `\d` ranges from 1 to `$version`.
  *
  * @param string $prefix default 'auto'; Must be formatted as an identifier.
  *
  * The table prefix to use for managed tables.
  *
- * *) REQUIRES: fatal()**) is called otherwise
- * **) (default implementation in Debug.php)
+ * @param string $upgrader (optional) Name of a class or namespace containing db_upgrade_vXX() static methods/functions.
  */
-function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
+function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto', $upgrader = null )
 {
 	$db_version	= max( 0, intval( $db_version ) );
 	$db->prefix = Check::identifier( $prefix = rtrim( $table_prefix , '_' ) . '_' );
@@ -64,7 +63,7 @@ function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 
 	$options = db_get_auto_options( $db, $table );
 
-	if ( ( $oldv = $cur_version = gad( gad( $options, 'db_version' ), 'value', 0) ) < $db_version )
+	if ( ( $oldv = $cur_version = gad( gad( $options, 'db_version' ), 'value', -1 ) ) < $db_version )
 	{
 		if ( $err = gad( $options, 'db_upgrade_error' ) )
 		{
@@ -73,9 +72,12 @@ function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 				$err = null;
 			}
 			else
+			{
 				debug( 'sys_warning', "A previous database upgrade failed: <pre>".$err['value']."</pre>"
-					. "<a href='?action:db-upgrade-retry'>Retry?</a>"
+					#. "<a href='?action:db-upgrade-retry'>Retry?</a>"
+					. "<form method='post'><button name='action:db-upgrade-retry'>Retry?</button>"
 				);
+			}
 		}
 
 		if ( ! $err )
@@ -88,13 +90,24 @@ function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 				{
 					debug( 'sys_notice', "Upgrading to version $cur_version" );
 					$db->beginTransaction();
-					db_upgrade_invoke( $db, $table, "db_upgrade_v$cur_version" );
+					$m = "db_upgrade_v$cur_version";
+					$callable = $cur_version === 0 ? $m : (
+						$upgrader === null ? $m :
+						( class_exists( $upgrader )
+						? [ $upgrader, $m ]
+						: "$upgrader\\$m"
+						)
+					);
+					db_upgrade_invoke( $db, $table, $callable );
 					executeUpdateQuery( $db, $table, [ 'name' => 'db_version' ], ['value' => $cur_version ] );
 					$db->commit();
 				}
 				catch ( \Exception $e )
 				{
-					debug( 'sys_error', "Upgrade to $cur_version failed: " . $e->getMessage() . "<pre>$db->last_query</pre>" );
+					debug( 'sys_error', "Upgrade to version $cur_version failed: " . $e->getMessage()
+					. ( $e instanceof PDOException ? "<pre>$db->last_query</pre>" : null )
+					. ( "<pre>$e</pre>" )
+					);
 					$db->rollback();
 					executeInsertQuery( $db, $table, [
 						'name' => 'db_upgrade_error',
@@ -118,22 +131,29 @@ function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto' )
 	}
 }
 
-function db_get_auto_options( $db, $table )
+function db_get_auto_options( PDODB $db, $table = null )
 {
-	static $__db_option_cache = null;
-	if ( $__db_option_cache !== null )
-		return $__db_option_cache;
+	if ( $table === null )
+		$table = $db->prefix . 'options';
+
+	static $__db_option_cache = [];
+	$cache_key = $db->dsn . '|' . $table;
+	if ( isset( $__db_option_cache[ $cache_key ] ) )
+		return $__db_option_cache[ $cache_key ];
 
 	try
 	{
-		$options = executeSelectQuery( $db, $table, ['autoload'=>1] );
+		if ( array_key_exists( $table, db_get_tables_meta( $db ) ) )
+			$options = executeSelectQuery( $db, $table, ['autoload'=>1] );
+		else
+			$options = [];
 	}
 	catch (PDOException $e)
 	{
 		$options = [];
 	}
 
-	return $__db_option_cache = array_hash( $options, 'name' );
+	return $__db_option_cache[ $cache_key ] = array_hash( $options, 'name' );
 }
 
 function db_upgrade_invoke( $db, $table, $callable )
@@ -143,30 +163,60 @@ function db_upgrade_invoke( $db, $table, $callable )
 	if ( !is_callable( $callable ) )
 		throw new Exception( __FUNCTION__ . ": Argument not callable" );
 
-	$callable( $db, $table );
+	try
+	{
+		$db->validate_meta = false;	// suppress column existence
+		$callable( $db, $table );
+		$db->validate_meta = true;
+	}
+	catch ( \Exception $e )
+	{
+		$db->validate_meta = true;
+		throw $e;
+	}
 }
 
 
 function db_upgrade_v0( $db, $table )
 {
-	foreach ( [
+	foreach ( array_merge( [
 		"DROP TABLE IF EXISTS $table",
 		"CREATE TABLE $table (
 			name			varchar(128) NOT NULL PRIMARY KEY,
 			value			text,
 			autoload	int not null default 0,
-			updated		timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
+			updated		timestamp NOT NULL DEFAULT NOW()"
+			. ( $db->driver == 'mysql' ? " ON UPDATE NOW()" : null ) . "
 		)",
-	 ] as $q )
+	 ],
+	 ( $db->driver != 'pgsql' ? [] : [
+	 	"CREATE OR REPLACE FUNCTION update_updated_column()
+			RETURNS TRIGGER AS $$
+			BEGIN
+				 IF row(NEW.*) IS DISTINCT FROM row(OLD.*) THEN
+						NEW.updated = now(); 
+						RETURN NEW;
+				 ELSE
+						RETURN OLD;
+				 END IF;
+			END;
+			$$ language 'plpgsql'
+		",
+		"CREATE TRIGGER update_{$table}_updated
+		 BEFORE UPDATE ON $table
+		 FOR EACH ROW EXECUTE PROCEDURE update_updated_column()
+		"
+	 ] )
+	 ) as $q )
 		$db->exec( $q );
+
+	db_clear_meta( $db );
 
 	executeInsertQuery( $db, $table, $option = [
 		'name'			=> 'db_version',
 		'value'			=> '0',
 		'autoload'	=> 1
 	] );
-
-	db_clear_meta( $db );
 
 	$options = [ $option ]; // executeSelectQuery( $db, $table, ['autoload'=>1] );
 

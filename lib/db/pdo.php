@@ -17,6 +17,9 @@ class PDODB extends PDO
 	public $name;
 	public $driver;
 
+	/** Requires there to be is metadata for the $table and $where/$update column name parameters in the various `execute*Query*` utility functions and methods. */
+	var $validate_meta = true;
+
 	/**
 	 * @Readonly update via db_upgrade( $db, $version, 'auto' );
 	 */
@@ -133,7 +136,7 @@ class PDODB extends PDO
 
 	public function query( $sql ) {
 		$this->last_query = $sql;
-		return call_user_func_array( 'parent::query', func_get_args() );
+		return call_user_func_array( 'parent::query', func_get_args() ); // PHP 5.3+
 	}
 
 	public function q( $sql, $args = [] ) {
@@ -223,7 +226,8 @@ function executeInsertQuery( $db, $table, $fields )
 	static $sth = array();
 	static $query = null;
 
-	_check_table( $db, $table );
+	_check_table( $db, Check::identifier( $table ) );
+	array_walk( $fields, function( $v, $k ) { Check::identifier( $k ); } );
 
 	$sthn = $db->name . "_".$table."_insert:" . md5( implode(":", array_keys($fields) ) );
 
@@ -247,7 +251,7 @@ function executeInsertQuery( $db, $table, $fields )
 	$result = null;
 
 	$arr = array_map( [$db, 'fix_sql_value'], array_values( $fields ) );
-
+	if ( $db instanceof PDODB ) $db->last_query = $sth[ $sthn ]->queryString;
 	if ( $result = $sth[ $sthn ]->execute( $arr ) )
 	{
 		debug( __FUNCTION__, "ok" );
@@ -267,7 +271,7 @@ function executeInsertQuery( $db, $table, $fields )
 
 function executeSelectQuery2( $db, $sql, $values = [] ) {
 	$sth = $db->prepare( $sql );
-	$values = array_map( [$db, 'fix_sql_value'], $values );
+	if ( $db instanceof PDODB ) $db->last_query = $sth[ $sthn ]->queryString;
 	$sth->execute( $values );
 	$result = $sth->fetchAll( \PDO::FETCH_ASSOC );
 	$sth->closeCursor();
@@ -286,7 +290,8 @@ function executeSelectQuery( $db, $table, $where = null, $extra = null )
 {
 	static $sth = array();
 
-	$table = _check_table( $db, $table );
+	_check_table( $db, Check::identifier( $table ) );
+	array_walk( $where, function( $v, $k ) { Check::identifier( $k ); } );
 
 	if ( empty( $extra ) || is_string( $extra ) ) // backwards compat
 	$extra = [ 'extra' => $extra ];
@@ -317,6 +322,7 @@ function executeSelectQuery( $db, $table, $where = null, $extra = null )
 
 	$result = null;
 	$values = is_null( $where ) ? [] : array_map( [$db, 'fix_sql_value'], array_values( $where ) );
+	if ( $db instanceof PDODB ) $db->last_query = $sth[ $sthn ]->queryString;
 	if ( ( $result = $sth[ $sthn ]->execute( $values ) ) !== false )
 	{
 #		debug( "queried $table; numrows: ".$sth[ $sthn ]->rowCount() );
@@ -331,7 +337,6 @@ function executeSelectQuery( $db, $table, $where = null, $extra = null )
 }
 
 function executeSelectQueryRequireSingle( $db, $table, $where, $extra = null ) {
-	$table = _check_table( $db, $table );
 
 	$rows = executeSelectQuery( $db, $table, $where, $extra);
 
@@ -359,9 +364,10 @@ function executeUpdateQuery( $db, $table, $where, $update )
 {
 	static $sth = array();
 
-	$table = _check_table( $db, $table );
-
-	_check_where( $db, $table, $where );
+	_check_table( $db, Check::identifier( $table ) );
+	array_walk( $where, function( $v, $k ) { Check::identifier( $k ); } );
+	array_walk( $update, function( $v, $k ) { Check::identifier( $k ); } );
+	_check_where( $db, $table, $where );	// this checks column metadata
 
 	#echo "<pre>".print_r(func_get_args(),1)."</pre>";
 
@@ -387,6 +393,7 @@ function executeUpdateQuery( $db, $table, $where, $update )
 	);
 
 	#echo "<pre>"; foreach ($arr as $k=>$v) { echo "$k=>$v: ". (is_null($v)?'NULL':'')."\n"; } echo "</pre>";
+	if ( $db instanceof PDODB ) $db->last_query = $sth[ $sthn ]->queryString;
 	if ( $result = $sth[ $sthn ]->execute( $arr ) )
 		{}#echo "queried $table; numrows: ".$sth[ $sthn ]->rowCount(). "\n";
 	else
@@ -406,8 +413,8 @@ function executeDeleteQuery( $db, $table, $where )
 {
 	static $sth = array();
 
-	$table = _check_table( $db, $table );
-
+	_check_table( $db, Check::identifier( $table ) );
+	array_walk( $where, function( $v, $k ) { Check::identifier( $k ); } );
 	_check_where( $db, $table, $where );
 
 	if ( $where == null || ! is_array( $where ) || ! count( $where ) )
@@ -425,6 +432,7 @@ function executeDeleteQuery( $db, $table, $where )
 
 	$result = null;
 	$arr = array_map( [$db, 'fix_sql_value'], array_values( $where ) );
+	if ( $db instanceof PDODB ) $db->last_query = $sth[ $sthn ]->queryString;
 	if ( ( $result = $sth[ $sthn ]->execute( $arr ) ) !== false )
 	{
 		$result = $sth[ $sthn ]->rowCount();
@@ -438,18 +446,20 @@ function executeDeleteQuery( $db, $table, $where )
 
 }
 
-function _check_table( PDODB $db, $name ) {
-	if ( ! db_get_tables_meta( $db, $name ) )
-		fatal( "missing database table meta for " . print_r( $db, 1 ) . ": $name"
-		#	. "\n" . print_r( array_keys( db_get_tables_meta( $db ) ), 1 )
-		);
-	return $name;
+function _check_table( PDODB $db, $table ) {
+	if ( $db instanceof PDODB && $db->validate_meta )
+		if ( ! db_get_tables_meta( $db, $table ) )
+			throw new \Exception( "missing database $db->name metadata for table $table" );
+	return $table;
 }
 
 
 function _check_where( PDODB $db, $table, $where ) {
-	$tm = db_get_tables_meta( $db, $table );
-	foreach ( $where as $k=>$v )
-		if ( ! isset( $tm['columns'][$k] ) )
-			fatal( "Illegal where clause: unknown column name '$k'" );
+	if ( $db instanceof PDODB && $db->validate_meta )
+	{
+		$tm = db_get_tables_meta( $db, $table );
+		foreach ( $where as $k=>$v )
+			if ( ! isset( $tm['columns'][$k] ) )
+				throw new \Exception( "No metadata for column '$k' in table '$table'" );
+	}
 }
