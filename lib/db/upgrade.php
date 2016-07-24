@@ -58,6 +58,7 @@ require_once 'action.php'; // UI interaction via ?action:
 function db_upgrade( $db, $db_version = 0, $table_prefix = 'auto', $upgrader = null )
 {
 	$db_version	= max( 0, intval( $db_version ) );
+	if ( $table_prefix === null ) $table_prefix = 'auto';
 	$db->prefix = Check::identifier( $prefix = rtrim( $table_prefix , '_' ) . '_' );
 	$table = $db->prefix . 'options';
 
@@ -161,7 +162,7 @@ function db_upgrade_invoke( $db, $table, $callable )
 	if ( is_string( $callable ) && ! function_exists( $callable ) )
 		throw new Exception( "Missing DB upgrade function <code>$callable</code>" );
 	if ( !is_callable( $callable ) )
-		throw new Exception( __FUNCTION__ . ": Argument not callable" );
+		throw new Exception( __FUNCTION__ . ": Argument not callable: " . print_r( $callable, 1 ) );
 
 	try
 	{
