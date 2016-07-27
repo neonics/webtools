@@ -139,10 +139,12 @@ class PDODB extends PDO
 		return call_user_func_array( 'parent::query', func_get_args() ); // PHP 5.3+
 	}
 
-	public function q( $sql, $args = [] ) {
+	public function q( $sql, $args = [], $fetchmode = \PDO::FETCH_BOTH ) {
 		$this->last_query = $sql;
 		$sth = $this->prepare( $sql );
 		$sth->execute( $args );
+		if ( $fetchmode != \PDO::FETCH_BOTH )
+			$sth->setFetchMode( $fetchmode );
 		return $sth;
 	}
 
