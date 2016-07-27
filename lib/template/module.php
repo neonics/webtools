@@ -10,6 +10,12 @@
 // $data = function module_init() //
 // function module_content( $data ) //
 
+// FIXME: when seeing an error "cannot redeclare template_init",
+// it is because the psp/template.php is called after this file has been loaded.
+// The psp/template.php module has it's methods auto-exported with template_ prefix.
+// Since this template_init is local, it can be renamed.
+// However, it is left in place since when this template system is used, fallbacks
+// to PSP should not happen.
 function template_init( $request ) {
 		ob_start();
 		$request->module_data = function_exists( 'module_init' ) ? (object) module_init( $request ) : new stdClass;

@@ -1,6 +1,8 @@
 <?php
 namespace template;
 
+use \Exception;
+
 require_once 'html.php';
 
 class Bootstrap {
