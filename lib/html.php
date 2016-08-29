@@ -131,16 +131,24 @@ HTML;
 	{
 		echo "<tr>";
 		$post = array();
-		if ( isset( $columns ) )
+		if ( isset( $columns ) || count( $rowmap ) ) # XXX
 		{
 			foreach ( $rowmap as $k=>$l )
 			{
 				if ( $k== '*' )	# skip filter rule
 					continue;
 
-				$x = array_key_exists($k, $row)
-					? $row[$k]
-					: "<span style='color:red'>unknown column '$k' (label '$l')</span>";
+				if ( is_array( $row ) )
+					$x = array_key_exists( $k, $row )
+						? $row[ $k ]
+						: "<span style='color:red'>unknown column '$k' (label '$l')</span>";
+				else if ( is_object( $row ) )
+					$x = property_exists( $row, $k )
+						? $row->$k
+						: "<span style='color:red'>unknown column '$k' (label '$l')</span>";
+				else
+					trigger_error( __FUNCTION__ . ": row is not array or object but " . gettype( $row ) );
+
 				$x = $fn( $k, $x, $row, $i );
 
 				$post[] = _echo_col( $k, $x );
