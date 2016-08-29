@@ -71,14 +71,14 @@ class APIClient
 
 			case 'POST':
 				curl_setopt($ch, CURLOPT_POST, 1);
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 				break;
 
 			case 'PUT':
 
 			case 'PATCH':
 				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method );
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 				break;
 		}
 
