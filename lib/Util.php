@@ -213,6 +213,7 @@
 			case "html": return "text/html";
 			case "png": return "image/png";
 			case "jpg": return "image/jpeg";
+			case "gif": return "image/gif";
 			case "ttf": return "font/truetype";
 			case "woff": return "application/font-woff";
 			case "woff2": return "application/font-woff2";
