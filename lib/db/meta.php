@@ -190,7 +190,15 @@ SQL
 
 	$ret = array();
 	foreach ( $sth->fetchAll( PDO::FETCH_ASSOC ) as $i => $row )
-		$ret[ $row['table_name'] ] = $row[ 'column_name'];
+		if ( isset( $ret[ $row['table_name'] ] ) )
+		{
+			if ( is_array( $ret[ $row['table_name'] ] ) )
+				$ret[ $row['table_name'] ][] = $row[ 'column_name'];
+			else
+				$ret[ $row['table_name'] ] = [ $ret[ $row['table_name'] ], $row[ 'column_name'] ];
+		}
+		else
+			$ret[ $row['table_name'] ] = $row[ 'column_name'];
 
 	return $ret;
 }
