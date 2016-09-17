@@ -82,13 +82,7 @@ function _module_auth( $request ) {
 
 function template_content( $request ) // only one module per page
 {
-
 	_module_auth( $request );
-
-	//ob_flush(); flush();
-		//$tmp = function_exists( 'module_menu' ) ? module_menu( $request->template_data['menu']() ) : null;
-
-#		die( "<pre>".print_r( $request->template->noticebar,1 ) ."</pre>");
 
 	?>
 		<div>
@@ -96,13 +90,18 @@ function template_content( $request ) // only one module per page
 
 	$override = "style='margin-top: 1em'"; // for when no <header>
 
-	if ( function_exists( 'module_menu' ) )
+	$td = $request->template_data;
+	$menu_function = ( $mod = gad( $td, 'template_module_instance' ) )
+		? [ $mod, 'module_menu' ]
+		: 'module_menu';
+
+	if ( is_callable( $menu_function ) )
 	{
 		// TODO: update js/menu.js to match the active link
 		ob_start();
 		$submenu_classes = "";
 		$submenu_label =
-		module_menu( $request, $submenu_classes );
+		$menu_function( $request, $submenu_classes );
 		$submenu = ob_get_clean();
 
 		$submenu = strlen(trim($submenu)) ? \template\AuthFilter::filter( $submenu ) : null;

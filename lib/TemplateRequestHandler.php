@@ -129,6 +129,13 @@ class TemplateRequestHandler extends RequestHandler
 	 * it is not set, and template_do will initialize it with \template\BootstrapTemplate.
 	 */
 	protected function template_data_filter( $request, $template_data ) {
+		if ( is_string( $template_data ) && class_exists( $template_data ) )
+		{
+			$inst = new $template_data( $request );
+			$td = $inst->config;
+			$td['template_module_instance'] = $inst;
+			return $td;
+		}
 		return $template_data;
 	}
 }
