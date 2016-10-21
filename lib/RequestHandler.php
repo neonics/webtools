@@ -209,7 +209,8 @@ abstract class RequestHandler
 
 	public static function init( $requestURIRoots, $staticContent, $redir )
 	{
-		ob_start();
+		if ( php_sapi_name() != 'cli' )
+			ob_start();	// buffer debug messages
 
 		global $psp_custom_handlers;
 		self::add( 'log', new LogRequestHandler() );
