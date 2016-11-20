@@ -2,6 +2,7 @@
 namespace template;
 
 use Menu; // no effect? see function menu()
+use \Exception;
 
 abstract class AbstractTemplate
 {
@@ -193,7 +194,7 @@ HTML;
 		}
 		catch (Exception $e)
 		{
-			echo "<pre class='alert alert-danger'><b>Exception</b>: ".$e->getMessage()."\nCaught at ".__METHOD__."</pre>";
+			echo "<pre class='alert alert-danger'><b>".get_class($e)."</b>: ".$e->getMessage()."\nCaught at ".__METHOD__."\n$e</pre>";
 		}
 	}
 
