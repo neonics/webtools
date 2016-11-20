@@ -6,9 +6,11 @@
  *   $.ajax( ajaxify( form, modal ) )
  *
  */
-function ajaxify(form, pe) // AJAX save
+function ajaxify(form, pe, contentel ) // AJAX save
 {
+	var newmode = contentel ? true : false;
 	pe = pe || form.closest('.modal-dialog');
+	contentel = contentel || pe.find( '.modal-body' );
 
 //			form.find('.btn-primary')[0].value= 'Saving...';//.val('Saving...'); -- bug, no re-layout
 	console.log("submitting ", form, "to ", form.attr('action'));
@@ -37,13 +39,14 @@ function ajaxify(form, pe) // AJAX save
 		error:function(jqXHR,status,error) {
 			console.log("ajax form submit response error",status,error,arguments, "form:",form);
 			pe.find('.btn-primary').val('Save');
-			pe.find('.modal-body').html(
+			contentel.html(
 				"<div class='alert alert-danger'>" + error + "<br>"+jqXHR.responseText+"</div>"
 			);
 
 		},
 		success:function(data,status,jqXHR) {
-			pe.find('.modal-body').html( data );
+			if ( newmode ) return;
+			contentel.html( data );
 
 			if (0){
 			// set all 'data-saved-value' attributes:
