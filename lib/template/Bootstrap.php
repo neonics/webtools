@@ -67,13 +67,14 @@ HTML;
 		else
 			list( $id, $classes, $attrs ) = [ html_id('cl'), $classes_or_attrs, null ];
 
-		$collapse = $collapsed ? 'collapse' : '';
+		$collapse = 'collapse' . ( $collapsed ? '' : ' in' );
+		$aria_expanded = $collapsed ? 'false' : 'true';
 
 		return array( <<<HTML
-			<a data-toggle='collapse' data-target='#$id'>$label<b class='caret'></b></a>
+			<a data-toggle='collapse' data-target='#$id' aria-expanded='$aria_expanded'>$label<b class='caret'></b></a>
 HTML
 			, <<<HTML
-			<$tag id='$id' class='$collapse $classes' $attrs>
+			<$tag id='$id' class='$collapse $classes' $attrs aria-expanded='$aria_expanded'>
 				 $data
 			</$tag>
 HTML
