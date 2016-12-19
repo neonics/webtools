@@ -6,7 +6,7 @@
  *   $.ajax( ajaxify( form, modal ) )
  *
  */
-function ajaxify(form, pe, contentel ) // AJAX save
+function ajaxify(form, pe, contentel, buttonEl ) // AJAX save
 {
 	var newmode = contentel ? true : false;
 	pe = pe || form.closest('.modal-dialog');
@@ -16,6 +16,9 @@ function ajaxify(form, pe, contentel ) // AJAX save
 	console.log("submitting ", form, "to ", form.attr('action'));
 
 	var data = {};
+	if ( buttonEl )
+		data[ buttonEl.name ] = buttonEl.value;
+
 	for ( var i in d = form.serializeArray() )
 	{
 //				console.log("FORM", d[i].name, " = ", d[i].value );
